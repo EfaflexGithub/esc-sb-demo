@@ -1,0 +1,21 @@
+{
+	"folders": [
+		{
+			"name": "Sources",
+			"path": "lib",
+		},
+		{
+			"name": "Test",
+			"path": "test",
+		},
+		{
+			"name": "Project",
+			"path": ".",
+		},
+	],
+	"settings": {
+		"conventionalCommits.autoCommit": false,
+		"conventionalCommits.promptCI": true,
+		"conventionalCommits.showEditor": true,
+	},
+}
