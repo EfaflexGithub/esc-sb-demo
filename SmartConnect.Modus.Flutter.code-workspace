@@ -16,6 +16,10 @@
 	"settings": {
 		"conventionalCommits.autoCommit": false,
 		"conventionalCommits.promptCI": true,
-		"conventionalCommits.showEditor": true,
+		// "conventionalCommits.showEditor": true,
+		"conventionalCommits.lineBreak": "\\n",
+		"conventionalCommits.scopes": [
+			"workspace"
+		],
 	},
 }
