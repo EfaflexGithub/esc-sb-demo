@@ -14,18 +14,18 @@ abstract class AppPages {
   static final routes = [
     GetPage(
         name: '/',
-        page: () => RootView(),
+        page: () => const RootView(),
         participatesInRootNavigator: true,
         preventDuplicates: true,
         children: [
           GetPage(
             name: Routes.DOOR_OVERVIEW,
-            page: () => DoorOverviewPage(),
+            page: () => const DoorOverviewPage(),
             binding: DoorOverviewBinding(),
           ),
           GetPage(
             name: Routes.EVENT_OVERVIEW,
-            page: () => EventOverviewPage(),
+            page: () => const EventOverviewPage(),
             binding: EventOverviewBinding(),
           ),
         ]),
@@ -34,11 +34,11 @@ abstract class AppPages {
   static final modalRoutes = [
     GetPage(
       name: Routes.SETTINGS,
-      page: () => DoorOverviewPage(),
+      page: () => const DoorOverviewPage(),
     ),
     GetPage(
       name: Routes.HELP_FEEDBACK,
-      page: () => DoorOverviewPage(),
+      page: () => const DoorOverviewPage(),
     ),
   ];
 }

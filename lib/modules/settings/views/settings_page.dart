@@ -13,9 +13,9 @@ class SettingsPage extends GetView<SettingsController> {
       appBar: AppBar(
         title: const Text('Door Overview'),
       ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
+      floatingActionButton: const FloatingActionButton(
         onPressed: null,
+        child: Icon(Icons.add),
       ),
     );
   }

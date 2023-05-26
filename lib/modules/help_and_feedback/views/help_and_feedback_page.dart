@@ -11,9 +11,9 @@ class HelpAndFeedbackPage extends GetView<HelpAndFeedbackController> {
       appBar: AppBar(
         title: const Text('Help and Feedback'),
       ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
+      floatingActionButton: const FloatingActionButton(
         onPressed: null,
+        child: Icon(Icons.add),
       ),
     );
   }

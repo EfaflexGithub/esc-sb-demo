@@ -5,6 +5,8 @@ import '../controllers/root_controller.dart';
 import '../../../routes/pages.dart';
 
 class RootView extends GetView<RootController> {
+  const RootView({super.key});
+
   @override
   Widget build(BuildContext context) {
     return GetRouterOutlet.builder(
@@ -12,7 +14,7 @@ class RootView extends GetView<RootController> {
         // final title = current?.location;
         return Row(
           children: [
-            SideNavigation(),
+            const SideNavigation(),
             Expanded(
               child: Scaffold(
                 // appBar: AppBar(
