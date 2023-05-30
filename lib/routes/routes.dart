@@ -1,8 +1,9 @@
 part of './pages.dart';
 
 abstract class Routes {
-  static const DOOR_OVERVIEW = '/door-overview';
-  static const EVENT_OVERVIEW = '/event-overview';
-  static const SETTINGS = '/settings';
-  static const HELP_FEEDBACK = '/help-and-feedback';
+  static const root = '/';
+  static const doorOverview = '${root}door-overview';
+  static const eventOverview = '${root}event-overview';
+  static const settings = '${root}settings';
+  static const helpAndFeedback = '${root}help-and-feedback';
 }

@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
     );
 
     return GetMaterialApp.router(
-      title: 'Flutter Demo',
+      title: 'EFA-SmartConnect Modbus Demo',
       theme: ThemeData(
         colorScheme: colorScheme,
         appBarTheme: AppBarTheme(

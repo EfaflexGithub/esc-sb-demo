@@ -7,15 +7,12 @@ class SettingsPage extends GetView<SettingsController> {
 
   @override
   Widget build(BuildContext context) {
-    final SettingsController c = Get.put(SettingsController());
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Door Overview'),
+        title: const Text('Application Settings'),
       ),
-      floatingActionButton: const FloatingActionButton(
-        onPressed: null,
-        child: Icon(Icons.add),
+      body: const Center(
+        child: Text("test"),
       ),
     );
   }

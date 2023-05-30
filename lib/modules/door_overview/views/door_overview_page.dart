@@ -13,28 +13,8 @@ class DoorOverviewPage extends GetView<DoorOverviewController> {
         centerTitle: true,
       ),
       body: Center(
-        child: Obx(() => Text('${controller.count} doors')),
+        child: Obx(() => Text('${controller.count} doorss')),
       ),
-      // Drawer(
-      //   width: 100,
-      //   child: ListView(
-      //     padding: EdgeInsets.zero,
-
-      //     children: [
-      //       const DrawerHeader(
-      //         decoration: BoxDecoration(
-      //           color: Colors.orange,
-      //         ),
-      //         child: Text("Drawer Header"),
-      //       ),
-      //       ListTile(
-      //         title: const Text('Door Overview'),
-      //         onTap: () => Get.to(Routes.DOOR_OVERVIEW),
-      //       )
-      //     ],
-      //   ),
-      // ),
-
       floatingActionButton: FloatingActionButton(
         onPressed: controller.increment,
         child: const Icon(Icons.add),

@@ -14,7 +14,7 @@ class RootView extends GetView<RootController> {
         // final title = current?.location;
         return Row(
           children: [
-            const SideNavigation(),
+            SideNavigation(),
             Expanded(
               child: Scaffold(
                 // appBar: AppBar(
@@ -22,7 +22,7 @@ class RootView extends GetView<RootController> {
                 //   centerTitle: true,
                 // ),
                 body: GetRouterOutlet(
-                  initialRoute: Routes.DOOR_OVERVIEW,
+                  initialRoute: AppPages.initial,
                 ),
               ),
             )

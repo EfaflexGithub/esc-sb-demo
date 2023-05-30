@@ -1,3 +1,7 @@
+import 'package:efa_smartconnect_modbus_demo/modules/help_and_feedback/bindings/help_and_feedback_binding.dart';
+import 'package:efa_smartconnect_modbus_demo/modules/help_and_feedback/views/help_and_feedback_page.dart';
+import 'package:efa_smartconnect_modbus_demo/modules/settings/bindings/settings_binding.dart';
+import 'package:efa_smartconnect_modbus_demo/modules/settings/views/settings_page.dart';
 import 'package:get/get.dart';
 import '../modules/root/views/root_view.dart';
 import '../modules/door_overview/bindings/door_overview_binding.dart';
@@ -9,36 +13,36 @@ part './routes.dart';
 abstract class AppPages {
   AppPages._(); // make constructor private
 
-  static const INITIAL = Routes.DOOR_OVERVIEW;
+  static const initial = Routes.doorOverview;
 
   static final routes = [
     GetPage(
-        name: '/',
-        page: () => const RootView(),
-        participatesInRootNavigator: true,
-        preventDuplicates: true,
-        children: [
-          GetPage(
-            name: Routes.DOOR_OVERVIEW,
-            page: () => const DoorOverviewPage(),
-            binding: DoorOverviewBinding(),
-          ),
-          GetPage(
-            name: Routes.EVENT_OVERVIEW,
-            page: () => const EventOverviewPage(),
-            binding: EventOverviewBinding(),
-          ),
-        ]),
-  ];
-
-  static final modalRoutes = [
-    GetPage(
-      name: Routes.SETTINGS,
-      page: () => const DoorOverviewPage(),
-    ),
-    GetPage(
-      name: Routes.HELP_FEEDBACK,
-      page: () => const DoorOverviewPage(),
+      name: Routes.root,
+      page: () => const RootView(),
+      participatesInRootNavigator: true,
+      preventDuplicates: true,
+      children: [
+        GetPage(
+          name: Routes.doorOverview,
+          page: () => const DoorOverviewPage(),
+          binding: DoorOverviewBinding(),
+        ),
+        GetPage(
+          name: Routes.eventOverview,
+          page: () => const EventOverviewPage(),
+          binding: EventOverviewBinding(),
+        ),
+        GetPage(
+          name: Routes.settings,
+          page: () => const SettingsPage(),
+          binding: SettingsBinding(),
+        ),
+        GetPage(
+          name: Routes.helpAndFeedback,
+          page: () => const HelpAndFeedbackPage(),
+          binding: HelpAndFeedbackBinding(),
+        ),
+      ],
     ),
   ];
 }
