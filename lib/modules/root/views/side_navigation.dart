@@ -1,4 +1,6 @@
 import 'package:efa_smartconnect_modbus_demo/modules/root/controllers/side_navigation_controller.dart';
+import 'package:efa_smartconnect_modbus_demo/modules/settings/views/settings_page.dart';
+import 'package:efa_smartconnect_modbus_demo/shared/widgets/NavigationRailIcon.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../routes/pages.dart';
@@ -9,50 +11,43 @@ class SideNavigation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Drawer(
-      shape: const BeveledRectangleBorder(borderRadius: BorderRadius.zero),
-      child: Column(
-        children: [
-          Expanded(
-            child: ListView(
-              children: [
-                const DrawerHeader(
-                  decoration: BoxDecoration(
-                    color: Colors.orange,
-                  ),
-                  child: Center(
-                    child: Text(
-                      "Drawer Header",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ),
-                ListTile(
-                  title: const Text('Door Overview'),
-                  leading: const Icon(Icons.home),
-                  onTap: () => Get.rootDelegate.toNamed(Routes.doorOverview),
-                ),
-                ListTile(
-                  title: const Text('Event Overview'),
-                  leading: const Icon(Icons.info_outline),
-                  onTap: () => Get.rootDelegate.toNamed(Routes.eventOverview),
-                ),
-              ],
+    return NavigationRail(
+      selectedIndex: controller.selectedIndex.value,
+      onDestinationSelected: (int index) => controller.changePage(index),
+      labelType: NavigationRailLabelType.all,
+      destinations: const [
+        NavigationRailDestination(
+          icon: Icon(Icons.home),
+          label: Text('Door Overview'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.info_outline),
+          label: Text('Event Overview'),
+        ),
+      ],
+      trailing: Expanded(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            NavigationRailIcon(
+              icon: const Icon(Icons.settings),
+              text: "Settings",
+              onTap: () => Get.to(const SettingsPage()),
             ),
-          ),
-          const Divider(),
-          ListTile(
-            title: const Text('Settings'),
-            leading: const Icon(Icons.settings),
-            onTap: () => Get.rootDelegate.toNamed(Routes.settings),
-          ),
-          ListTile(
-            title: const Text('Help & Feedback'),
-            leading: const Icon(Icons.help),
-            onTap: () => Get.rootDelegate.toNamed(Routes.helpAndFeedback),
-          ),
-          Obx(() => Text("Version ${controller.version.value}")),
-        ],
+            NavigationRailIcon(
+              icon: const Icon(Icons.help),
+              text: "Help",
+              onTap: () => controller.showAbout(
+                context: context,
+                applicationIcon: SizedBox(
+                  width: 64,
+                  height: 64,
+                  child: Image.asset('assets/icon/icon.png'),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

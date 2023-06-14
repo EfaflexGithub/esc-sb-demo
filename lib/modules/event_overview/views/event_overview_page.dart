@@ -8,9 +8,6 @@ class EventOverviewPage extends GetView<EventOverviewController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Event Overview'),
-      ),
       body: Center(child: Obx(() => Text('${controller.count} unread events'))),
       floatingActionButton: FloatingActionButton(
         onPressed: controller.increment,

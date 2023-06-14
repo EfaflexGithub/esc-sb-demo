@@ -8,10 +8,6 @@ class DoorOverviewPage extends GetView<DoorOverviewController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Door Overview'),
-        centerTitle: true,
-      ),
       body: Center(
         child: Obx(() => Text('${controller.count} doorss')),
       ),

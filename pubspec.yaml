@@ -1,5 +1,6 @@
 name: efa_smartconnect_modbus_demo
-description: A new Flutter project.
+title: EFA-SmartConnect Modbus Demo
+description: This application demonstrates how to use the EFA-SmartConnect Modbus TCP interface.
 publish_to: 'none'
 version: 0.1.0
 
@@ -27,5 +28,7 @@ flutter:
   uses-material-design: true
 
   assets:
+    - LICENSE.md
+    - pubspec.yaml
     - assets/icon/icon.png
 

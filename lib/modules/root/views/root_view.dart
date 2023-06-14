@@ -15,6 +15,7 @@ class RootView extends GetView<RootController> {
         return Row(
           children: [
             SideNavigation(),
+            const VerticalDivider(thickness: 1, width: 1),
             Expanded(
               child: Scaffold(
                 // appBar: AppBar(
