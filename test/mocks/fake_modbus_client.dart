@@ -1,0 +1,216 @@
+import 'dart:typed_data';
+
+import 'package:efa_smartconnect_modbus_demo/data/services/modbus_tcp_service.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:modbus/modbus.dart';
+import 'package:logging/logging.dart';
+
+class FakeModbusClient extends Fake implements ModbusClient {
+  final _logger = Logger('FakeModbusClient');
+  final ModbusDataConfiguration _dataConfiguration;
+  var _isConnected = false;
+
+  FakeModbusClient(this._dataConfiguration);
+
+  void throwIfNotConnected() {
+    if (_isConnected == false) {
+      throw Exception('Not connected');
+    }
+  }
+
+  @override
+  Future<void> connect() {
+    _isConnected = true;
+    _logger.info('FakeModbusClient successfully connected');
+    return Future.value();
+  }
+
+  @override
+  Future<void> close() {
+    _isConnected = false;
+    _logger.info('FakeModbusClient successfully closed');
+    return Future.value();
+  }
+
+  @override
+  Future<Uint16List> readInputRegisters(int address, int amount) {
+    throwIfNotConnected();
+
+    switch (address) {
+      case 9002 when amount == 1:
+        return Future.value(Uint16List.fromList([0x8421]));
+
+      case 9003 when amount == 2:
+        var index = 0;
+        if (_dataConfiguration.wordSwap) {
+          index |= 0x0001;
+        }
+        if (_dataConfiguration.byteSwap) {
+          index |= 0x0002;
+        }
+        final List<Uint16List> registers = [
+          Uint16List.fromList([0x8765, 0x4321]),
+          Uint16List.fromList([0x4321, 0x8765]),
+          Uint16List.fromList([0x6587, 0x2143]),
+          Uint16List.fromList([0x2143, 0x6587]),
+        ];
+        return Future.value(registers[index]);
+
+      case 9005 when amount == 4:
+        var index = 0;
+        if (_dataConfiguration.dWordSwap) {
+          index |= 0x0001;
+        }
+        if (_dataConfiguration.wordSwap) {
+          index |= 0x0002;
+        }
+        if (_dataConfiguration.byteSwap) {
+          index |= 0x0004;
+        }
+        final List<Uint16List> registers = [
+          Uint16List.fromList([0xFEDC, 0xBA98, 0x7654, 0x3210]),
+          Uint16List.fromList([0x7654, 0x3210, 0xFEDC, 0xBA98]),
+          Uint16List.fromList([0xBA98, 0xFEDC, 0x3210, 0x7654]),
+          Uint16List.fromList([0x3210, 0x7654, 0xBA98, 0xFEDC]),
+          Uint16List.fromList([0xDCFE, 0x98BA, 0x5476, 0x1032]),
+          Uint16List.fromList([0x5476, 0x1032, 0xDCFE, 0x98BA]),
+          Uint16List.fromList([0x98BA, 0xDCFE, 0x1032, 0x5476]),
+          Uint16List.fromList([0x1032, 0x5476, 0x98BA, 0xDCFE]),
+        ];
+        return Future.value(registers[index]);
+
+      case 9009 when amount == 4:
+        final registers = Uint16List.fromList([0x646f, 0x2069, 0x7400, 0x0000]);
+        return Future.value(registers);
+
+      case 9013 when amount == 4:
+        final registers = Uint16List.fromList([0x2192, 0x0032, 0x00B0, 0x2713]);
+        return Future.value(registers);
+
+      case 9017
+          when amount == 4 &&
+              _dataConfiguration.dateTimeFormat ==
+                  DateTimeFormat.dateTimeFormat2:
+        return Future.value(
+            Uint16List.fromList([0x07E6, 0x0202, 0x0B1C, 0x0009]));
+
+      case 9017
+          when amount == 4 &&
+              _dataConfiguration.dateTimeFormat ==
+                  DateTimeFormat.dateTimeFormat1 &&
+              _dataConfiguration.dWordSwap == false &&
+              _dataConfiguration.wordSwap == false &&
+              _dataConfiguration.byteSwap == false:
+        return Future.value(
+            Uint16List.fromList([0x0000, 0x0000, 0x61FA, 0x6AC9]));
+
+      case 9017
+          when amount == 4 &&
+              _dataConfiguration.dateTimeFormat ==
+                  DateTimeFormat.dateTimeFormat1 &&
+              _dataConfiguration.dWordSwap == true &&
+              _dataConfiguration.wordSwap == true &&
+              _dataConfiguration.byteSwap == true:
+        return Future.value(
+            Uint16List.fromList([0xC96A, 0xFA61, 0x0000, 0x0000]));
+
+      case 9021
+          when amount == 4 &&
+              _dataConfiguration.dateTimeFormat ==
+                  DateTimeFormat.dateTimeFormat2:
+        return Future.value(
+            Uint16List.fromList([0x0757, 0x030E, 0x0B1E, 0x0000]));
+
+      case 9021
+          when amount == 4 &&
+              _dataConfiguration.dateTimeFormat ==
+                  DateTimeFormat.dateTimeFormat1 &&
+              _dataConfiguration.dWordSwap == false &&
+              _dataConfiguration.wordSwap == false &&
+              _dataConfiguration.byteSwap == false:
+        return Future.value(
+            Uint16List.fromList([0xFFFF, 0xFFFF, 0x5535, 0x3E38]));
+
+      case 9021
+          when amount == 4 &&
+              _dataConfiguration.dateTimeFormat ==
+                  DateTimeFormat.dateTimeFormat1 &&
+              _dataConfiguration.dWordSwap == true &&
+              _dataConfiguration.wordSwap == true &&
+              _dataConfiguration.byteSwap == true:
+        return Future.value(
+            Uint16List.fromList([0x383E, 0x3555, 0xFFFF, 0xFFFF]));
+
+      case 9025 when amount == 5:
+        return Future.value(
+            Uint16List.fromList([0x0002, 0x000F, 0x0006, 0x0002, 0x0017]));
+
+      case 9030
+          when amount == 10 &&
+              _dataConfiguration.dateTimeFormat ==
+                  DateTimeFormat.dateTimeFormat1 &&
+              _dataConfiguration.dWordSwap == false &&
+              _dataConfiguration.wordSwap == false &&
+              _dataConfiguration.byteSwap == false:
+        return Future.value(Uint16List.fromList([
+          0x0000,
+          0x0000,
+          0x62EB,
+          0x8AE6,
+          0x0001,
+          0x6910,
+          0x4600,
+          0x040C,
+          0x0000,
+          0x0000
+        ]));
+
+      case 9030
+          when amount == 10 &&
+              _dataConfiguration.dateTimeFormat ==
+                  DateTimeFormat.dateTimeFormat2 &&
+              _dataConfiguration.dWordSwap == true &&
+              _dataConfiguration.wordSwap == true &&
+              _dataConfiguration.byteSwap == true:
+        return Future.value(Uint16List.fromList([
+          2022,
+          (8 << 8) | (4 << 0),
+          (9 << 8) | (1 << 0),
+          26,
+          0x1069,
+          0x0100,
+          0x4600,
+          0x040C,
+          0x0000,
+          0x0000
+        ]));
+
+      default:
+        throw UnimplementedError("desired register request not mocked!");
+    }
+  }
+
+  @override
+  Future<int> writeSingleRegister(int address, int value) {
+    throwIfNotConnected();
+    switch (address) {
+      case 2016:
+        _dataConfiguration.dWordSwap = value & 0x0001 != 0;
+        _dataConfiguration.wordSwap = value & 0x0002 != 0;
+        _dataConfiguration.byteSwap = value & 0x0004 != 0;
+        break;
+
+      case 2017:
+        _dataConfiguration.dateTimeFormat = switch (value) {
+          0 => DateTimeFormat.dateTimeFormat1,
+          1 => DateTimeFormat.dateTimeFormat2,
+          _ => throw Exception('Invalid date time format'),
+        };
+        break;
+
+      default:
+        throw UnimplementedError();
+    }
+    return Future.value(0);
+  }
+}

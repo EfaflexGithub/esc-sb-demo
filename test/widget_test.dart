@@ -11,6 +11,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:efa_smartconnect_modbus_demo/main.dart';
 
 void main() {
+  initializeApplication();
+
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const MyApp());
