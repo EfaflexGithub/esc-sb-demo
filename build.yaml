@@ -1,0 +1,13 @@
+builders:
+  modbus_yaml_to_dart:
+    import: "tools/code_generators/builder.dart"
+    builder_factories: ["modbusRegisterMapBuilder"]
+    build_extensions: {".yaml": [".g.dart"]}
+    build_to: source
+
+targets:
+  $default:
+    builders:
+      efa_smartconnect_modbus_demo|modbus_yaml_to_dart:
+        generate_for:
+          - lib/data/repositories/modbus_register_map.yaml

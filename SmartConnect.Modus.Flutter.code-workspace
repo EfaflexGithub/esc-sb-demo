@@ -5,8 +5,8 @@
 			"path": "lib",
 		},
 		{
-			"name": "Test",
-			"path": "test",
+			"name": "CodeGenerators",
+			"path": "tools/code_generators",
 		},
 		{
 			"name": "Project",
@@ -20,6 +20,13 @@
 		"conventionalCommits.lineBreak": "\\n",
 		"conventionalCommits.scopes": [
 			"workspace"
+		],
+	},
+	"extensions": {
+		"recommendations": [
+			"Dart-Code.flutter",
+			"vivaxy.vscode-conventional-commits",
+			"redhat.vscode-yaml"
 		],
 	},
 }

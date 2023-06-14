@@ -1,9 +1,23 @@
+import 'package:efa_smartconnect_modbus_demo/data/services/modbus_register_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import './routes/pages.dart';
 
 void main() {
+  initializeApplication();
   runApp(const MyApp());
+}
+
+void initializeApplication() {
+  // add LICENSE.md of the project to the LicenseRegistry
+  LicenseRegistry.addLicense(() async* {
+    final license = await rootBundle.loadString('LICENSE.md');
+    yield LicenseEntryWithLineBreaks(['EFA-SmartConnect Modbus Demo'], license);
+  });
+
+  Get.put(ModbusRegisterService(), permanent: true);
 }
 
 class MyApp extends StatelessWidget {

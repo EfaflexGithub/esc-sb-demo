@@ -1,0 +1,599 @@
+extendedDatatypes:
+  - name: Boolean
+    length: 1
+    valueMap:
+      - 0xFFFF: true
+      - 0x0000: false
+
+  - name: UInt32
+    length: 2
+
+  - name: Int32
+    length: 2
+
+  - name: UInt64
+    length: 4
+
+  - name: Int64
+    length: 4
+
+  - name: Ascii
+    length: variable
+
+  - name: Unicode
+    length: variable
+
+  - name: DateTime
+    length: 4
+
+  - name: SemVer
+    length: 5
+
+  - name: EventEntry
+    length: 10
+
+validators:
+  - &userApplicationValidator
+    enum:
+      - -1: Unknown (read-only)
+      - 0: Disabled
+      - 1: Disable Openings
+      - 2: Disable openings from outside
+      - 3: Disable openings from coils
+      - 4: Disable travels by foil keypad
+      - 5: Disable automatic mode / Enable manual mode (foil keypad)
+      - 6: Disable keep-open time
+      - 7: Disable intermediate stop
+      - 8: Force slow travels
+      - 9: Open door
+      - 10: Open door with auto close afterwards
+      - 11: Drive to intermediate stop
+      - 12: Drive to intermediate stop with auto close afterwards
+      - 13: Close door
+      - 14: Stop door travel
+      - 15: Activate smoke extraction (drive to intermediate stop and disable door travel)
+
+groups:
+  - name: Change Notification Flags
+
+  - name: Door Data
+
+  - name: Operating Information
+
+  - name: Inputs and Outputs
+
+  - name: Door Interaction
+
+  - name: Test Registers
+
+  - name: Data Configuration Registers
+
+  - name: Equipment Information
+    group: Door Data
+
+  - name: Door Control Inforamtion
+    group: Door Data
+
+  - name: SmartConnect Information
+    group: Door Data
+
+  - name: Cycle Counters
+    group: Operating Information
+
+  - name: Current Operating Information
+    group: Operating Information
+
+  - name: Display Content
+    group: Operating Information
+
+  - name: Event Memory
+    group: Operating Information
+
+  - name: Parameterization
+    group: Door Interaction
+
+  - name: User Applications
+    group: Door Interaction
+
+registers:
+
+  # Data Configuration Registers
+  - name: Swap Options
+    group: Data Configuration Registers
+    registerType: HoldingRegister
+    address: 2017
+    datatype: UInt16
+    validator:
+      - range:
+          min: 0
+          max: 7
+
+  - name: DateTime Format
+    group: Data Configuration Registers
+    registerType: HoldingRegister
+    address: 2018
+    datatype: UInt16
+    validator:
+      - range:
+          min: 0
+          max: 1
+
+  # Test registers
+  - name: Integer Test 1
+    group: Test Registers
+    registerType: InputRegister
+    address: 9003
+    datatype: UInt16
+
+  - name: Integer Test 2
+    group: Test Registers
+    registerType: InputRegister
+    address: 9003
+    datatype: Int16
+
+  - name: Integer Test 3
+    group: Test Registers
+    registerType: InputRegister
+    address: 9004
+    datatype: UInt32
+
+  - name: Integer Test 4
+    group: Test Registers
+    registerType: InputRegister
+    address: 9004
+    datatype: Int32
+
+  - name: Integer Test 5
+    group: Test Registers
+    registerType: InputRegister
+    address: 9006
+    datatype: UInt64
+
+  - name: Integer Test 6
+    group: Test Registers
+    registerType: InputRegister
+    address: 9006
+    datatype: Int64
+
+  - name: Ascii Test 1
+    group: Test Registers
+    registerType: InputRegister
+    address: 9010
+    datatype: Ascii
+    length: 4
+
+  - name: Unicode Test 1
+    group: Test Registers
+    registerType: InputRegister
+    address: 9014
+    datatype: Unicode
+    length: 4
+
+  - name: DateTime Test 1
+    group: Test Registers
+    registerType: InputRegister
+    address: 9018
+    datatype: DateTime
+
+  - name: DateTime Test 2
+    group: Test Registers
+    registerType: InputRegister
+    address: 9022
+    datatype: DateTime
+
+  - name: Semantic Version Test
+    group: Test Registers
+    registerType: InputRegister
+    address: 9026
+    datatype: SemVer
+
+  - name: Event Entry Test
+    group: Test Registers
+    registerType: InputRegister
+    address: 9031
+    datatype: EventEntry
+
+  # Change notification flags
+
+  - name: Equipment Inforamtion Changed
+    group: Change Notification Flags
+    registerType: DiscreteInput
+    address: 1
+
+  - name: Physical Outputs Changed
+    group: Change Notification Flags
+    registerType: DiscreteInput
+    address: 2
+
+  - name: Virtual Outputs Changed
+    group: Change Notification Flags
+    registerType: DiscreteInput
+    address: 3
+
+  - name: Physical Inputs Changed
+    group: Change Notification Flags
+    registerType: DiscreteInput
+    address: 4
+
+  - name: Virtual Inputs Changed
+    group: Change Notification Flags
+    registerType: DiscreteInput
+    address: 5
+
+  - name: Cycle Counters Changed
+    group: Change Notification Flags
+    registerType: DiscreteInput
+    address: 6
+
+  - name: Operation Information Changed
+    group: Change Notification Flags
+    registerType: DiscreteInput
+    address: 7
+
+  - name: Display Content Changed
+    group: Change Notification Flags
+    registerType: DiscreteInput
+    address: 8
+
+  - name: Event Memory Changed
+    group: Change Notification Flags
+    registerType: DiscreteInput
+    address: 9
+
+  # Equipment Information
+
+  - name: Individual Name
+    group: Equipment Information
+    registerType: HoldingRegister
+    address: 1
+    datatype: Ascii
+    length: 25
+
+  - name: Equipment Number
+    group: Equipment Information
+    registerType: InputRegister
+    address: 1
+    datatype: UInt64
+
+  - name: Door Profile
+    group: Equipment Information
+    registerType: InputRegister
+    address: 5
+    datatype: Ascii
+    length: 4
+
+  # Door Control Information
+
+  - name: Door Control Series
+    group: Door Control Inforamtion
+    registerType: InputRegister
+    address: 101
+    datatype: Ascii
+    length: 10
+
+  - name: Door Control Serial
+    group: Door Control Inforamtion
+    registerType: InputRegister
+    address: 111
+    datatype: UInt32
+
+  - name: Door Control Firmware Version
+    group: Door Control Inforamtion
+    registerType: InputRegister
+    address: 113
+    datatype: Ascii
+    length: 25
+
+  # SmartConnect Information
+
+  - name: SmartConnect Material Number
+    group: SmartConnect Information
+    registerType: InputRegister
+    address: 501
+    datatype: Ascii
+    length: 10
+
+  - name: SmartConnect Serial Number
+    group: SmartConnect Information
+    registerType: InputRegister
+    address: 511
+    datatype: UInt64
+
+  - name: SmartConnect Firmware Version
+    group: SmartConnect Information
+    registerType: InputRegister
+    address: 515
+    datatype: SemVer
+
+  # Cycle Counters
+
+  - name: Current Cycle Counter
+    group: Cycle Counters
+    registerType: InputRegister
+    address: 1001
+    datatype: Int32
+
+  - name: Daily Cycles (Day)
+    group: Cycle Counters
+    registerType: InputRegister
+    address: 1007
+    datatype: Int16
+
+  - name: Daily Cycles (Week)
+    group: Cycle Counters
+    registerType: InputRegister
+    address: 1008
+    datatype: Int16
+
+  - name: Daily Cycles (Month)
+    group: Cycle Counters
+    registerType: InputRegister
+    address: 1009
+    datatype: Int16
+
+  - name: Daily Cycles (Year)
+    group: Cycle Counters
+    registerType: InputRegister
+    address: 1010
+    datatype: Int16
+
+  # Current Operating Information
+
+  - name: Current Status
+    group: Current Operating Information
+    registerType: InputRegister
+    address: 1011
+    datatype: Int16
+    validator:
+      enum:
+        - 0: Unknown
+        - 1: Opened
+        - 2: Opening
+        - 3: Intermediate
+        - 4: Closing
+        - 5: Closed
+
+  - name: Current Opening Position
+    group: Current Operating Information
+    registerType: InputRegister
+    address: 1012
+    datatype: Int16
+    validator:
+      range:
+        min: 0
+        max: 100
+
+  - name: Current Speed
+    group: Current Operating Information
+    registerType: InputRegister
+    address: 1013
+    datatype: Int16
+
+  # Display Content
+
+  - name: Display Content Line 1
+    group: Display Content
+    registerType: InputRegister
+    address: 1061
+    datatype: Unicode
+    length: 16
+
+  - name: Display Content Line 2
+    group: Display Content
+    registerType: InputRegister
+    address: 1077
+    datatype: Unicode
+    length: 16
+
+  # Event Memory
+
+  - name: Event Entry 1
+    group: Event Memory
+    registerType: InputRegister
+    address: 1093
+    datatype: EventEntry
+
+  - name: Event Entry 2
+    group: Event Memory
+    registerType: InputRegister
+    address: 1103
+    datatype: EventEntry
+
+  - name: Event Entry 3
+    group: Event Memory
+    registerType: InputRegister
+    address: 1113
+    datatype: EventEntry
+
+  - name: Event Entry 4
+    group: Event Memory
+    registerType: InputRegister
+    address: 1123
+    datatype: EventEntry
+
+  - name: Event Entry 5
+    group: Event Memory
+    registerType: InputRegister
+    address: 1133
+    datatype: EventEntry
+
+  - name: Event Entry 6
+    group: Event Memory
+    registerType: InputRegister
+    address: 1143
+    datatype: EventEntry
+
+  - name: Event Entry 7
+    group: Event Memory
+    registerType: InputRegister
+    address: 1153
+    datatype: EventEntry
+
+  - name: Event Entry 8
+    group: Event Memory
+    registerType: InputRegister
+    address: 1163
+    datatype: EventEntry
+
+  - name: Event Entry 9
+    group: Event Memory
+    registerType: InputRegister
+    address: 1173
+    datatype: EventEntry
+
+  - name: Event Entry 10
+    group: Event Memory
+    registerType: InputRegister
+    address: 1183
+    datatype: EventEntry
+
+  - name: Event Entry 11
+    group: Event Memory
+    registerType: InputRegister
+    address: 1193
+    datatype: EventEntry
+
+  - name: Event Entry 12
+    group: Event Memory
+    registerType: InputRegister
+    address: 1203
+    datatype: EventEntry
+
+  - name: Event Entry 13
+    group: Event Memory
+    registerType: InputRegister
+    address: 1213
+    datatype: EventEntry
+
+  - name: Event Entry 14
+    group: Event Memory
+    registerType: InputRegister
+    address: 1223
+    datatype: EventEntry
+
+  - name: Event Entry 15
+    group: Event Memory
+    registerType: InputRegister
+    address: 1233
+    datatype: EventEntry
+
+  - name: Event Entry 16
+    group: Event Memory
+    registerType: InputRegister
+    address: 1243
+    datatype: EventEntry
+
+  - name: Event Entry 17
+    group: Event Memory
+    registerType: InputRegister
+    address: 1253
+    datatype: EventEntry
+
+  - name: Event Entry 18
+    group: Event Memory
+    registerType: InputRegister
+    address: 1263
+    datatype: EventEntry
+
+  - name: Event Entry 19
+    group: Event Memory
+    registerType: InputRegister
+    address: 1273
+    datatype: EventEntry
+
+  - name: Event Entry 20
+    group: Event Memory
+    registerType: InputRegister
+    address: 1283
+    datatype: EventEntry
+
+  # Inputs and Outputs
+
+  ## ToDo
+
+  # Parameterization
+
+  - name: Current Date and Time
+    group: Parameterization
+    registerType: HoldingRegister
+    address: 101
+    datatype: DateTime
+
+  - name: Daylight Saving Time
+    group: Parameterization
+    registerType: HoldingRegister
+    address: 105
+    datatype: UInt16
+    validator:
+      enum:
+        - 0: Disabled
+        - 1: EU
+        - 2: UK
+        - 3: US
+
+  - name: Keep-Open Time (Automatic Mode)
+    group: Parameterization
+    registerType: HoldingRegister
+    address: 106
+    datatype: UInt16
+    validator:
+      range:
+        min: 0
+        max: 9999
+
+  - name: Keep-Open Time (Intermediate Stop)
+    group: Parameterization
+    registerType: HoldingRegister
+    address: 107
+    datatype: UInt16
+    validator:
+      range:
+        min: 0
+        max: 9999
+
+  - name: Closed Position Adjustment
+    group: Parameterization
+    registerType: HoldingRegister
+    address: 108
+    datatype: Int16
+    validator:
+      range:
+        min: -120
+        max: 120
+
+  - name: Open Position Adjustment
+    group: Parameterization
+    registerType: HoldingRegister
+    address: 109
+    datatype: Int16
+    validator:
+      range:
+        min: -60
+        max: 60
+
+  # User Applications
+ 
+  - name: User Application 1 Configuration
+    group: User Applications
+    registerType: HoldingRegister
+    address: 1001
+    datatype: Int16
+    validator: *userApplicationValidator
+
+  - name: User Application 2 Configuration
+    group: User Applications
+    registerType: HoldingRegister
+    address: 1002
+    datatype: Int16
+    validator: *userApplicationValidator
+
+  - name: User Application 1
+    group: User Applications
+    registerType: Coil
+    address: 501
+
+  - name: User Application 2
+    group: User Applications
+    registerType: Coil
+    address: 502
+

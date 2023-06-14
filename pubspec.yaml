@@ -11,12 +11,17 @@ dependencies:
     sdk: flutter
   flutter_launcher_icons:
   get:
-  package_info_plus: ^4.0.1
+  yaml:
+  build:
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.0
+  flutter_lints:
+  build_runner:
+  source_gen:
+  code_builder:
+  dart_style:
 
 flutter:
   uses-material-design: true
