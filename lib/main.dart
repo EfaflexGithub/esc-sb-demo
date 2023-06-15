@@ -1,3 +1,4 @@
+import 'package:efa_smartconnect_modbus_demo/data/services/door_collection_service.dart';
 import 'package:efa_smartconnect_modbus_demo/data/services/modbus_register_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -16,8 +17,12 @@ void initializeApplication() {
     final license = await rootBundle.loadString('LICENSE.md');
     yield LicenseEntryWithLineBreaks(['EFA-SmartConnect Modbus Demo'], license);
   });
+  _registerServices();
+}
 
+void _registerServices() {
   Get.put(ModbusRegisterService(), permanent: true);
+  Get.put(DoorCollectionService(), permanent: true);
 }
 
 class MyApp extends StatelessWidget {

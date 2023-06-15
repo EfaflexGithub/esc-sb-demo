@@ -3,11 +3,11 @@ import 'package:get/get.dart';
 import './door_control.dart';
 
 class Door {
-  Rx<String?> individualName = null.obs;
+  Rx<String?> individualName = Rx<String?>(null);
 
-  Rx<Uint64?> equipmentNumber = null.obs;
+  Rx<Uint64?> equipmentNumber = Rx<Uint64?>(null);
 
-  Rx<String?> doorProfile = null.obs;
+  Rx<String?> doorProfile = Rx<String?>(null);
 
   Rx<DoorControl?> doorControl = null.obs;
 }

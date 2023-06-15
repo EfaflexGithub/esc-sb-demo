@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:efa_smartconnect_modbus_demo/data/models/door.dart';
 import 'package:efa_smartconnect_modbus_demo/data/models/event_entry.dart';
 import 'package:efa_smartconnect_modbus_demo/data/repositories/modbus_register.dart';
 import 'package:efa_smartconnect_modbus_demo/data/repositories/modbus_register_map.g.dart';
@@ -11,7 +12,10 @@ import 'package:version/version.dart';
 
 import './smart_door_service.dart';
 
-class ModbusTcpService extends SmartDoorService {
+class ModbusTcpService implements SmartDoorService {
+  @override
+  Door door = Door();
+
   final ModbusTcpServiceConfiguration configuration;
   final ModbusDataConfiguration _dataConfiguration = ModbusDataConfiguration();
 
@@ -56,7 +60,13 @@ class ModbusTcpService extends SmartDoorService {
   }
 
   Future<void> updateIndividualName() async {
-    String? result = await _readRegister(ModbusRegisterName.individualName);
+    door.individualName.value =
+        await _readRegister(ModbusRegisterName.individualName);
+  }
+
+  Future<void> updateCycles() async {
+    door.doorControl.value?.cycleCounter.value =
+        await _readRegister(ModbusRegisterName.currentCycleCounter);
   }
 
   Future<void> writeModbusDataConfiguration(
@@ -295,10 +305,10 @@ class ModbusTcpService extends SmartDoorService {
         int eventCode = _decodeModbusData(
             list.sublist(7, 8), ModbusDataType.uint16, dataConfiguration);
         return EventEntry(
-          code:
-              "$eventType.${eventCode.toRadixString(16).toUpperCase().padLeft(3, '0')}",
-          dateTime: dateTime,
-        )..cycleCounter = cycles;
+            code:
+                "$eventType.${eventCode.toRadixString(16).toUpperCase().padLeft(3, '0')}",
+            dateTime: dateTime,
+            cycleCounter: cycles);
     }
   }
 

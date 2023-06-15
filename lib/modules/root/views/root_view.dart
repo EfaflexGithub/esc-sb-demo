@@ -18,12 +18,11 @@ class RootView extends GetView<RootController> {
             const VerticalDivider(thickness: 1, width: 1),
             Expanded(
               child: Scaffold(
-                // appBar: AppBar(
-                //   title: Text(title ?? ''),
-                //   centerTitle: true,
-                // ),
-                body: GetRouterOutlet(
-                  initialRoute: AppPages.initial,
+                body: Padding(
+                  padding: const EdgeInsets.only(left: 10),
+                  child: GetRouterOutlet(
+                    initialRoute: AppPages.initial,
+                  ),
                 ),
               ),
             )

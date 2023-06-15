@@ -17,8 +17,9 @@ class EventEntry {
       other is EventEntry &&
           runtimeType == other.runtimeType &&
           code == other.code &&
-          dateTime == other.dateTime;
+          dateTime == other.dateTime &&
+          cycleCounter == other.cycleCounter;
 
   @override
-  int get hashCode => code.hashCode ^ dateTime.hashCode;
+  int get hashCode => code.hashCode ^ dateTime.hashCode ^ cycleCounter.hashCode;
 }

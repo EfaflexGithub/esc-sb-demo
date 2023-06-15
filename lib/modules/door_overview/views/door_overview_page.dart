@@ -8,11 +8,39 @@ class DoorOverviewPage extends GetView<DoorOverviewController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Obx(() => Text('${controller.count} doorss')),
+      body: SingleChildScrollView(
+        child: SizedBox(
+          width: double.infinity,
+          child: Obx(
+            () => DataTable(
+              columns: const [
+                DataColumn(label: Expanded(child: Text('Status'))),
+                DataColumn(label: Expanded(child: Text('Equipment'))),
+                DataColumn(label: Expanded(child: Text('Name'))),
+                DataColumn(label: Expanded(child: Text('Display'))),
+                DataColumn(label: Expanded(child: Text('Position'))),
+                DataColumn(label: Expanded(child: Text('Event'))),
+              ],
+              rows: controller.doorCollectionService.smartDoorServices
+                  .map((smartDoorService) {
+                var door = smartDoorService.door;
+                return DataRow(cells: [
+                  DataCell(Text('Offline')),
+                  DataCell(Text(door.equipmentNumber.value?.toString() ?? '?')),
+                  DataCell(Text(door.individualName.value?.toString() ?? '?')),
+                  DataCell(Text(door.equipmentNumber.value?.toString() ?? '?')),
+                  DataCell(Text(door.equipmentNumber.value?.toString() ?? '?')),
+                  DataCell(Text(door.equipmentNumber.value?.toString() ?? '?')),
+                ]);
+              }).toList(),
+            ),
+          ),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: controller.increment,
+        onPressed: () {
+          controller.showAddModbusTcpDoorDialog();
+        },
         child: const Icon(Icons.add),
       ),
     );
