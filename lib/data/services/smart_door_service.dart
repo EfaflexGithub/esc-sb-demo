@@ -1,9 +1,12 @@
 import 'package:efa_smartconnect_modbus_demo/data/models/door.dart';
+import 'package:get/get.dart';
 
 abstract interface class SmartDoorService {
   Door get door;
 
-  void start();
+  var status = 'Uninitialized'.obs;
 
-  void stop();
+  Future<void> start();
+
+  Future<void> stop();
 }

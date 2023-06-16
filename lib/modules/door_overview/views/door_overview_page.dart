@@ -25,11 +25,12 @@ class DoorOverviewPage extends GetView<DoorOverviewController> {
                   .map((smartDoorService) {
                 var door = smartDoorService.door;
                 return DataRow(cells: [
-                  const DataCell(Text('Offline')),
+                  DataCell(Text(smartDoorService.status.value)),
                   DataCell(Text(door.equipmentNumber.value?.toString() ?? '?')),
                   DataCell(Text(door.individualName.value?.toString() ?? '?')),
-                  DataCell(Text(door.equipmentNumber.value?.toString() ?? '?')),
-                  DataCell(Text(door.equipmentNumber.value?.toString() ?? '?')),
+                  DataCell(Text(
+                      door.doorControl.value?.displayContent.value ?? '?')),
+                  DataCell(Text(door.openingStatus.value.toString() ?? '?')),
                   DataCell(Text(door.equipmentNumber.value?.toString() ?? '?')),
                 ]);
               }).toList(),

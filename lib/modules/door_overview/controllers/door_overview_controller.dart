@@ -63,10 +63,7 @@ class DoorOverviewController extends GetxController {
           ),
         ) as ModbusTcpService;
 
-        service.door.doorControl = EfaTronic().obs;
-
-        await service.updateIndividualName();
-        await service.updateCycles();
+        await service.start();
 
         Get.back(); // Close the dialog
       },

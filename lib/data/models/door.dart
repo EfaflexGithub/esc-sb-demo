@@ -1,5 +1,3 @@
-import 'package:efa_smartconnect_modbus_demo/data/models/efa_tronic.dart';
-import 'package:efa_smartconnect_modbus_demo/data/models/smart_connect_module.dart';
 import 'package:get/get.dart';
 import './door_control.dart';
 
@@ -12,14 +10,28 @@ class Door {
 
   Rx<int?> cycleCounter = Rx<int?>(null);
 
-  Rx<DoorControl?> doorControl = null.obs;
+  Rx<OpeningStatus> openingStatus = Rx<OpeningStatus>(OpeningStatus.unknown);
 
-  Door();
+  Rx<double?> openingPosition = Rx<double?>(null);
 
-  Door.smartConnectModule() {
-    var efaTronic = EfaTronic();
-    var smartConnectModule = SmartConnectModule();
-    doorControl.value = efaTronic;
-    efaTronic.extensionBoards.add(smartConnectModule);
+  Rx<int?> currentSpeed = Rx<int?>(null);
+
+  Rx<DoorControl?> doorControl = Rx<DoorControl?>(null);
+}
+
+enum OpeningStatus {
+  unknown,
+  opened,
+  opening,
+  intermediate,
+  closing,
+  closed;
+
+  @override
+  String toString() {
+    return switch (this) {
+      unknown => '?',
+      _ => name.toUpperCase(),
+    };
   }
 }

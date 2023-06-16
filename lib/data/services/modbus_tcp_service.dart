@@ -21,6 +21,9 @@ class ModbusTcpService implements SmartDoorService {
   @override
   final Door door;
 
+  @override
+  RxString status = 'Uninitialized'.obs;
+
   final ModbusTcpServiceConfiguration configuration;
   final ModbusDataConfiguration _dataConfiguration = ModbusDataConfiguration();
 
@@ -32,12 +35,13 @@ class ModbusTcpService implements SmartDoorService {
       Get.find<ModbusRegisterService>();
 
   @override
-  void start() {
-    // TODO: implement start
+  Future<void> start() async {
+    await updateDoorModelByGroup(ModbusRegisterGroup.doorData);
+    await updateDoorModelByGroup(ModbusRegisterGroup.operatingInformation);
   }
 
   @override
-  void stop() {
+  Future<void> stop() async {
     // TODO: implement stop
   }
 
@@ -59,7 +63,13 @@ class ModbusTcpService implements SmartDoorService {
             createTcpClient(configuration.ip,
                 port: configuration.port,
                 timeout: configuration.timeout,
-                mode: ModbusMode.rtu);
+                mode: ModbusMode.rtu) {
+    // as we know that modbus_tcp_service uses the EFA-SmartConnect module,
+    // add the specific door control implementation and the SmartConnectModule
+    var efaTronic = EfaTronic();
+    this.door.doorControl.value = efaTronic;
+    efaTronic.extensionBoards.add(SmartConnectModule());
+  }
 
   ModbusTcpService.fromSerialzedConfig(String serializedConfiguration)
       : this.fromConfig(_deserializeConfiguration(serializedConfiguration));
@@ -166,6 +176,7 @@ class ModbusTcpService implements SmartDoorService {
     if (!isConnected) {
       await client.connect();
       isConnected = true;
+      status.value = 'Online';
     }
   }
 
@@ -241,6 +252,70 @@ class ModbusTcpService implements SmartDoorService {
 
       case ModbusRegisterName.currentCycleCounter when value is int:
         door.cycleCounter.value = value;
+        break;
+
+      case ModbusRegisterName.dailyCyclesDay when value is int:
+        DoorControl? control = door.doorControl.value;
+        if (control is EfaTronic) {
+          control
+              .findExtensionBoardByType<SmartConnectModule>()
+              ?.cycleAnalysis
+              .dailyCyclesDay
+              .value = value;
+        }
+        break;
+
+      case ModbusRegisterName.dailyCyclesWeek when value is int:
+        DoorControl? control = door.doorControl.value;
+        if (control is EfaTronic) {
+          control
+              .findExtensionBoardByType<SmartConnectModule>()
+              ?.cycleAnalysis
+              .dailyCyclesWeek
+              .value = value;
+        }
+        break;
+
+      case ModbusRegisterName.dailyCyclesMonth when value is int:
+        DoorControl? control = door.doorControl.value;
+        if (control is EfaTronic) {
+          control
+              .findExtensionBoardByType<SmartConnectModule>()
+              ?.cycleAnalysis
+              .dailyCyclesMonth
+              .value = value;
+        }
+        break;
+
+      case ModbusRegisterName.dailyCyclesYear when value is int:
+        DoorControl? control = door.doorControl.value;
+        if (control is EfaTronic) {
+          control
+              .findExtensionBoardByType<SmartConnectModule>()
+              ?.cycleAnalysis
+              .dailyCyclesYear
+              .value = value;
+        }
+        break;
+
+      case ModbusRegisterName.currentStatus when value is int:
+        door.openingStatus.value = OpeningStatus.values[value];
+        break;
+
+      case ModbusRegisterName.currentOpeningPosition when value is int:
+        door.openingPosition.value = value / 100.0;
+        break;
+
+      case ModbusRegisterName.currentSpeed when value is int:
+        door.currentSpeed.value = value;
+        break;
+
+      case ModbusRegisterName.displayContentLine1 when value is String:
+        (door.doorControl.value as EfaTronic).displayContentLine1 = value;
+        break;
+
+      case ModbusRegisterName.displayContentLine2 when value is String:
+        (door.doorControl.value as EfaTronic).displayContentLine2 = value;
         break;
 
       default:
@@ -423,8 +498,12 @@ class ModbusTcpService implements SmartDoorService {
           _ => (throw "Unsupported label value: $labelValue"),
         };
         final labelIndex = list.byteData().getUint16(8);
-        return Version(major, minor, patch,
-            preRelease: [label, labelIndex.toString()]);
+        return switch (label) {
+          '' => Version(major, minor, patch),
+          _ => Version(major, minor, patch,
+              preRelease: [label, labelIndex.toString()])
+        };
+
       case ModbusDataType.eventEntry:
         DateTime dateTime = _decodeModbusData(
             list.sublist(0, 4), ModbusDataType.dateTime, dataConfiguration);

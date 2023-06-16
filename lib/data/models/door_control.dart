@@ -6,4 +6,6 @@ abstract base class DoorControl {
   Rx<int?> serialNumber = Rx<int?>(null);
 
   Rx<String?> firmwareVersion = Rx<String?>(null);
+
+  Rx<String?> displayContent = Rx<String?>(null);
 }
