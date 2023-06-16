@@ -104,7 +104,7 @@ String _generateModbusRegisterDefinition(String name, YamlMap map) {
       break;
     case ModbusRegisterType.holdingRegister:
     case ModbusRegisterType.inputRegister:
-      classType = "ModbusWordRegisters";
+      classType = "ModbusWordRegister";
       dataType = map.extractDatatype();
       length = _getDataTypeLength(dataType) ?? map.extractLength();
       break;
@@ -124,7 +124,7 @@ String _generateModbusRegisterDefinition(String name, YamlMap map) {
     address: $address,
   ),''';
 
-    case "ModbusWordRegisters":
+    case "ModbusWordRegister":
       return '''
   ${classType.toString()} (
     name: ModbusRegisterName.$name,
@@ -246,122 +246,3 @@ int? _getDataTypeLength(ModbusDataType datatype) {
       throw ArgumentError('Invalid ModbusDataType: $datatype');
   }
 }
-
-// class ModbusRegisterService extends GetxController {
-//   ModbusRegisterService();
-
-//   final List<ModbusRegisterDefinition> _registers =
-//       <ModbusRegisterDefinition>[];
-
-//   @override
-//   void onInit() async {
-//     super.onInit();
-
-//     final yamlString =
-//         await rootBundle.loadString('assets/modbus/registers.yaml');
-//     final yamlMap = loadYaml(yamlString);
-
-//     _parseRegisters(yamlMap['registers']);
-//   }
-
-//   void _parseRegisters(YamlList registers) {
-//     for (var register in registers) {
-//       var registerMap = register as YamlMap;
-//       final name = registerMap.extractName();
-//       final registerType = registerMap.extractModbusRegisterType();
-//       final address = registerMap.extractAddress();
-//       late final ModbusDataType dataType;
-//       late final int count;
-//       switch (registerType) {
-//         case ModbusRegisterType.coil:
-//         case ModbusRegisterType.discreteInput:
-//           dataType = ModbusDataType.bit;
-//           count = 1;
-//           break;
-//         default:
-//           dataType = registerMap.extractModbusDataType();
-//           switch (dataType) {
-//             case ModbusDataType.bit:
-//             case ModbusDataType.int16:
-//             case ModbusDataType.uint16:
-//               count = 1;
-//               break;
-//             case ModbusDataType.int32:
-//             case ModbusDataType.uint32:
-//               count = 2;
-//               break;
-//             case ModbusDataType.int64:
-//             case ModbusDataType.uint64:
-//             case ModbusDataType.dateTime:
-//               count = 4;
-//               break;
-//             case ModbusDataType.semVer:
-//               count = 5;
-//               break;
-//             case ModbusDataType.eventEntry:
-//               count = 10;
-//               break;
-//             case ModbusDataType.ascii:
-//             case ModbusDataType.unicode:
-//               count = registerMap.extractLength();
-//               break;
-//           }
-//       }
-
-//       _registers.add(ModbusRegisterDefinition(
-//         name: name,
-//         type: registerType,
-//       ));
-//     }
-//   }
-
-//   ModbusRegisterDefinition? findRegisterByName(String name) {
-//     for (var register in _registers) {
-//       if (register.name == name) {
-//         return register;
-//       }
-//     }
-//     return null;
-//   }
-// }
-
-// enum ModbusRegisterType {
-//   coil,
-//   discreteInput,
-//   holdingRegister,
-//   inputRegister,
-// }
-
-
-
-// class ModbusRegisterDefinition {
-//   final String name;
-//   final ModbusRegisterType type;
-//   final int address;
-
-//   ModbusRegisterDefinition({
-//     required this.name,
-//     required this.type,
-//     required this.address,
-//   });
-// }
-
-// class BitAddressableModbusRegister extends ModbusRegisterDefinition {
-//   BitAddressableModbusRegister({
-//     required super.name,
-//     required super.type,
-//     required super.address,
-//   });
-// }
-
-// class ByteAddressableModbusRegister extends ModbusRegisterDefinition {
-//   final ModbusDataType dataType;
-//   final int count;
-//   ByteAddressableModbusRegister({
-//     required super.name,
-//     required super.type,
-//     required super.address,
-//     required this.dataType,
-//     required this.count,
-//   });
-// }
