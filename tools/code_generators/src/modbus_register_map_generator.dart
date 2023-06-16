@@ -96,14 +96,14 @@ String _generateModbusRegisterDefinition(String name, YamlMap map) {
   late final ModbusDataType? dataType;
   late final int? length;
   switch (registerType) {
-    case ModbusBitRegisterType.discreteInput:
-    case ModbusBitRegisterType.coil:
+    case ModbusRegisterType.discreteInput:
+    case ModbusRegisterType.coil:
       classType = "ModbusBitRegister";
       dataType = null;
       length = null;
       break;
-    case ModbusWordRegistersType.holdingRegister:
-    case ModbusWordRegistersType.inputRegister:
+    case ModbusRegisterType.holdingRegister:
+    case ModbusRegisterType.inputRegister:
       classType = "ModbusWordRegisters";
       dataType = map.extractDatatype();
       length = _getDataTypeLength(dataType) ?? map.extractLength();
@@ -169,13 +169,13 @@ extension _ParseModbusRegisterFields on YamlMap {
   dynamic extractRegisterType() {
     switch (this['registerType'].toString()) {
       case 'Coil':
-        return ModbusBitRegisterType.coil;
+        return ModbusRegisterType.coil;
       case 'DiscreteInput':
-        return ModbusBitRegisterType.discreteInput;
+        return ModbusRegisterType.discreteInput;
       case 'HoldingRegister':
-        return ModbusWordRegistersType.holdingRegister;
+        return ModbusRegisterType.holdingRegister;
       case 'InputRegister':
-        return ModbusWordRegistersType.inputRegister;
+        return ModbusRegisterType.inputRegister;
       default:
         throw ArgumentError('Unknown ModbusRegisterType: $this');
     }

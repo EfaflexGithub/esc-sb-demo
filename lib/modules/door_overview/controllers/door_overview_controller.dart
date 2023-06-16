@@ -55,7 +55,7 @@ class DoorOverviewController extends GetxController {
         final doorCollectionService = Get.find<DoorCollectionService>();
 
         var service = doorCollectionService.add(
-          ModbusTcpService(
+          ModbusTcpService.fromConfig(
             ModbusTcpServiceConfiguration(
               ip: ip,
               port: int.parse(port),

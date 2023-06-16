@@ -5,7 +5,8 @@ class NavigationRailIcon extends StatelessWidget {
   final String text;
   final VoidCallback onTap;
 
-  NavigationRailIcon({
+  const NavigationRailIcon({
+    super.key,
     required this.icon,
     required this.text,
     required this.onTap,

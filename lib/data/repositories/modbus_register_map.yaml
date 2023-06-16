@@ -89,6 +89,15 @@ groups:
   - name: Event Memory
     group: Operating Information
 
+  - name: Physical Inputs
+    group: Inputs and Outputs
+
+  - name: Physical Outputs
+    group: Inputs and Outputs
+
+  - name: Virtual In- Outputs
+    group: Inputs and Outputs
+
   - name: Parameterization
     group: Door Interaction
 
@@ -507,9 +516,421 @@ registers:
     address: 1283
     datatype: EventEntry
 
-  # Inputs and Outputs
+  # Physical Inputs
 
-  ## ToDo
+  - name: Input E1
+    group: Physical Inputs
+    registerType: DiscreteInput
+    address: 1001
+
+  - name: Input E2
+    group: Physical Inputs
+    registerType: DiscreteInput
+    address: 1002
+
+  - name: Input E3
+    group: Physical Inputs
+    registerType: DiscreteInput
+    address: 1003
+
+  - name: Input E4
+    group: Physical Inputs
+    registerType: DiscreteInput
+    address: 1004
+
+  - name: Input E5
+    group: Physical Inputs
+    registerType: DiscreteInput
+    address: 1005
+  
+  - name: Input E6
+    group: Physical Inputs
+    registerType: DiscreteInput
+    address: 1006
+
+  - name: Input E7
+    group: Physical Inputs
+    registerType: DiscreteInput
+    address: 1007
+
+  - name: Input S1
+    group: Physical Inputs
+    registerType: DiscreteInput
+    address: 1008
+
+  - name: Input S2
+    group: Physical Inputs
+    registerType: DiscreteInput
+    address: 1009
+
+  - name: Input SE
+    group: Physical Inputs
+    registerType: DiscreteInput
+    address: 1010
+
+  - name: Input SA
+    group: Physical Inputs
+    registerType: DiscreteInput
+    address: 1011
+
+  - name: Input SB
+    group: Physical Inputs
+    registerType: DiscreteInput
+    address: 1012
+
+  - name: Input 21
+    group: Physical Inputs
+    registerType: DiscreteInput
+    address: 1013
+
+  - name: Input 22
+    group: Physical Inputs
+    registerType: DiscreteInput
+    address: 1014
+
+  - name: Input 23
+    group: Physical Inputs
+    registerType: DiscreteInput
+    address: 1015
+
+  - name: Input 24
+    group: Physical Inputs
+    registerType: DiscreteInput
+    address: 1016
+
+  - name: Input 25
+    group: Physical Inputs
+    registerType: DiscreteInput
+    address: 1017
+
+  - name: Input 26
+    group: Physical Inputs
+    registerType: DiscreteInput
+    address: 1018
+
+  - name: Radio 1
+    group: Physical Inputs
+    registerType: DiscreteInput
+    address: 1019
+
+  - name: Radio 2
+    group: Physical Inputs
+    registerType: DiscreteInput
+    address: 1020
+
+  - name: Detector 1
+    group: Physical Inputs
+    registerType: DiscreteInput
+    address: 1021
+
+  - name: Detector 2
+    group: Physical Inputs
+    registerType: DiscreteInput
+    address: 1022
+
+  - name: Detector 3
+    group: Physical Inputs
+    registerType: DiscreteInput
+    address: 1023
+
+  - name: Detector 4
+    group: Physical Inputs
+    registerType: DiscreteInput
+    address: 1024
+
+  - name: Safety Strip SE
+    group: Physical Inputs
+    registerType: DiscreteInput
+    address: 1025
+
+  - name: Safety Strip SE2
+    group: Physical Inputs
+    registerType: DiscreteInput
+    address: 1026
+
+  - name: Emergency Stop NA1 to NA2
+    group: Physical Inputs
+    registerType: DiscreteInput
+    address: 1027
+
+  - name: Emergency Stop NA3 to NA4
+    group: Physical Inputs
+    registerType: DiscreteInput
+    address: 1028
+
+  - name: Emergency Stop NA5 to NA6
+    group: Physical Inputs
+    registerType: DiscreteInput
+    address: 1029
+
+  - name: Foil Keyboard Open
+    group: Physical Inputs
+    registerType: DiscreteInput
+    address: 1030
+
+  - name: Foil Keyboard Stop
+    group: Physical Inputs
+    registerType: DiscreteInput
+    address: 1031
+
+  - name: Foil Keyboard Close
+    group: Physical Inputs
+    registerType: DiscreteInput
+    address: 1032
+
+  # Physical Outputs
+
+  - name: Relay K1
+    group: Physical Outputs
+    registerType: Coil
+    address: 1001
+
+  - name: Relay K2
+    group: Physical Outputs
+    registerType: Coil
+    address: 1002
+
+  - name: Relay K3
+    group: Physical Outputs
+    registerType: Coil
+    address: 1003
+
+  - name: Relay K4
+    group: Physical Outputs
+    registerType: Coil
+    address: 1004
+
+  - name: Relay K5
+    group: Physical Outputs
+    registerType: Coil
+    address: 1005
+
+  - name: Relay K6
+    group: Physical Outputs
+    registerType: Coil
+    address: 1006
+
+  - name: Relay K7
+    group: Physical Outputs
+    registerType: Coil
+    address: 1007
+
+  - name: Relay K8
+    group: Physical Outputs
+    registerType: Coil
+    address: 1008
+
+  - name: Relay K9
+    group: Physical Outputs
+    registerType: Coil
+    address: 1009
+
+  - name: Relay K10
+    group: Physical Outputs
+    registerType: Coil
+    address: 1010
+
+  - name: Output 28
+    group: Physical Outputs
+    registerType: Coil
+    address: 1011
+
+  - name: Output 29
+    group: Physical Outputs
+    registerType: Coil
+    address: 1012
+
+  - name: Test Output 1
+    group: Physical Outputs
+    registerType: Coil
+    address: 1013
+
+  - name: Test Output 2
+    group: Physical Outputs
+    registerType: Coil
+    address: 1014
+
+  - name: Test Output 3
+    group: Physical Outputs
+    registerType: Coil
+    address: 1015
+
+  - name: Test Output 4
+    group: Physical Outputs
+    registerType: Coil
+    address: 1016
+
+  - name: Break (24 V)
+    group: Physical Outputs
+    registerType: Coil
+    address: 1017
+
+  - name: LED Open
+    group: Physical Outputs
+    registerType: Coil
+    address: 1018
+
+  - name: LED Stop
+    group: Physical Outputs
+    registerType: Coil
+    address: 1019
+
+  - name: LED Close
+    group: Physical Outputs
+    registerType: Coil
+    address: 1020
+
+  # Virtual In- Outputs
+
+  - name: Virtual Output 21
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1501
+  
+  - name: Virtual Output 22
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1502
+
+  - name: Virtual Output 23
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1503
+
+  - name: Virtual Output 24
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1504
+
+  - name: Virtual Output 27
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1505
+
+  - name: Virtual Output 2B
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1506
+
+  - name: Virtual Output 2C
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1507
+
+  - name: Virtual Output 2D
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1508
+
+  - name: Virtual Output 2E
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1509
+
+  - name: Virtual Output 2F
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1510
+
+  - name: Virtual Output 31
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1511
+
+  - name: Virtual Output 32
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1512
+
+  - name: Virtual Output 33
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1513
+
+  - name: Virtual Output 34
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1514
+
+  - name: Virtual Output 35
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1515
+
+  - name: Virtual Output 36
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1516
+
+  - name: Virtual Output 37
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1517
+
+  - name: Virtual Output 38
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1518
+
+  - name: Virtual Input 13
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1501
+
+  - name: Virtual Input 14
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1502
+
+  - name: Virtual Input 15
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1503
+
+  - name: Virtual Input 27
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1504
+  
+  - name: Virtual Input 28
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1505
+
+  - name: Virtual Input 31
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1506
+  
+  - name: Virtual Input 3A
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1507
+
+  - name: Virtual Input 3B
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1508
+
+  - name: Virtual Input 3C
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1509
+
+  - name: Virtual Input 3D
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1510
+
+  - name: Virtual Input 3E
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1511
+
+  - name: Virtual Input 3F
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1512
 
   # Parameterization
 

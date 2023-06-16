@@ -12,10 +12,14 @@ class FakeModbusClient extends Fake implements ModbusClient {
 
   FakeModbusClient(this._dataConfiguration);
 
-  void throwIfNotConnected() {
+  void _throwIfNotConnected() {
     if (_isConnected == false) {
       throw Exception('Not connected');
     }
+  }
+
+  bool _isDefaultDataConfiguration() {
+    return _dataConfiguration == ModbusDataConfiguration();
   }
 
   @override
@@ -33,14 +37,71 @@ class FakeModbusClient extends Fake implements ModbusClient {
   }
 
   @override
-  Future<Uint16List> readInputRegisters(int address, int amount) {
-    throwIfNotConnected();
+  Future<Uint16List> readHoldingRegisters(int address, int amount) {
+    switch (address + 1) {
+      case 1 when amount == 25:
+        return Future.value(Uint16List.fromList([
+          0x4546,
+          0x412D,
+          0x536D,
+          0x6172,
+          0x7443,
+          0x6F6E,
+          0x6E65,
+          0x6374,
+          0x204D,
+          0x6F63,
+          0x6B00,
+          0x0000,
+          0x0000,
+          0x0000,
+          0x0000,
+          0x0000,
+          0x0000,
+          0x0000,
+          0x0000,
+          0x0000,
+          0x0000,
+          0x0000,
+          0x0000,
+          0x0000,
+          0x0000,
+        ]));
 
-    switch (address) {
-      case 9002 when amount == 1:
+      default:
+        throw UnimplementedError("desired register request not mocked!");
+    }
+  }
+
+  @override
+  Future<Uint16List> readInputRegisters(int address, int amount) {
+    _throwIfNotConnected();
+
+    switch (address + 1) {
+      case 1 when amount == 8 && _isDefaultDataConfiguration():
+        return Future.value(Uint16List.fromList([
+          0x0000,
+          0x0001,
+          0xDCD8,
+          0x3240,
+          0x3237,
+          0x3100,
+          0x0000,
+          0x0000,
+        ]));
+
+      case 1 when amount == 4 && _isDefaultDataConfiguration():
+        return Future.value(
+            Uint16List.fromList([0x0000, 0x0001, 0xDCD8, 0x3240]));
+
+      case 5 when amount == 4:
+        return Future.value(
+            Uint16List.fromList([0x3237, 0x3100, 0x0000, 0x0000]));
+
+      case 9003 when amount == 1:
         return Future.value(Uint16List.fromList([0x8421]));
 
-      case 9003 when amount == 2:
+      case 9004 when amount == 2:
         var index = 0;
         if (_dataConfiguration.wordSwap) {
           index |= 0x0001;
@@ -56,7 +117,7 @@ class FakeModbusClient extends Fake implements ModbusClient {
         ];
         return Future.value(registers[index]);
 
-      case 9005 when amount == 4:
+      case 9006 when amount == 4:
         var index = 0;
         if (_dataConfiguration.dWordSwap) {
           index |= 0x0001;
@@ -79,32 +140,26 @@ class FakeModbusClient extends Fake implements ModbusClient {
         ];
         return Future.value(registers[index]);
 
-      case 9009 when amount == 4:
+      case 9010 when amount == 4:
         final registers = Uint16List.fromList([0x646f, 0x2069, 0x7400, 0x0000]);
         return Future.value(registers);
 
-      case 9013 when amount == 4:
+      case 9014 when amount == 4:
         final registers = Uint16List.fromList([0x2192, 0x0032, 0x00B0, 0x2713]);
         return Future.value(registers);
 
-      case 9017
+      case 9018
           when amount == 4 &&
               _dataConfiguration.dateTimeFormat ==
                   DateTimeFormat.dateTimeFormat2:
         return Future.value(
             Uint16List.fromList([0x07E6, 0x0202, 0x0B1C, 0x0009]));
 
-      case 9017
-          when amount == 4 &&
-              _dataConfiguration.dateTimeFormat ==
-                  DateTimeFormat.dateTimeFormat1 &&
-              _dataConfiguration.dWordSwap == false &&
-              _dataConfiguration.wordSwap == false &&
-              _dataConfiguration.byteSwap == false:
+      case 9018 when amount == 4 && _isDefaultDataConfiguration():
         return Future.value(
             Uint16List.fromList([0x0000, 0x0000, 0x61FA, 0x6AC9]));
 
-      case 9017
+      case 9018
           when amount == 4 &&
               _dataConfiguration.dateTimeFormat ==
                   DateTimeFormat.dateTimeFormat1 &&
@@ -114,24 +169,18 @@ class FakeModbusClient extends Fake implements ModbusClient {
         return Future.value(
             Uint16List.fromList([0xC96A, 0xFA61, 0x0000, 0x0000]));
 
-      case 9021
+      case 9022
           when amount == 4 &&
               _dataConfiguration.dateTimeFormat ==
                   DateTimeFormat.dateTimeFormat2:
         return Future.value(
             Uint16List.fromList([0x0757, 0x030E, 0x0B1E, 0x0000]));
 
-      case 9021
-          when amount == 4 &&
-              _dataConfiguration.dateTimeFormat ==
-                  DateTimeFormat.dateTimeFormat1 &&
-              _dataConfiguration.dWordSwap == false &&
-              _dataConfiguration.wordSwap == false &&
-              _dataConfiguration.byteSwap == false:
+      case 9022 when amount == 4 && _isDefaultDataConfiguration():
         return Future.value(
             Uint16List.fromList([0xFFFF, 0xFFFF, 0x5535, 0x3E38]));
 
-      case 9021
+      case 9022
           when amount == 4 &&
               _dataConfiguration.dateTimeFormat ==
                   DateTimeFormat.dateTimeFormat1 &&
@@ -141,17 +190,11 @@ class FakeModbusClient extends Fake implements ModbusClient {
         return Future.value(
             Uint16List.fromList([0x383E, 0x3555, 0xFFFF, 0xFFFF]));
 
-      case 9025 when amount == 5:
+      case 9026 when amount == 5:
         return Future.value(
             Uint16List.fromList([0x0002, 0x000F, 0x0006, 0x0002, 0x0017]));
 
-      case 9030
-          when amount == 10 &&
-              _dataConfiguration.dateTimeFormat ==
-                  DateTimeFormat.dateTimeFormat1 &&
-              _dataConfiguration.dWordSwap == false &&
-              _dataConfiguration.wordSwap == false &&
-              _dataConfiguration.byteSwap == false:
+      case 9031 when amount == 10 && _isDefaultDataConfiguration():
         return Future.value(Uint16List.fromList([
           0x0000,
           0x0000,
@@ -165,7 +208,7 @@ class FakeModbusClient extends Fake implements ModbusClient {
           0x0000
         ]));
 
-      case 9030
+      case 9031
           when amount == 10 &&
               _dataConfiguration.dateTimeFormat ==
                   DateTimeFormat.dateTimeFormat2 &&
@@ -186,21 +229,22 @@ class FakeModbusClient extends Fake implements ModbusClient {
         ]));
 
       default:
-        throw UnimplementedError("desired register request not mocked!");
+        throw UnimplementedError(
+            "desired register request not mocked: $amount registers @ $address with data configuration $_dataConfiguration");
     }
   }
 
   @override
   Future<int> writeSingleRegister(int address, int value) {
-    throwIfNotConnected();
-    switch (address) {
-      case 2016:
+    _throwIfNotConnected();
+    switch (address + 1) {
+      case 2017:
         _dataConfiguration.dWordSwap = value & 0x0001 != 0;
         _dataConfiguration.wordSwap = value & 0x0002 != 0;
         _dataConfiguration.byteSwap = value & 0x0004 != 0;
         break;
 
-      case 2017:
+      case 2018:
         _dataConfiguration.dateTimeFormat = switch (value) {
           0 => DateTimeFormat.dateTimeFormat1,
           1 => DateTimeFormat.dateTimeFormat2,

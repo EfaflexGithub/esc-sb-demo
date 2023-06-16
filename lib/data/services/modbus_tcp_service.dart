@@ -1,11 +1,16 @@
+import 'dart:collection';
 import 'dart:typed_data';
 
 import 'package:efa_smartconnect_modbus_demo/data/models/door.dart';
+import 'package:efa_smartconnect_modbus_demo/data/models/door_control.dart';
+import 'package:efa_smartconnect_modbus_demo/data/models/efa_tronic.dart';
 import 'package:efa_smartconnect_modbus_demo/data/models/event_entry.dart';
+import 'package:efa_smartconnect_modbus_demo/data/models/smart_connect_module.dart';
 import 'package:efa_smartconnect_modbus_demo/data/repositories/modbus_register.dart';
 import 'package:efa_smartconnect_modbus_demo/data/repositories/modbus_register_map.g.dart';
 import 'package:efa_smartconnect_modbus_demo/data/repositories/modbus_register_types.dart';
 import 'package:efa_smartconnect_modbus_demo/data/services/modbus_register_service.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:modbus/modbus.dart';
 import 'package:version/version.dart';
@@ -14,7 +19,7 @@ import './smart_door_service.dart';
 
 class ModbusTcpService implements SmartDoorService {
   @override
-  Door door = Door();
+  final Door door;
 
   final ModbusTcpServiceConfiguration configuration;
   final ModbusDataConfiguration _dataConfiguration = ModbusDataConfiguration();
@@ -23,7 +28,7 @@ class ModbusTcpService implements SmartDoorService {
 
   final ModbusClient client;
 
-  late final ModbusRegisterService _modbusRegisterService =
+  final ModbusRegisterService _modbusRegisterService =
       Get.find<ModbusRegisterService>();
 
   @override
@@ -36,22 +41,28 @@ class ModbusTcpService implements SmartDoorService {
     // TODO: implement stop
   }
 
-  ModbusTcpService(this.configuration, {ModbusClient? client})
-      : client = client ??
+  ModbusTcpService(
+    String ip, {
+    int port = 502,
+    Duration timeout = const Duration(seconds: 5),
+    ModbusClient? client,
+    Door? door,
+  }) : this.fromConfig(
+            ModbusTcpServiceConfiguration(ip: ip, port: port, timeout: timeout),
+            client: client,
+            door: door);
+
+  ModbusTcpService.fromConfig(this.configuration,
+      {ModbusClient? client, Door? door})
+      : door = door ?? Door(),
+        client = client ??
             createTcpClient(configuration.ip,
                 port: configuration.port,
                 timeout: configuration.timeout,
                 mode: ModbusMode.rtu);
 
-  ModbusTcpService.ip(
-    String ip, {
-    int port = 502,
-    Duration timeout = const Duration(seconds: 5),
-  }) : this(ModbusTcpServiceConfiguration(
-            ip: ip, port: port, timeout: timeout));
-
-  ModbusTcpService.deserialize(String serializedConfiguration)
-      : this(_deserializeConfiguration(serializedConfiguration));
+  ModbusTcpService.fromSerialzedConfig(String serializedConfiguration)
+      : this.fromConfig(_deserializeConfiguration(serializedConfiguration));
 
   static ModbusTcpServiceConfiguration _deserializeConfiguration(
       String serializedConfiguration) {
@@ -60,13 +71,11 @@ class ModbusTcpService implements SmartDoorService {
   }
 
   Future<void> updateIndividualName() async {
-    door.individualName.value =
-        await _readRegister(ModbusRegisterName.individualName);
+    updateDoorModelByName(ModbusRegisterName.individualName);
   }
 
   Future<void> updateCycles() async {
-    door.doorControl.value?.cycleCounter.value =
-        await _readRegister(ModbusRegisterName.currentCycleCounter);
+    updateDoorModelByName(ModbusRegisterName.currentCycleCounter);
   }
 
   Future<void> writeModbusDataConfiguration(
@@ -93,52 +102,64 @@ class ModbusTcpService implements SmartDoorService {
 
   Future<void> applyDateTimeFormat(DateTimeFormat? dateTimeFormat) async {}
 
+  @visibleForTesting
   Future<int> readIntegerTest1() async {
-    return await _readRegister(ModbusRegisterName.integerTest1);
+    return await _readRegisterByName(ModbusRegisterName.integerTest1);
   }
 
+  @visibleForTesting
   Future<int> readIntegerTest2() async {
-    return await _readRegister(ModbusRegisterName.integerTest2);
+    return await _readRegisterByName(ModbusRegisterName.integerTest2);
   }
 
+  @visibleForTesting
   Future<int> readIntegerTest3() async {
-    return await _readRegister(ModbusRegisterName.integerTest3);
+    return await _readRegisterByName(ModbusRegisterName.integerTest3);
   }
 
+  @visibleForTesting
   Future<int> readIntegerTest4() async {
-    return await _readRegister(ModbusRegisterName.integerTest4);
+    return await _readRegisterByName(ModbusRegisterName.integerTest4);
   }
 
+  @visibleForTesting
   Future<int> readIntegerTest5() async {
-    return await _readRegister(ModbusRegisterName.integerTest5);
+    return await _readRegisterByName(ModbusRegisterName.integerTest5);
   }
 
+  @visibleForTesting
   Future<int> readIntegerTest6() async {
-    return await _readRegister(ModbusRegisterName.integerTest6);
+    return await _readRegisterByName(ModbusRegisterName.integerTest6);
   }
 
+  @visibleForTesting
   Future<String> readAsciiTest1() async {
-    return await _readRegister(ModbusRegisterName.asciiTest1);
+    return await _readRegisterByName(ModbusRegisterName.asciiTest1);
   }
 
+  @visibleForTesting
   Future<String> readUnicodeTest1() async {
-    return await _readRegister(ModbusRegisterName.unicodeTest1);
+    return await _readRegisterByName(ModbusRegisterName.unicodeTest1);
   }
 
+  @visibleForTesting
   Future<DateTime> readDateTimeTest1() async {
-    return await _readRegister(ModbusRegisterName.dateTimeTest1);
+    return await _readRegisterByName(ModbusRegisterName.dateTimeTest1);
   }
 
+  @visibleForTesting
   Future<DateTime> readDateTimeTest2() async {
-    return await _readRegister(ModbusRegisterName.dateTimeTest2);
+    return await _readRegisterByName(ModbusRegisterName.dateTimeTest2);
   }
 
+  @visibleForTesting
   Future<Version> readSemanticVersionTest() async {
-    return await _readRegister(ModbusRegisterName.semanticVersionTest);
+    return await _readRegisterByName(ModbusRegisterName.semanticVersionTest);
   }
 
+  @visibleForTesting
   Future<EventEntry> readEventEntryTest() async {
-    return await _readRegister(ModbusRegisterName.eventEntryTest);
+    return await _readRegisterByName(ModbusRegisterName.eventEntryTest);
   }
 
   Future<void> _ensureConnected() async {
@@ -153,38 +174,149 @@ class ModbusTcpService implements SmartDoorService {
     isConnected = false;
   }
 
-  dynamic _readRegister(ModbusRegisterName modbusRegisterName) async {
-    dynamic retval;
-    await _ensureConnected();
+  Future<void> updateDoorModelByName(ModbusRegisterName name) async {
+    var value = await _readRegisterByName(name);
+    _updateDoorModel(name, value);
+  }
+
+  Future<void> updateDoorModelByGroup(ModbusRegisterGroup group) async {
+    var value = await _readRegistersByGroup(group);
+    for (var name in value.keys) {
+      _updateDoorModel(name, value[name]);
+    }
+  }
+
+  void _updateDoorModel(ModbusRegisterName name, dynamic value) {
+    switch (name) {
+      case ModbusRegisterName.swapOptions
+          when value is int && value > 0 && value < 8:
+        _dataConfiguration.swapOptions = value;
+        break;
+
+      case ModbusRegisterName.dateTimeFormat when value is int:
+        _dataConfiguration.dateTimeFormat = DateTimeFormat.values[value];
+        break;
+
+      case ModbusRegisterName.individualName when value is String:
+        door.individualName.value = value;
+        break;
+
+      case ModbusRegisterName.equipmentNumber when value is int:
+        door.equipmentNumber.value = value;
+        break;
+
+      case ModbusRegisterName.doorProfile when value is String:
+        door.profile.value = value;
+        break;
+
+      case ModbusRegisterName.smartConnectMaterialNumber when value is String:
+        DoorControl? control = door.doorControl.value;
+        if (control is EfaTronic) {
+          control
+              .findExtensionBoardByType<SmartConnectModule>()
+              ?.materialNumber
+              .value = value;
+        }
+        break;
+
+      case ModbusRegisterName.smartConnectSerialNumber when value is int:
+        DoorControl? control = door.doorControl.value;
+        if (control is EfaTronic) {
+          control
+              .findExtensionBoardByType<SmartConnectModule>()
+              ?.serialNumber
+              .value = value;
+        }
+        break;
+
+      case ModbusRegisterName.smartConnectFirmwareVersion when value is Version:
+        DoorControl? control = door.doorControl.value;
+        if (control is EfaTronic) {
+          control
+              .findExtensionBoardByType<SmartConnectModule>()
+              ?.firmwareVersion
+              .value = value;
+        }
+        break;
+
+      case ModbusRegisterName.currentCycleCounter when value is int:
+        door.cycleCounter.value = value;
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  Future<dynamic> _readRegisterByName(
+      ModbusRegisterName modbusRegisterName) async {
     var register = _modbusRegisterService.getModbusRegister(modbusRegisterName);
     if (register is ModbusBitRegister) {
-      List<bool?> result;
-      switch (register.type) {
-        case ModbusBitRegisterType.coil:
-          result = await client.readCoils(register.address - 1, 1);
-          break;
-        case ModbusBitRegisterType.discreteInput:
-          result = await client.readDiscreteInputs(register.address - 1, 1);
-          break;
-        default:
-          throw "Unsupported type: ${register.type}";
+      return await _readRegisters(register.type, register.address, 1);
+    }
+
+    if (register is ModbusWordRegister) {
+      Uint16List result = await _readRegisters(
+          register.type, register.address, register.length);
+      return _decodeModbusData(result, register.dataType, _dataConfiguration);
+    }
+
+    throw "Unsupported type: ${register.type}";
+  }
+
+  Future<HashMap<ModbusRegisterName, dynamic>> _readRegistersByGroup(
+      ModbusRegisterGroup group) async {
+    HashMap<ModbusRegisterName, dynamic> retval =
+        HashMap<ModbusRegisterName, dynamic>();
+    var collections =
+        _modbusRegisterService.getModbusRegisterCollections(group);
+
+    for (var collection in collections) {
+      var result = await _readRegisters(
+          collection.registerType, collection.address, collection.length);
+
+      if (collection.registerType.classType == ModbusBitRegister &&
+          result is List<bool?>) {
+        for (int i = 0; i < result.length; i++) {
+          retval[collection.registers[i].name] = result[i];
+        }
+      } else if (collection.registerType.classType == ModbusWordRegister &&
+          result is Uint16List) {
+        int startIndex = 0;
+        for (int i = 0; i < collection.registers.length; i++) {
+          var register = collection.registers[i] as ModbusWordRegister;
+          var registerResult =
+              result.sublist(startIndex, startIndex + register.length);
+          retval[collection.registers[i].name] = _decodeModbusData(
+              registerResult, register.dataType, _dataConfiguration);
+          startIndex += register.length;
+        }
+      } else {
+        throw "Unsupported type: ${collection.registerType.classType}";
       }
-      retval = result[0];
-    } else if (register is ModbusWordRegisters) {
-      Uint16List result;
-      switch (register.type) {
-        case ModbusWordRegistersType.holdingRegister:
-          result = await client.readHoldingRegisters(
-              register.address - 1, register.length);
-          break;
-        case ModbusWordRegistersType.inputRegister:
-          result = await client.readInputRegisters(
-              register.address - 1, register.length);
-          break;
-        default:
-          throw "Unsupported type: ${register.type}";
-      }
-      retval = _decodeModbusData(result, register.dataType, _dataConfiguration);
+    }
+    return retval;
+  }
+
+  Future<dynamic> _readRegisters(
+      ModbusRegisterType type, int address, int length) async {
+    dynamic retval;
+    await _ensureConnected();
+    switch (type) {
+      case ModbusRegisterType.coil:
+        retval = await client.readCoils(address - 1, length);
+
+      case ModbusRegisterType.discreteInput:
+        retval = await client.readDiscreteInputs(address - 1, length);
+
+      case ModbusRegisterType.holdingRegister:
+        retval = await client.readHoldingRegisters(address - 1, length);
+
+      case ModbusRegisterType.inputRegister:
+        retval = await client.readInputRegisters(address - 1, length);
+
+      default:
+        throw "Unsupported type: $type";
     }
     await _disconnect();
     return retval;
@@ -196,13 +328,11 @@ class ModbusTcpService implements SmartDoorService {
     var register = _modbusRegisterService.getModbusRegister(modbusRegisterName);
     if (register is ModbusBitRegister) {
       throw UnimplementedError();
-    } else if (register is ModbusWordRegisters) {
-      if (register.type != ModbusWordRegistersType.holdingRegister) {
+    } else if (register is ModbusWordRegister) {
+      if (register.type != ModbusRegisterType.holdingRegister) {
         throw "It is not possible to write to register of type ${register.type}";
       }
-      late Uint16List words;
-
-      words = _encodeModbusData(
+      final Uint16List words = _encodeModbusData(
           value, register.dataType, _dataConfiguration, register.length);
 
       switch (words.length) {
@@ -356,12 +486,55 @@ class ModbusDataConfiguration {
   bool byteSwap;
   DateTimeFormat dateTimeFormat;
 
+  int get swapOptions {
+    return (dWordSwap ? 0x01 : 0) |
+        (wordSwap ? 0x02 : 0) |
+        (byteSwap ? 0x04 : 0);
+  }
+
+  set swapOptions(int value) {
+    if (value & 0x01 != 0) {
+      dWordSwap = true;
+    }
+    if (value & 0x02 != 0) {
+      wordSwap = true;
+    }
+    if (value & 0x04 != 0) {
+      byteSwap = true;
+    }
+  }
+
   ModbusDataConfiguration({
     this.dWordSwap = false,
     this.wordSwap = false,
     this.byteSwap = false,
     this.dateTimeFormat = DateTimeFormat.dateTimeFormat1,
   });
+
+  @override
+  String toString() {
+    String bool2binary(bool value) {
+      return value ? "1" : "0";
+    }
+
+    return "swap(dword|word|byte): ${bool2binary(dWordSwap)}|${bool2binary(wordSwap)}|${bool2binary(byteSwap)}, datetime: ${dateTimeFormat.index}";
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ModbusDataConfiguration &&
+          dWordSwap == other.dWordSwap &&
+          wordSwap == other.wordSwap &&
+          byteSwap == other.byteSwap &&
+          dateTimeFormat == other.dateTimeFormat;
+
+  @override
+  int get hashCode =>
+      dWordSwap.hashCode ^
+      wordSwap.hashCode ^
+      byteSwap.hashCode ^
+      dateTimeFormat.hashCode;
 }
 
 extension _Uint16ListModbusExtension on Uint16List {

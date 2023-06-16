@@ -1,9 +1,6 @@
-enum ModbusBitRegisterType {
+enum ModbusRegisterType {
   coil,
   discreteInput,
-}
-
-enum ModbusWordRegistersType {
   holdingRegister,
   inputRegister,
 }

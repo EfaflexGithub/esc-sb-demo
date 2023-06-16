@@ -1,13 +1,17 @@
-import 'dart:ffi';
+import 'package:efa_smartconnect_modbus_demo/data/models/extension_board.dart';
 import 'package:get/get.dart';
 
 import './door_control.dart';
 
 base class EfaTronic extends DoorControl {
-  Rx<String?> series = Rx<String?>(null);
+  /// List of extension boards
+  RxList<ExtensionBoard> extensionBoards = RxList<ExtensionBoard>();
 
-  // assign 0 by default to serial
-  Rx<Uint32?> serial = Rx<Uint32?>(null);
-
-  Rx<String?> firmwareVersion = Rx<String?>(null);
+  /// Get the extension board by type
+  /// @param type Type of extension board
+  /// @return Extension board
+  T? findExtensionBoardByType<T extends ExtensionBoard>() {
+    return extensionBoards
+        .firstWhereOrNull((element) => element.runtimeType == T) as T?;
+  }
 }
