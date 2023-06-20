@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 class EventEntry implements Comparable<EventEntry> {
   String code;
@@ -39,6 +40,6 @@ class EventEntry implements Comparable<EventEntry> {
 
   @override
   String toString() {
-    return '$code on $dateTime';
+    return '$code on ${DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime)}';
   }
 }

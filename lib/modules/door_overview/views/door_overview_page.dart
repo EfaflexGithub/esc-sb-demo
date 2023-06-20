@@ -24,9 +24,11 @@ class DoorOverviewPage extends GetView<DoorOverviewController> {
           width: double.infinity,
           child: Obx(
             () => DataTable(
+              showCheckboxColumn: false,
               columns: columnTitles.map(_buildColumnTitle).toList(),
               rows: controller.doorCollectionService.smartDoorServices
-                  .map(_buildDataRow)
+                  .map((smartDoorService) =>
+                      _buildDataRow(context, smartDoorService))
                   .toList(),
             ),
           ),
@@ -51,34 +53,38 @@ class DoorOverviewPage extends GetView<DoorOverviewController> {
     );
   }
 
-  static DataRow _buildDataRow(SmartDoorService smartDoorService) {
+  DataRow _buildDataRow(
+      BuildContext context, SmartDoorService smartDoorService) {
     var door = smartDoorService.door;
     return DataRow(
       color: MaterialStateProperty.resolveWith<Color?>(
           (Set<MaterialState> states) {
         if (states.contains(MaterialState.hovered)) {
-          return Colors.blue.withOpacity(0.88);
+          return Theme.of(context).colorScheme.primary.withOpacity(0.08);
         }
         return null;
       }),
+      onSelectChanged: (bool? value) {},
       cells: [
         DataCell(
-          Obx(
-            () => IconButton(
-              iconSize: 20,
-              icon: smartDoorService.isServiceRunning.value
-                  ? const Icon(Icons.stop)
-                  : const Icon(Icons.play_arrow),
-              color: smartDoorService.isServiceRunning.value
-                  ? Colors.red
-                  : Colors.green,
-              tooltip: smartDoorService.isServiceRunning.value
-                  ? 'Stop Service'
-                  : 'Start Service',
-              onPressed: () => smartDoorService.isServiceRunning.value
-                  ? smartDoorService.stop()
-                  : smartDoorService.start(),
-            ),
+          Row(
+            children: [
+              IconButton(
+                iconSize: 20,
+                icon: smartDoorService.isServiceRunning.value
+                    ? const Icon(Icons.stop)
+                    : const Icon(Icons.play_arrow),
+                color: smartDoorService.isServiceRunning.value
+                    ? Colors.red
+                    : Colors.green,
+                tooltip: smartDoorService.isServiceRunning.value
+                    ? 'Stop Service'
+                    : 'Start Service',
+                onPressed: () => smartDoorService.isServiceRunning.value
+                    ? smartDoorService.stop()
+                    : smartDoorService.start(),
+              ),
+            ],
           ),
         ),
         DataCell(

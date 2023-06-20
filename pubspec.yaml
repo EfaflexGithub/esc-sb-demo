@@ -18,7 +18,7 @@ dependencies:
   build:
   logger:
   statemachine:
-  async:
+  intl:
 
 dev_dependencies:
   test:
