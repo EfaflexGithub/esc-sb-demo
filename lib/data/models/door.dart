@@ -2,21 +2,21 @@ import 'package:get/get.dart';
 import './door_control.dart';
 
 class Door {
-  Rx<String?> individualName = Rx<String?>(null);
+  var individualName = Rxn<String>();
 
-  Rx<int?> equipmentNumber = Rx<int?>(null);
+  var equipmentNumber = Rxn<int>();
 
-  Rx<String?> profile = Rx<String?>(null);
+  var profile = Rxn<String>();
 
-  Rx<int?> cycleCounter = Rx<int?>(null);
+  var cycleCounter = Rxn<int>();
 
   Rx<OpeningStatus> openingStatus = Rx<OpeningStatus>(OpeningStatus.unknown);
 
-  Rx<double?> openingPosition = Rx<double?>(null);
+  var openingPosition = Rxn<double>();
 
-  Rx<int?> currentSpeed = Rx<int?>(null);
+  var currentSpeed = Rxn<int>();
 
-  Rx<DoorControl?> doorControl = Rx<DoorControl?>(null);
+  var doorControl = Rxn<DoorControl>();
 }
 
 enum OpeningStatus {
@@ -31,7 +31,7 @@ enum OpeningStatus {
   String toString() {
     return switch (this) {
       unknown => '?',
-      _ => name.toUpperCase(),
+      _ => name.capitalizeFirst!,
     };
   }
 }

@@ -16,7 +16,9 @@ dependencies:
   version:
   yaml:
   build:
-  logger: 
+  logger:
+  statemachine:
+  async:
 
 dev_dependencies:
   test:

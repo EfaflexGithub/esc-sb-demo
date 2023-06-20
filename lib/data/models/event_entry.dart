@@ -1,9 +1,11 @@
-class EventEntry {
+import 'package:get/get.dart';
+
+class EventEntry implements Comparable<EventEntry> {
   String code;
   DateTime dateTime;
   int? cycleCounter;
-  String? title;
-  String? description;
+  var title = Rxn<String>();
+  var description = Rxn<String>();
 
   EventEntry({
     required this.code,
@@ -22,4 +24,21 @@ class EventEntry {
 
   @override
   int get hashCode => code.hashCode ^ dateTime.hashCode ^ cycleCounter.hashCode;
+
+  @override
+  int compareTo(EventEntry other) {
+    // compare datetime and if equal, compare cycle counter
+    if (dateTime != other.dateTime) {
+      return dateTime.compareTo(other.dateTime);
+    }
+    if (cycleCounter != other.cycleCounter) {
+      return cycleCounter!.compareTo(other.cycleCounter!);
+    }
+    return 0;
+  }
+
+  @override
+  String toString() {
+    return '$code on $dateTime';
+  }
 }

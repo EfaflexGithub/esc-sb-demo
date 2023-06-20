@@ -1,11 +1,14 @@
+import 'package:efa_smartconnect_modbus_demo/data/models/event_entry.dart';
 import 'package:get/get.dart';
 
 abstract base class DoorControl {
-  Rx<String?> series = Rx<String?>(null);
+  var series = Rxn<String>();
 
-  Rx<int?> serialNumber = Rx<int?>(null);
+  var serialNumber = Rxn<int>();
 
-  Rx<String?> firmwareVersion = Rx<String?>(null);
+  var firmwareVersion = Rxn<String>();
 
-  Rx<String?> displayContent = Rx<String?>(null);
+  var displayContent = Rxn<String>();
+
+  var eventEntries = RxList<EventEntry>();
 }

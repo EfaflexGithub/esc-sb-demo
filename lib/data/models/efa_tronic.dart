@@ -7,6 +7,18 @@ base class EfaTronic extends DoorControl {
   /// List of extension boards
   RxList<ExtensionBoard> extensionBoards = RxList<ExtensionBoard>();
 
+  var dateTime = Rxn<DateTime>();
+
+  var daylightSavingTime = Rxn<DaylightSavingTime>();
+
+  var keepOpenTimeAutomatic = Rxn<int?>();
+
+  var keepOpenTimeIntermediateStop = Rxn<int?>();
+
+  var closedPositionAdjustment = Rxn<int?>();
+
+  var openPositionAdjustment = Rxn<int?>();
+
   /// Get the extension board by type
   /// @param type Type of extension board
   /// @return Extension board
@@ -17,15 +29,21 @@ base class EfaTronic extends DoorControl {
 
   EfaTronic() {
     var string = String.fromCharCodes(List.filled(33, ' '.codeUnitAt(0)));
-    string.replaceRange(16, 17, '\n');
-    displayContent.value = string;
+    displayContent.value = string.replaceRange(16, 17, '\n');
   }
 
   set displayContentLine1(String value) {
-    displayContent.value?.replaceRange(0, 16, value);
+    displayContent.value = displayContent.value?.replaceRange(0, 16, value);
   }
 
   set displayContentLine2(String value) {
-    displayContent.value?.replaceRange(17, 33, value);
+    displayContent.value = displayContent.value?.replaceRange(17, 33, value);
   }
+}
+
+enum DaylightSavingTime {
+  Disabled,
+  EU,
+  UK,
+  US;
 }

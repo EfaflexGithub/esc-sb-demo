@@ -54,6 +54,8 @@ validators:
       - 15: Activate smoke extraction (drive to intermediate stop and disable door travel)
 
 groups:
+  - name: Licensing
+
   - name: Change Notification Flags
 
   - name: Door Data
@@ -111,6 +113,7 @@ registers:
     group: Data Configuration Registers
     registerType: HoldingRegister
     address: 2017
+    access: R/W
     datatype: UInt16
     validator:
       - range:
@@ -121,6 +124,7 @@ registers:
     group: Data Configuration Registers
     registerType: HoldingRegister
     address: 2018
+    access: R/W
     datatype: UInt16
     validator:
       - range:
@@ -128,6 +132,19 @@ registers:
           max: 1
 
   # Test registers
+
+  - name: Boolean Test 1
+    group: Test Registers
+    registerType: InputRegister
+    address: 9001
+    datatype: Boolean
+
+  - name: Boolean Test 2
+    group: Test Registers
+    registerType: InputRegister
+    address: 9002
+    datatype: Boolean
+
   - name: Integer Test 1
     group: Test Registers
     registerType: InputRegister
@@ -202,6 +219,33 @@ registers:
     address: 9031
     datatype: EventEntry
 
+  # Licensing
+
+  - name: License Key
+    group: Licensing
+    registerType: HoldingRegister
+    address: 2001
+    datatype: Ascii
+    access: W
+    length: 15
+
+  - name: License Activation Result
+    group: Licensing
+    registerType: InputRegister
+    address: 2001
+    datatype: UInt16
+
+  - name: License Activation State
+    group: Licensing
+    registerType: DiscreteInput
+    address: 2001
+
+  - name: License Expiration Date
+    group: Licensing
+    registerType: InputRegister
+    address: 2002
+    datatype: DateTime
+
   # Change notification flags
 
   - name: Equipment Inforamtion Changed
@@ -255,6 +299,7 @@ registers:
     group: Equipment Information
     registerType: HoldingRegister
     address: 1
+    access: R/W
     datatype: Ascii
     length: 25
 
@@ -684,101 +729,121 @@ registers:
     group: Physical Outputs
     registerType: Coil
     address: 1001
+    access: R/W
 
   - name: Relay K2
     group: Physical Outputs
     registerType: Coil
     address: 1002
+    access: R/W
 
   - name: Relay K3
     group: Physical Outputs
     registerType: Coil
     address: 1003
+    access: R/W
 
   - name: Relay K4
     group: Physical Outputs
     registerType: Coil
     address: 1004
+    access: R
 
   - name: Relay K5
     group: Physical Outputs
     registerType: Coil
     address: 1005
+    access: R/W
 
   - name: Relay K6
     group: Physical Outputs
     registerType: Coil
     address: 1006
+    access: R/W
 
   - name: Relay K7
     group: Physical Outputs
     registerType: Coil
     address: 1007
+    access: R/W
 
   - name: Relay K8
     group: Physical Outputs
     registerType: Coil
     address: 1008
+    access: R/W
 
   - name: Relay K9
     group: Physical Outputs
     registerType: Coil
     address: 1009
+    access: R/W
 
   - name: Relay K10
     group: Physical Outputs
     registerType: Coil
     address: 1010
+    access: R/W
 
   - name: Output 28
     group: Physical Outputs
     registerType: Coil
     address: 1011
+    access: R/W
 
   - name: Output 29
     group: Physical Outputs
     registerType: Coil
     address: 1012
+    access: R/W
 
   - name: Test Output 1
     group: Physical Outputs
     registerType: Coil
     address: 1013
+    access: R/W
 
   - name: Test Output 2
     group: Physical Outputs
     registerType: Coil
     address: 1014
+    access: R/W
 
   - name: Test Output 3
     group: Physical Outputs
     registerType: Coil
     address: 1015
+    access: R/W
 
   - name: Test Output 4
     group: Physical Outputs
     registerType: Coil
     address: 1016
+    access: R/W
 
   - name: Break (24 V)
     group: Physical Outputs
     registerType: Coil
     address: 1017
+    access: R
 
   - name: LED Open
     group: Physical Outputs
     registerType: Coil
     address: 1018
+    access: R
 
   - name: LED Stop
     group: Physical Outputs
     registerType: Coil
     address: 1019
+    access: R
 
   - name: LED Close
     group: Physical Outputs
     registerType: Coil
     address: 1020
+    access: R
 
   # Virtual In- Outputs
 
@@ -786,91 +851,109 @@ registers:
     group: Virtual In- Outputs
     registerType: Coil
     address: 1501
+    access: R
   
   - name: Virtual Output 22
     group: Virtual In- Outputs
     registerType: Coil
     address: 1502
+    access: R
 
   - name: Virtual Output 23
     group: Virtual In- Outputs
     registerType: Coil
     address: 1503
+    access: R
 
   - name: Virtual Output 24
     group: Virtual In- Outputs
     registerType: Coil
     address: 1504
+    access: R
 
   - name: Virtual Output 27
     group: Virtual In- Outputs
     registerType: Coil
     address: 1505
+    access: R
 
   - name: Virtual Output 2B
     group: Virtual In- Outputs
     registerType: Coil
     address: 1506
+    access: R
 
   - name: Virtual Output 2C
     group: Virtual In- Outputs
     registerType: Coil
     address: 1507
+    access: R
 
   - name: Virtual Output 2D
     group: Virtual In- Outputs
     registerType: Coil
     address: 1508
+    access: R
 
   - name: Virtual Output 2E
     group: Virtual In- Outputs
     registerType: Coil
     address: 1509
+    access: R
 
   - name: Virtual Output 2F
     group: Virtual In- Outputs
     registerType: Coil
     address: 1510
+    access: R
 
   - name: Virtual Output 31
     group: Virtual In- Outputs
     registerType: Coil
     address: 1511
+    access: R
 
   - name: Virtual Output 32
     group: Virtual In- Outputs
     registerType: Coil
     address: 1512
+    access: R
 
   - name: Virtual Output 33
     group: Virtual In- Outputs
     registerType: Coil
     address: 1513
+    access: R
 
   - name: Virtual Output 34
     group: Virtual In- Outputs
     registerType: Coil
     address: 1514
+    access: R
 
   - name: Virtual Output 35
     group: Virtual In- Outputs
     registerType: Coil
     address: 1515
+    access: R
 
   - name: Virtual Output 36
     group: Virtual In- Outputs
     registerType: Coil
     address: 1516
+    access: R
 
   - name: Virtual Output 37
     group: Virtual In- Outputs
     registerType: Coil
     address: 1517
+    access: R
 
   - name: Virtual Output 38
     group: Virtual In- Outputs
     registerType: Coil
     address: 1518
+    access: R
 
   - name: Virtual Input 13
     group: Virtual In- Outputs
@@ -938,12 +1021,14 @@ registers:
     group: Parameterization
     registerType: HoldingRegister
     address: 101
+    access: R/W
     datatype: DateTime
 
   - name: Daylight Saving Time
     group: Parameterization
     registerType: HoldingRegister
     address: 105
+    access: R/W
     datatype: UInt16
     validator:
       enum:
@@ -956,6 +1041,7 @@ registers:
     group: Parameterization
     registerType: HoldingRegister
     address: 106
+    access: R/W
     datatype: UInt16
     validator:
       range:
@@ -966,6 +1052,7 @@ registers:
     group: Parameterization
     registerType: HoldingRegister
     address: 107
+    access: R/W
     datatype: UInt16
     validator:
       range:
@@ -976,6 +1063,7 @@ registers:
     group: Parameterization
     registerType: HoldingRegister
     address: 108
+    access: R/W
     datatype: Int16
     validator:
       range:
@@ -986,6 +1074,7 @@ registers:
     group: Parameterization
     registerType: HoldingRegister
     address: 109
+    access: R/W
     datatype: Int16
     validator:
       range:
@@ -998,6 +1087,7 @@ registers:
     group: User Applications
     registerType: HoldingRegister
     address: 1001
+    access: R/W
     datatype: Int16
     validator: *userApplicationValidator
 
@@ -1005,6 +1095,7 @@ registers:
     group: User Applications
     registerType: HoldingRegister
     address: 1002
+    access: R/W
     datatype: Int16
     validator: *userApplicationValidator
 
@@ -1012,9 +1103,11 @@ registers:
     group: User Applications
     registerType: Coil
     address: 501
+    access: R/W
 
   - name: User Application 2
     group: User Applications
     registerType: Coil
     address: 502
+    access: R/W
 

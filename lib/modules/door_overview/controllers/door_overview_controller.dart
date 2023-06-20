@@ -1,4 +1,3 @@
-import 'package:efa_smartconnect_modbus_demo/data/models/efa_tronic.dart';
 import 'package:efa_smartconnect_modbus_demo/data/services/door_collection_service.dart';
 import 'package:efa_smartconnect_modbus_demo/data/services/modbus_tcp_service.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +12,7 @@ class DoorOverviewController extends GetxController {
         TextEditingController(text: "192.168.10.11");
     final TextEditingController portController =
         TextEditingController(text: "502");
-    final TextEditingController refreshRate =
+    final TextEditingController refreshRateController =
         TextEditingController(text: "1000");
     final TextEditingController licenseController = TextEditingController();
 
@@ -38,7 +37,7 @@ class DoorOverviewController extends GetxController {
             decoration: const InputDecoration(labelText: 'Port'),
           ),
           TextField(
-            controller: refreshRate,
+            controller: refreshRateController,
             decoration: const InputDecoration(labelText: 'Refresh Rate'),
           ),
           TextField(
@@ -50,6 +49,7 @@ class DoorOverviewController extends GetxController {
       onConfirm: () async {
         String ip = ipController.text;
         String port = portController.text;
+        int refreshRate = int.parse(refreshRateController.text, radix: 10);
         // String licenseKey = licenseController.text;
 
         final doorCollectionService = Get.find<DoorCollectionService>();
@@ -59,6 +59,7 @@ class DoorOverviewController extends GetxController {
             ModbusTcpServiceConfiguration(
               ip: ip,
               port: int.parse(port),
+              refreshRate: Duration(milliseconds: refreshRate),
             ),
           ),
         ) as ModbusTcpService;

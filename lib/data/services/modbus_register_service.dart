@@ -24,7 +24,8 @@ class ModbusRegisterService extends GetxService {
   }
 
   List<ModbusRegisterCollection> getModbusRegisterCollections(
-      ModbusRegisterGroup group) {
+      ModbusRegisterGroup group,
+      [AccessType accessType = AccessType.read]) {
     List<ModbusRegisterCollection> collections = [
       ModbusRegisterCollection(registerType: ModbusRegisterType.coil),
       ModbusRegisterCollection(registerType: ModbusRegisterType.discreteInput),
@@ -34,7 +35,9 @@ class ModbusRegisterService extends GetxService {
     ];
 
     List<ModbusRegister> registers = modbusRegisterMap
-        .where((element) => element.groups.contains(group))
+        .where((element) =>
+            element.groups.contains(group) &&
+            element.accessType.contains(accessType))
         .toList();
 
     // move the registers into the 4 collections, based on the ModbusRegisterType

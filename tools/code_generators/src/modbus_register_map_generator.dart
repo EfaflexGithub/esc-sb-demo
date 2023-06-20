@@ -89,8 +89,8 @@ String _generateModbusRegisterDefinition(String name, YamlMap map) {
     groups.insert(0, "ModbusRegisterGroup.$group,");
     group = _modbusGroups[group];
   }
-  final dynamic registerType = map.extractRegisterType();
-  final int address = map.extractAddress();
+  final registerType = map.extractRegisterType();
+  final address = map.extractAddress();
 
   late final String classType;
   late final ModbusDataType? dataType;
@@ -108,9 +108,8 @@ String _generateModbusRegisterDefinition(String name, YamlMap map) {
       dataType = map.extractDatatype();
       length = _getDataTypeLength(dataType) ?? map.extractLength();
       break;
-    default:
-      throw Exception('Unknown register type: $registerType');
   }
+  final AccessType accessType = map.extractAccessType(registerType);
 
   switch (classType) {
     case "ModbusBitRegister":
@@ -122,6 +121,7 @@ String _generateModbusRegisterDefinition(String name, YamlMap map) {
     ],
     type: $registerType,
     address: $address,
+    accessType: $accessType,
   ),''';
 
     case "ModbusWordRegister":
@@ -133,6 +133,7 @@ String _generateModbusRegisterDefinition(String name, YamlMap map) {
     ],
     type: $registerType,
     address: $address,
+    accessType: $accessType,
     dataType: $dataType,
     length: $length,
   ),''';
@@ -166,7 +167,7 @@ extension _ParseModbusRegisterFields on YamlMap {
     return this['group']?.toString().camelCase;
   }
 
-  dynamic extractRegisterType() {
+  ModbusRegisterType extractRegisterType() {
     switch (this['registerType'].toString()) {
       case 'Coil':
         return ModbusRegisterType.coil;
@@ -189,6 +190,8 @@ extension _ParseModbusRegisterFields on YamlMap {
 
   ModbusDataType extractDatatype() {
     switch (this['datatype'].toString()) {
+      case 'Boolean':
+        return ModbusDataType.boolean;
       case 'Int16':
         return ModbusDataType.int16;
       case 'Int32':
@@ -221,10 +224,27 @@ extension _ParseModbusRegisterFields on YamlMap {
     if (length == null) throw ArgumentError('Missing length');
     return int.parse(length);
   }
+
+  AccessType extractAccessType(ModbusRegisterType registerType) {
+    if (registerType == ModbusRegisterType.discreteInput ||
+        registerType == ModbusRegisterType.inputRegister) {
+      return AccessType.read;
+    }
+
+    String accessType =
+        this['access'] ?? (throw ArgumentError('Missing access: $this'));
+    return switch (accessType) {
+      'R' => AccessType.read,
+      'W' => AccessType.write,
+      'R/W' => AccessType.readWrite,
+      _ => throw ArgumentError('Unknown access type: $accessType'),
+    };
+  }
 }
 
 int? _getDataTypeLength(ModbusDataType datatype) {
   switch (datatype) {
+    case ModbusDataType.boolean:
     case ModbusDataType.int16:
     case ModbusDataType.uint16:
       return 1;

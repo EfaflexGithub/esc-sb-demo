@@ -4,11 +4,11 @@ import 'package:version/version.dart';
 import './extension_board.dart';
 
 class SmartConnectModule extends ExtensionBoard {
-  Rx<String?> materialNumber = Rx<String?>(null);
+  var materialNumber = Rxn<String>();
 
-  Rx<int?> serialNumber = Rx<int?>(null);
+  var serialNumber = Rxn<int>();
 
-  Rx<Version?> firmwareVersion = Rx<Version?>(null);
+  var firmwareVersion = Rxn<Version>();
 
   var cycleAnalysis = CycleAnalysis();
 }
