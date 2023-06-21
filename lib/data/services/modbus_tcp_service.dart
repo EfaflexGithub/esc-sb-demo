@@ -128,6 +128,7 @@ base class ModbusTcpService with SmartDoorService {
             ModbusRegisterGroup.dataConfigurationRegisters);
         _startedMachine.current = _ModbusTcpServiceState.checkingLicense;
       } on SocketException {
+        _blockClient = false;
         // Nothing to do here as we want to stay inside the offlineState on a
         // SocketException (normally caused by a timeout if the modbus server
         // is not reachable)
@@ -157,11 +158,12 @@ base class ModbusTcpService with SmartDoorService {
     onlineState.onTimeout(configuration.refreshRate, onlineState.enter);
 
     onlineState.onEntry(() async {
+      _setStatus(_ModbusTcpServiceState.online);
       try {
         await _readAndProcessChangeNotificationFlags();
-        _setStatus(_ModbusTcpServiceState.online);
       } on SocketException {
         _startedMachine.current = _ModbusTcpServiceState.offline;
+        _blockClient = false;
       }
     });
 
