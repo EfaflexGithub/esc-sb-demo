@@ -19,6 +19,8 @@ dependencies:
   logger:
   statemachine:
   intl:
+  async:
+  data_table_2:
 
 dev_dependencies:
   test:

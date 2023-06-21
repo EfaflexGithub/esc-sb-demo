@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:data_table_2/data_table_2.dart';
 import 'package:efa_smartconnect_modbus_demo/data/services/smart_door_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -6,31 +9,31 @@ import '../controllers/door_overview_controller.dart';
 class DoorOverviewPage extends GetView<DoorOverviewController> {
   const DoorOverviewPage({super.key});
 
-  static const List<String> columnTitles = [
-    '',
-    'Status',
-    'Equipment',
-    'Name',
-    'Display',
-    'Position',
-    'Event',
+  static const List<(String, dynamic?)> columnTitles = [
+    ('', 50),
+    ('Status', ColumnSize.S),
+    ('Equipment', ColumnSize.M),
+    ('Name', ColumnSize.M),
+    ('Display', ColumnSize.M),
+    ('Position', ColumnSize.S),
+    ('Event', ColumnSize.L),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: SizedBox(
-          width: double.infinity,
-          child: Obx(
-            () => DataTable(
-              showCheckboxColumn: false,
-              columns: columnTitles.map(_buildColumnTitle).toList(),
-              rows: controller.doorCollectionService.smartDoorServices
-                  .map((smartDoorService) =>
-                      _buildDataRow(context, smartDoorService))
-                  .toList(),
-            ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Obx(
+          () => DataTable2(
+            columnSpacing: 1,
+            horizontalMargin: 0,
+            minWidth: 1000,
+            showCheckboxColumn: false,
+            columns: columnTitles.map<DataColumn>(_buildColumnTitle).toList(),
+            rows: controller.doorCollectionService.smartDoorServices
+                .map((service) => _buildDataRow(context, service))
+                .toList(),
           ),
         ),
       ),
@@ -43,13 +46,16 @@ class DoorOverviewPage extends GetView<DoorOverviewController> {
     );
   }
 
-  static DataColumn _buildColumnTitle(String title) {
-    return DataColumn(
-      label: Expanded(
-        child: Center(
-          child: Text(title),
-        ),
-      ),
+  static DataColumn _buildColumnTitle((String, dynamic) record) {
+    var (title, width) = record;
+
+    double? fixedWidth = (width is int || width is double) ? width + .0 : null;
+    ColumnSize size = (width is ColumnSize) ? width : ColumnSize.M;
+
+    return DataColumn2(
+      size: size,
+      fixedWidth: fixedWidth,
+      label: Center(child: Text(title)),
     );
   }
 
@@ -111,7 +117,8 @@ class DoorOverviewPage extends GetView<DoorOverviewController> {
         ),
         DataCell(Text(door.equipmentNumber.value?.toString() ?? '?')),
         DataCell(Text(door.individualName.value?.toString() ?? '?')),
-        DataCell(Text(door.doorControl.value?.displayContent.value ?? '?')),
+        DataCell(Center(
+            child: Text(door.doorControl.value?.displayContent.value ?? '?'))),
         DataCell(Text(door.openingStatus.value.toString())),
         DataCell(
           Text(door.doorControl.value?.eventEntries.firstOrNull?.toString() ??
