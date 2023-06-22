@@ -4,19 +4,21 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:hive_flutter/adapters.dart';
 import './routes/pages.dart';
 
-void main() {
-  initializeApplication();
+void main() async {
+  await initializeApplication();
   runApp(const MyApp());
 }
 
-void initializeApplication() {
+Future<void> initializeApplication() async {
   // add LICENSE.md of the project to the LicenseRegistry
   LicenseRegistry.addLicense(() async* {
     final license = await rootBundle.loadString('LICENSE.md');
     yield LicenseEntryWithLineBreaks(['EFA-SmartConnect Modbus Demo'], license);
   });
+  await Hive.initFlutter();
   _registerServices();
 }
 

@@ -1,11 +1,16 @@
 import 'package:efa_smartconnect_modbus_demo/data/models/door.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:uuid/uuid.dart';
 
-base mixin SmartDoorService {
-  Door door = Door();
+abstract base class SmartDoorService {
+  final String uuid;
+
+  Door get door;
 
   final Rx<Color> _statusColor = Colors.grey.obs;
+
+  SmartDoorService([String? uuid]) : uuid = uuid ?? const Uuid().v4();
 
   set statusColor(StatusColor color) {
     _statusColor.value = switch (color) {
@@ -22,13 +27,19 @@ base mixin SmartDoorService {
 
   var statusString = 'Uninitialized'.obs;
 
-  void start() {
+  @mustCallSuper
+  Future<void> start() async {
     isServiceRunning.value = true;
   }
 
-  void stop() {
+  @mustCallSuper
+  Future<void> stop() async {
     isServiceRunning.value = false;
   }
+
+  String getServiceName();
+
+  Map<String, dynamic> getConfiguration();
 }
 
 enum StatusColor {

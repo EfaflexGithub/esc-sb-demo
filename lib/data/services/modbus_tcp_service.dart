@@ -21,9 +21,17 @@ import 'package:async/async.dart';
 
 import './smart_door_service.dart';
 
-base class ModbusTcpService with SmartDoorService {
+base class ModbusTcpService extends SmartDoorService {
   final ModbusTcpServiceConfiguration configuration;
   final ModbusDataConfiguration _dataConfiguration = ModbusDataConfiguration();
+
+  static const String serviceName = 'modbus_tcp_service';
+
+  @override
+  final Door door = Door();
+
+  @override
+  String getServiceName() => serviceName;
 
   bool isConnected = false;
 
@@ -58,6 +66,11 @@ base class ModbusTcpService with SmartDoorService {
     super.stop();
   }
 
+  @override
+  Map<String, dynamic> getConfiguration() {
+    return configuration.toMap();
+  }
+
   ModbusTcpService(String ip,
       {int port = 502,
       Duration timeout = const Duration(seconds: 3),
@@ -66,35 +79,29 @@ base class ModbusTcpService with SmartDoorService {
             ModbusTcpServiceConfiguration(ip: ip, port: port, timeout: timeout),
             client: client);
 
-  ModbusTcpService.fromConfig(this.configuration, {ModbusClient? client})
+  ModbusTcpService.fromConfig(this.configuration,
+      {String? uuid, ModbusClient? client})
       : client = client ??
             createTcpClient(configuration.ip,
                 port: configuration.port,
                 timeout: configuration.timeout,
-                mode: ModbusMode.rtu) {
+                mode: ModbusMode.rtu),
+        super(uuid) {
     // as we know that modbus_tcp_service uses the EFA-SmartConnect module,
     // add the specific door control implementation and the SmartConnectModule
     var efaTronic = EfaTronic();
     door.doorControl.value = efaTronic;
     efaTronic.extensionBoards.add(SmartConnectModule());
+    initializeStateMachine();
+  }
 
+  void initializeStateMachine() {
+    // configure disconnect timer
     _disconnectTimer ??=
         RestartableTimer(const Duration(milliseconds: 500), () async {
       await _disconnect();
     });
-    initializeStateMachine();
-  }
 
-  ModbusTcpService.fromSerialzedConfig(String serializedConfiguration)
-      : this.fromConfig(_deserializeConfiguration(serializedConfiguration));
-
-  static ModbusTcpServiceConfiguration _deserializeConfiguration(
-      String serializedConfiguration) {
-    // todo: implement deserialization logic
-    return ModbusTcpServiceConfiguration(ip: "0.0.0.0");
-  }
-
-  void initializeStateMachine() {
     // configure root state machine
     final stoppedState = _rootMachine.newState(_ModbusTcpServiceState.stopped);
     final startedState = _rootMachine.newState(_ModbusTcpServiceState.started);
@@ -781,6 +788,21 @@ class ModbusTcpServiceConfiguration {
     this.refreshRate = const Duration(seconds: 1000),
     this.timeout = const Duration(seconds: 5),
   });
+
+  ModbusTcpServiceConfiguration.fromMap(Map<String, dynamic> map)
+      : ip = map['ip'],
+        port = map['port'],
+        timeout = Duration(milliseconds: map['timeout']),
+        refreshRate = Duration(milliseconds: map['refreshRate']);
+
+  Map<String, dynamic> toMap() {
+    return {
+      'ip': ip,
+      'port': port,
+      'timeout': timeout.inMilliseconds,
+      'refreshRate': refreshRate.inMilliseconds,
+    };
+  }
 }
 
 enum DateTimeFormat {

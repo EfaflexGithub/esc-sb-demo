@@ -21,14 +21,17 @@ dependencies:
   intl:
   async:
   data_table_2:
+  hive:
+  hive_flutter:
+  uuid:
 
 dev_dependencies:
   test:
   flutter_test:
     sdk: flutter
   flutter_lints:
+  hive_generator:
   build_runner:
-  source_gen:
   code_builder:
   dart_style:
 
