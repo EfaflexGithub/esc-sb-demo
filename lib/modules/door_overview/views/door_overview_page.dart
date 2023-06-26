@@ -1,6 +1,5 @@
-import 'dart:developer';
-
 import 'package:data_table_2/data_table_2.dart';
+import 'package:efa_smartconnect_modbus_demo/data/models/door.dart';
 import 'package:efa_smartconnect_modbus_demo/data/services/smart_door_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -9,8 +8,7 @@ import '../controllers/door_overview_controller.dart';
 class DoorOverviewPage extends GetView<DoorOverviewController> {
   const DoorOverviewPage({super.key});
 
-  static const List<(String, dynamic?)> columnTitles = [
-    ('', 50),
+  static const List<(String, dynamic)> columnTitles = [
     ('Status', ColumnSize.S),
     ('Equipment', ColumnSize.M),
     ('Name', ColumnSize.M),
@@ -29,8 +27,30 @@ class DoorOverviewPage extends GetView<DoorOverviewController> {
             columnSpacing: 1,
             horizontalMargin: 0,
             minWidth: 1000,
-            showCheckboxColumn: false,
-            columns: columnTitles.map<DataColumn>(_buildColumnTitle).toList(),
+            showCheckboxColumn: controller.showCheckboxColumn.value,
+            columns: [
+              DataColumn2(
+                label: Visibility(
+                  visible: controller
+                      .doorCollectionService.smartDoorServices.isNotEmpty,
+                  child: IconButton(
+                      iconSize: 20,
+                      icon: Icon(controller.showCheckboxColumn.value
+                          ? Icons.cancel
+                          : Icons.edit),
+                      onPressed: () {
+                        controller.showCheckboxColumn.toggle();
+                        if (controller.showCheckboxColumn.value) {
+                          _enterEditMode(context);
+                        } else {
+                          controller.leaveEditMode();
+                        }
+                      }),
+                ),
+                fixedWidth: 50,
+              ),
+              ...columnTitles.map<DataColumn>(_buildColumnTitle).toList()
+            ],
             rows: controller.doorCollectionService.smartDoorServices
                 .map((service) => _buildDataRow(context, service))
                 .toList(),
@@ -43,6 +63,60 @@ class DoorOverviewPage extends GetView<DoorOverviewController> {
         },
         child: const Icon(Icons.add),
       ),
+    );
+  }
+
+  void _enterEditMode(BuildContext context) {
+    if (controller.bottomSheetController != null) {
+      return;
+    }
+    controller.showCheckboxColumn.value = true;
+    controller.bottomSheetController = showBottomSheet<void>(
+      enableDrag: false,
+      elevation: 8,
+      context: context,
+      builder: (context) {
+        List<(String, IconData, RxBool, void Function()?)> actions = [
+          (
+            'Start Service',
+            Icons.play_arrow,
+            controller.enableStartServiceIcon,
+            controller.startSelectedServices,
+          ),
+          (
+            'Stop Service',
+            Icons.stop,
+            controller.enableStopServiceIcon,
+            controller.stopSelectedServices,
+          ),
+          (
+            'Remove',
+            Icons.delete_forever,
+            controller.enableRemoveIcon,
+            controller.removeSelectedServices,
+          ),
+          (
+            'Cancel',
+            Icons.cancel,
+            true.obs,
+            controller.leaveEditMode,
+          ),
+        ];
+        return SizedBox(
+          height: 100,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32.0),
+            child: ListView(
+              shrinkWrap: true,
+              scrollDirection: Axis.horizontal,
+              children: List.generate(
+                actions.length,
+                (index) => _buildActionButton(actions.elementAt(index)),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -63,6 +137,10 @@ class DoorOverviewPage extends GetView<DoorOverviewController> {
       BuildContext context, SmartDoorService smartDoorService) {
     var door = smartDoorService.door;
     return DataRow(
+      onLongPress: () {
+        smartDoorService.selected.value = true;
+        _enterEditMode(context);
+      },
       color: MaterialStateProperty.resolveWith<Color?>(
           (Set<MaterialState> states) {
         if (states.contains(MaterialState.hovered)) {
@@ -70,61 +148,107 @@ class DoorOverviewPage extends GetView<DoorOverviewController> {
         }
         return null;
       }),
-      onSelectChanged: (bool? value) {},
+      selected: smartDoorService.selected.value,
+      onSelectChanged: (bool? value) {
+        if (value != null) {
+          if (controller.showCheckboxColumn.value) {
+            smartDoorService.selected.value = value;
+            controller.updateIconStates();
+          } else {
+            // TODO
+            print('TODO: open details for door ${smartDoorService.uuid}');
+          }
+        }
+      },
       cells: [
         DataCell(
           Row(
             children: [
-              IconButton(
-                iconSize: 20,
-                icon: smartDoorService.isServiceRunning.value
-                    ? const Icon(Icons.stop)
-                    : const Icon(Icons.play_arrow),
-                color: smartDoorService.isServiceRunning.value
-                    ? Colors.red
-                    : Colors.green,
-                tooltip: smartDoorService.isServiceRunning.value
-                    ? 'Stop Service'
-                    : 'Start Service',
-                onPressed: () => smartDoorService.isServiceRunning.value
-                    ? smartDoorService.stop()
-                    : smartDoorService.start(),
+              Visibility(
+                visible: !smartDoorService.isServiceRunning.value,
+                child: IconButton(
+                  iconSize: 20,
+                  icon: const Icon(Icons.play_arrow),
+                  color: Colors.green,
+                  tooltip: 'Start Service',
+                  onPressed: () => smartDoorService.start(),
+                ),
               ),
             ],
           ),
         ),
         DataCell(
-          Row(
-            children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: smartDoorService.statusColorValue,
-                        shape: BoxShape.circle,
+          Tooltip(
+            message: smartDoorService.tooltip.value,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: smartDoorService.statusColorValue,
+                          shape: BoxShape.circle,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(smartDoorService.statusString.value),
-                  ],
+                      const SizedBox(width: 4),
+                      Text(smartDoorService.statusString.value),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         DataCell(Text(door.equipmentNumber.value?.toString() ?? '?')),
         DataCell(Text(door.individualName.value?.toString() ?? '?')),
         DataCell(Center(
             child: Text(door.doorControl.value?.displayContent.value ?? '?'))),
-        DataCell(Text(door.openingStatus.value.toString())),
+        DataCell(Text(switch (door.openingStatus.value) {
+          OpeningStatus.unknown => '?',
+          OpeningStatus.opening ||
+          OpeningStatus.intermediate ||
+          OpeningStatus.closing when door.openingPosition.value != null =>
+            '${door.openingStatus.value.toString()} (${(door.openingPosition.value! * 100).round()} %)',
+          _ => door.openingStatus.value.toString(),
+        })),
         DataCell(
           Text(door.doorControl.value?.eventEntries.firstOrNull?.toString() ??
               '?'),
         ),
       ],
+    );
+  }
+
+  Widget _buildActionButton(
+      (String, IconData, RxBool, void Function()?) record) {
+    var (label, icon, enabled, action) = record;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 20.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Obx(() => IconButton(
+                onPressed: enabled.value
+                    ? () async {
+                        if (action != null) {
+                          if (action is Future<void> Function()) {
+                            await action();
+                          } else {
+                            action();
+                          }
+                          controller.leaveEditMode();
+                        }
+                      }
+                    : null,
+                icon: Icon(icon),
+              )),
+          Text(label),
+        ],
+      ),
     );
   }
 }

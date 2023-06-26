@@ -4,9 +4,70 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class DoorOverviewController extends GetxController {
+  final showCheckboxColumn = false.obs;
+
   final doorCollectionService = Get.find<DoorCollectionService>();
 
-  showAddModbusTcpDoorDialog() {
+  final enableStopServiceIcon = false.obs;
+
+  final enableStartServiceIcon = false.obs;
+
+  final enableRemoveIcon = false.obs;
+
+  PersistentBottomSheetController? bottomSheetController;
+
+  void updateIconStates() {
+    bool startServiceIcon = false;
+    bool stopServiceIcon = false;
+    bool deleteIcon = false;
+    for (var service in doorCollectionService.smartDoorServices) {
+      if (service.selected.value) {
+        deleteIcon = true;
+        if (service.isServiceRunning.value) {
+          stopServiceIcon = true;
+        } else {
+          startServiceIcon = true;
+        }
+      }
+    }
+    enableStartServiceIcon.value = startServiceIcon;
+    enableStopServiceIcon.value = stopServiceIcon;
+    enableRemoveIcon.value = deleteIcon;
+  }
+
+  void startSelectedServices() {
+    doorCollectionService.smartDoorServices
+        .where((service) => service.selected.value)
+        .forEach((service) {
+      service.start();
+    });
+  }
+
+  void stopSelectedServices() {
+    doorCollectionService.smartDoorServices
+        .where((service) => service.selected.value)
+        .forEach((service) {
+      service.stop();
+    });
+  }
+
+  Future<void> removeSelectedServices() async {
+    await doorCollectionService.removeWhere(
+      (service) => service.selected.value,
+    );
+  }
+
+  void leaveEditMode() {
+    for (var service in doorCollectionService.smartDoorServices) {
+      service.selected.value = false;
+    }
+    bottomSheetController?.close();
+    bottomSheetController = null;
+    showCheckboxColumn.value = false;
+    updateIconStates();
+  }
+
+  void showAddModbusTcpDoorDialog() {
     final TextEditingController ipController =
         // TextEditingController(text: "10.10.20.70");
         TextEditingController(text: "192.168.10.11");
@@ -54,7 +115,7 @@ class DoorOverviewController extends GetxController {
 
         final doorCollectionService = Get.find<DoorCollectionService>();
 
-        var service = doorCollectionService.add(
+        var service = await doorCollectionService.add(
           ModbusTcpService.fromConfig(
             ModbusTcpServiceConfiguration(
               ip: ip,

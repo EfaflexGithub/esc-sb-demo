@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:efa_smartconnect_modbus_demo/data/factories/modbus_tcp_service_factory.dart';
 import 'package:efa_smartconnect_modbus_demo/data/factories/smart_door_service_factory.dart';
 import 'package:efa_smartconnect_modbus_demo/data/services/modbus_tcp_service.dart';
@@ -10,8 +12,8 @@ class DoorCollectionService extends GetxService {
   static const String _configurationsBoxName = 'smartDoorServiceConfigurations';
 
   @override
-  void onInit() async {
-    super.onInit();
+  void onReady() async {
+    super.onReady();
     await loadConfigurations();
   }
 
@@ -30,8 +32,23 @@ class DoorCollectionService extends GetxService {
     return smartDoorService;
   }
 
-  void removeAt(int index) {
-    _smartDoorServices.removeAt(index);
+  Future<void> removeWhere(bool Function(SmartDoorService) test) async {
+    _smartDoorServices.where(test).forEach((service) {
+      service.stop();
+    });
+    await Hive.withBox(_configurationsBoxName, (box) {
+      var uuids = _smartDoorServices.where(test).map<String>((e) => e.uuid);
+      box.deleteAll(uuids);
+    });
+    _smartDoorServices.removeWhere(test);
+  }
+
+  Future<void> remove(SmartDoorService service) async {
+    await service.stop();
+    await Hive.withBox(_configurationsBoxName, (box) {
+      box.delete(service.uuid);
+    });
+    _smartDoorServices.remove(service);
   }
 
   Future<void> saveConfigurations() async {

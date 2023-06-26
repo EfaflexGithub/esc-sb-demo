@@ -8,6 +8,10 @@ abstract base class SmartDoorService {
 
   Door get door;
 
+  final tooltip = ''.obs;
+
+  final selected = false.obs;
+
   final Rx<Color> _statusColor = Colors.grey.obs;
 
   SmartDoorService([String? uuid]) : uuid = uuid ?? const Uuid().v4();

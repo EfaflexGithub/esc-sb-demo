@@ -92,6 +92,8 @@ base class ModbusTcpService extends SmartDoorService {
     var efaTronic = EfaTronic();
     door.doorControl.value = efaTronic;
     efaTronic.extensionBoards.add(SmartConnectModule());
+    tooltip.value =
+        'server: ${configuration.ip}:${configuration.port}\nrefresh rate: ${configuration.refreshRate.inMilliseconds} ms';
     initializeStateMachine();
   }
 
@@ -349,7 +351,6 @@ base class ModbusTcpService extends SmartDoorService {
           break;
 
         default:
-          print('Unknown change notification flag: $name');
           break;
       }
     }
