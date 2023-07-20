@@ -1,6 +1,6 @@
 import 'package:efa_smartconnect_modbus_demo/modules/root/controllers/side_navigation_controller.dart';
 import 'package:efa_smartconnect_modbus_demo/modules/settings/views/settings_page.dart';
-// import 'package:efa_smartconnect_modbus_demo/shared/widgets/NavigationRailIcon.dart';
+import '../../settings/models/application_setttings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -33,7 +33,8 @@ class SideNavigation extends StatelessWidget {
             IconButton(
               icon: const Icon(Icons.settings),
               tooltip: 'Settings',
-              onPressed: () => Get.to(const SettingsPage()),
+              onPressed: () =>
+                  Get.to(() => const SettingsPage<ApplicationSettingKeys>()),
             ),
             IconButton(
               icon: const Icon(Icons.help),

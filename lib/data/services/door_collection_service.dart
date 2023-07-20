@@ -83,6 +83,7 @@ class DoorCollectionService extends GetxService {
         SmartDoorService service =
             factory.createSmartDoorService(configuration, uuid);
         await add(service, saveConfiguration: false);
+        await service.loadCachedData();
         await service.start();
       });
     });

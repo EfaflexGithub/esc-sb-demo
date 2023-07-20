@@ -1,7 +1,5 @@
 import 'package:efa_smartconnect_modbus_demo/modules/help_and_feedback/bindings/help_and_feedback_binding.dart';
 import 'package:efa_smartconnect_modbus_demo/modules/help_and_feedback/views/help_and_feedback_page.dart';
-import 'package:efa_smartconnect_modbus_demo/modules/settings/bindings/settings_binding.dart';
-import 'package:efa_smartconnect_modbus_demo/modules/settings/views/settings_page.dart';
 import 'package:get/get.dart';
 import '../modules/root/views/root_view.dart';
 import '../modules/door_overview/bindings/door_overview_binding.dart';
@@ -31,11 +29,6 @@ abstract class AppPages {
           name: Routes.eventOverview,
           page: () => const EventOverviewPage(),
           binding: EventOverviewBinding(),
-        ),
-        GetPage(
-          name: Routes.settings,
-          page: () => const SettingsPage(),
-          binding: SettingsBinding(),
         ),
         GetPage(
           name: Routes.helpAndFeedback,

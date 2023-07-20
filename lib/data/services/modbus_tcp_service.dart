@@ -162,6 +162,7 @@ base class ModbusTcpService extends SmartDoorService {
     checkingLicenseState.onExit(() async {
       await updateDoorModelByGroup(ModbusRegisterGroup.doorData);
       await updateDoorModelByGroup(ModbusRegisterGroup.operatingInformation);
+      await saveToCache();
     });
 
     onlineState.onTimeout(configuration.refreshRate, onlineState.enter);

@@ -24,6 +24,9 @@ dependencies:
   hive:
   hive_flutter:
   uuid:
+  isar: ^3.1.0+1
+  isar_flutter_libs: ^3.1.0+1
+  shared_preferences: ^2.2.0
 
 dev_dependencies:
   test:
@@ -31,9 +34,10 @@ dev_dependencies:
     sdk: flutter
   flutter_lints:
   hive_generator:
-  build_runner:
+  build_runner: ^2.4.5
   code_builder:
   dart_style:
+  isar_generator: ^3.1.0+1
 
 flutter:
   uses-material-design: true
