@@ -8,14 +8,10 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/adapters.dart';
 import './routes/pages.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   await initializeApplication();
-  bool darkMode = await Get.find<SettingsController<ApplicationSettingKeys>>()
-          .getValueFromKey<bool>(ApplicationSettingKeys.appDarkMode) ??
-      false;
-  runApp(MyApp(brightness: darkMode ? Brightness.dark : Brightness.light));
+  runApp(const MyApp());
 }
 
 Future<void> initializeApplication() async {
@@ -31,32 +27,52 @@ Future<void> initializeApplication() async {
 void _registerServices() {
   Get.put(ModbusRegisterService(), permanent: true);
   Get.put(DoorCollectionService(), permanent: true);
-  Get.put(SettingsController<ApplicationSettingKeys>(applicationSettings),
+  Get.put(SettingsController<AppSettingKeys>(applicationSettings),
       permanent: true);
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key, this.brightness = Brightness.light});
-
-  final Brightness brightness;
+  const MyApp({super.key});
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = ColorScheme.fromSeed(
+    final darkModeSetting = Get.find<SettingsController<AppSettingKeys>>()
+        .getSettingFromKey(AppSettingKeys.appDarkMode);
+
+    darkModeSetting?.temporaryValueObs.listen((value) {
+      Get.changeThemeMode(value ? ThemeMode.dark : ThemeMode.light);
+    });
+
+    final themeMode = darkModeSetting?.value ? ThemeMode.dark : ThemeMode.light;
+
+    final ColorScheme colorSchemeLight = ColorScheme.fromSeed(
       seedColor: Colors.orange,
-      brightness: brightness,
+      brightness: Brightness.light,
+    );
+
+    final ColorScheme colorSchemeDark = ColorScheme.fromSeed(
+      seedColor: Colors.orange,
+      brightness: Brightness.dark,
     );
 
     return GetMaterialApp.router(
       title: 'EFA-SmartConnect Modbus Demo',
       theme: ThemeData(
-        colorScheme: colorScheme,
+        colorScheme: colorSchemeLight,
         appBarTheme: AppBarTheme(
-          backgroundColor: colorScheme.inversePrimary,
+          backgroundColor: colorSchemeLight.inversePrimary,
         ),
         useMaterial3: true,
       ),
+      darkTheme: ThemeData(
+        colorScheme: colorSchemeDark,
+        appBarTheme: AppBarTheme(
+          backgroundColor: colorSchemeDark.inversePrimary,
+        ),
+        useMaterial3: true,
+      ),
+      themeMode: themeMode,
       getPages: AppPages.routes,
       defaultTransition: Transition.noTransition,
     );

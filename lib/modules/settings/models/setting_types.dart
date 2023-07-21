@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApplicationSettings<K> {
@@ -38,11 +39,17 @@ class Setting<K, T> {
     required this.title,
     this.description = "",
     required this.defaultValue,
-  })  : value = defaultValue,
-        temporaryValue = defaultValue;
+  })  : valueObs = Rx<T>(defaultValue),
+        temporaryValueObs = Rx<T>(defaultValue);
 
-  T value;
-  T temporaryValue;
+  Rx<T> valueObs;
+  Rx<T> temporaryValueObs;
+
+  T get value => valueObs.value;
+  set value(T value) => valueObs.value = value;
+
+  T get temporaryValue => temporaryValueObs.value;
+  set temporaryValue(T value) => temporaryValueObs.value = value;
   final T defaultValue;
 
   Type get genericType => value.runtimeType;

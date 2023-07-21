@@ -116,11 +116,11 @@ class SettingsPage<K> extends GetView<SettingsController<K>> {
           for (var setting in settingsGroup.settings)
             Column(
               children: [
-                if (setting.genericType == bool)
+                if (setting is Setting<K, bool>)
                   _buildSwitchSettingRow(setting, context: context)
-                else if (setting.genericType == String)
+                else if (setting is Setting<K, String>)
                   _buildStringSettingRow(setting, context: context)
-                else if (setting.genericType == int)
+                else if (setting is Setting<K, int>)
                   _buildIntSettingRow(setting, context: context),
                 if (setting != settingsGroup.settings.last)
                   const Divider(indent: 0, height: 1),
@@ -131,7 +131,7 @@ class SettingsPage<K> extends GetView<SettingsController<K>> {
     );
   }
 
-  Widget _buildSwitchSettingRow(Setting<K, dynamic> setting,
+  Widget _buildSwitchSettingRow(Setting<K, bool> setting,
       {required BuildContext context}) {
     final switchValue = RxBool(setting.temporaryValue);
 
@@ -154,7 +154,7 @@ class SettingsPage<K> extends GetView<SettingsController<K>> {
     );
   }
 
-  Widget _buildStringSettingRow(Setting<K, dynamic> setting,
+  Widget _buildStringSettingRow(Setting<K, String> setting,
       {required BuildContext context}) {
     var textEditingController = TextEditingController(
       text: setting.temporaryValue,
@@ -174,7 +174,7 @@ class SettingsPage<K> extends GetView<SettingsController<K>> {
     );
   }
 
-  Widget _buildIntSettingRow(Setting<K, dynamic> setting,
+  Widget _buildIntSettingRow(Setting<K, int> setting,
       {required BuildContext context}) {
     var textEditingController = TextEditingController(
       text: setting.temporaryValue.toString(),

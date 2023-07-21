@@ -1,5 +1,7 @@
 import 'package:efa_smartconnect_modbus_demo/data/services/door_collection_service.dart';
 import 'package:efa_smartconnect_modbus_demo/data/services/modbus_tcp_service.dart';
+import 'package:efa_smartconnect_modbus_demo/modules/settings/controllers/settings_controller.dart';
+import 'package:efa_smartconnect_modbus_demo/modules/settings/models/application_setttings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -68,14 +70,21 @@ class DoorOverviewController extends GetxController {
   }
 
   void showAddModbusTcpDoorDialog() {
-    final TextEditingController ipController =
-        // TextEditingController(text: "10.10.20.70");
-        TextEditingController(text: "192.168.10.11");
-    final TextEditingController portController =
-        TextEditingController(text: "502");
-    final TextEditingController refreshRateController =
-        TextEditingController(text: "1000");
-    final TextEditingController licenseController = TextEditingController();
+    final settingsController = Get.find<SettingsController<AppSettingKeys>>();
+    final TextEditingController ipController = TextEditingController(
+        text: settingsController.getValueFromKey<String>(
+            AppSettingKeys.defaultModbusTcpHostAddress));
+    final TextEditingController portController = TextEditingController(
+        text: settingsController
+            .getValueFromKey<int>(AppSettingKeys.defaultModbusTcpPort)
+            .toString());
+    final TextEditingController refreshRateController = TextEditingController(
+        text: settingsController
+            .getValueFromKey<int>(AppSettingKeys.defaultModbusTcpRefreshRate)
+            .toString());
+    final TextEditingController licenseController = TextEditingController(
+        text: settingsController.getValueFromKey<String>(
+            AppSettingKeys.defaultModbusTcpLicenseKey));
 
     Get.defaultDialog(
       title: 'Add New Modbus Tcp Door',
@@ -87,25 +96,28 @@ class DoorOverviewController extends GetxController {
         onPressed: () => Get.back(),
         child: const Text('Cancel'),
       ),
-      content: Column(
-        children: [
-          TextField(
-            controller: ipController,
-            decoration: const InputDecoration(labelText: 'IP'),
-          ),
-          TextField(
-            controller: portController,
-            decoration: const InputDecoration(labelText: 'Port'),
-          ),
-          TextField(
-            controller: refreshRateController,
-            decoration: const InputDecoration(labelText: 'Refresh Rate'),
-          ),
-          TextField(
-            controller: licenseController,
-            decoration: const InputDecoration(labelText: 'License Key'),
-          ),
-        ],
+      content: Container(
+        constraints: const BoxConstraints(minWidth: 400),
+        child: Column(
+          children: [
+            TextField(
+              controller: ipController,
+              decoration: const InputDecoration(labelText: 'IP'),
+            ),
+            TextField(
+              controller: portController,
+              decoration: const InputDecoration(labelText: 'Port'),
+            ),
+            TextField(
+              controller: refreshRateController,
+              decoration: const InputDecoration(labelText: 'Refresh Rate'),
+            ),
+            TextField(
+              controller: licenseController,
+              decoration: const InputDecoration(labelText: 'License Key'),
+            ),
+          ],
+        ),
       ),
       onConfirm: () async {
         String ip = ipController.text;

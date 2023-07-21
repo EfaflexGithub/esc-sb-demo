@@ -1,7 +1,7 @@
 import 'package:efa_smartconnect_modbus_demo/modules/settings/models/setting_types.dart';
 import 'package:flutter/material.dart';
 
-enum ApplicationSettingKeys {
+enum AppSettingKeys {
   appDarkMode,
   eventHighlightingTime,
   eventHighlightingCycles,
@@ -14,52 +14,51 @@ enum ApplicationSettingKeys {
   defaultModbusTcpLicenseKey,
 }
 
-final applicationSettings = ApplicationSettings(
+final applicationSettings = ApplicationSettings<AppSettingKeys>(
   categories: [
     SettingsCategory(
       label: 'General',
       icon: Icons.apps,
       groups: [
         SettingsGroup(label: 'Appereance', settings: [
-          Setting(
-            storageKey: ApplicationSettingKeys.appDarkMode,
+          Setting<AppSettingKeys, bool>(
+            storageKey: AppSettingKeys.appDarkMode,
             title: 'Dark Mode',
             defaultValue: false,
-          )
+          ),
         ]),
-        SettingsGroup(
-          label: 'Event Highlighting',
-          settings: [
-            Setting(
-              storageKey: ApplicationSettingKeys.eventHighlightingTime,
-              title: 'Highlight by Hours',
-              description:
-                  'Events that happended during the last x hours will be highlighted.',
-              defaultValue: 72,
-            ),
-            Setting(
-              storageKey: ApplicationSettingKeys.eventHighlightingCycles,
-              title: 'Hightlight by Cycles',
-              description:
-                  'Events that happended during the last x cycles will be highlighted.',
-              defaultValue: 20,
-            ),
-          ],
-        ),
-        SettingsGroup(
-          label: 'User Applications',
-          settings: [
-            Setting(
-              storageKey: ApplicationSettingKeys.showUnknownUserApplications,
-              title: 'Unknown User Applications',
-              description:
-                  'Show unknown user applications in the door overview',
-              defaultValue: false,
-            ),
-          ],
-        ),
       ],
     ),
+    SettingsCategory(label: 'Door Overview', icon: Icons.home, groups: [
+      SettingsGroup(
+        label: 'Highlighting',
+        settings: [
+          Setting<AppSettingKeys, int>(
+            storageKey: AppSettingKeys.eventHighlightingTime,
+            title: 'Events by Hours',
+            description: 'Highlight events that are younger than x hours.',
+            defaultValue: 72,
+          ),
+          Setting<AppSettingKeys, int>(
+            storageKey: AppSettingKeys.eventHighlightingCycles,
+            title: 'Events by Cycles',
+            description: 'Highlight events that are younger than x cycles.',
+            defaultValue: 20,
+          ),
+        ],
+      ),
+      SettingsGroup(
+        label: 'User Applications',
+        settings: [
+          Setting<AppSettingKeys, bool>(
+            storageKey: AppSettingKeys.showUnknownUserApplications,
+            title: 'Unknown User Applications',
+            description: 'Show unknown user applications in the door overview',
+            defaultValue: false,
+          ),
+        ],
+      ),
+    ]),
     SettingsCategory(
       label: 'Modbus TCP',
       icon: Icons.lan,
@@ -67,28 +66,28 @@ final applicationSettings = ApplicationSettings(
         SettingsGroup(
           label: 'Prefill Values',
           settings: [
-            Setting(
-              storageKey: ApplicationSettingKeys.defaultModbusTcpHostAddress,
+            Setting<AppSettingKeys, String>(
+              storageKey: AppSettingKeys.defaultModbusTcpHostAddress,
               title: 'Host address',
               defaultValue: '127.0.0.1',
             ),
-            Setting(
-              storageKey: ApplicationSettingKeys.defaultModbusTcpPort,
+            Setting<AppSettingKeys, int>(
+              storageKey: AppSettingKeys.defaultModbusTcpPort,
               title: 'Port',
               defaultValue: 502,
             ),
-            Setting(
-              storageKey: ApplicationSettingKeys.defaultModbusTcpTimeout,
+            Setting<AppSettingKeys, int>(
+              storageKey: AppSettingKeys.defaultModbusTcpTimeout,
               title: 'Timeout',
               defaultValue: 1000,
             ),
-            Setting(
-              storageKey: ApplicationSettingKeys.defaultModbusTcpRetryCount,
+            Setting<AppSettingKeys, int>(
+              storageKey: AppSettingKeys.defaultModbusTcpRefreshRate,
               title: 'Refresh rate',
               defaultValue: 1000,
             ),
-            Setting(
-              storageKey: ApplicationSettingKeys.defaultModbusTcpRefreshRate,
+            Setting<AppSettingKeys, String>(
+              storageKey: AppSettingKeys.defaultModbusTcpLicenseKey,
               title: 'License key',
               defaultValue: 'J6LC5-ALT3Q-7HMAB-YZ3GR-MPO7Z-CN33E',
             )

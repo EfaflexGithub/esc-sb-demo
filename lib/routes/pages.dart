@@ -22,7 +22,7 @@ abstract class AppPages {
       children: [
         GetPage(
           name: Routes.doorOverview,
-          page: () => const DoorOverviewPage(),
+          page: () => DoorOverviewPage(),
           binding: DoorOverviewBinding(),
         ),
         GetPage(

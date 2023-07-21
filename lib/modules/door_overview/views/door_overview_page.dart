@@ -1,12 +1,24 @@
 import 'package:data_table_2/data_table_2.dart';
 import 'package:efa_smartconnect_modbus_demo/data/models/door.dart';
 import 'package:efa_smartconnect_modbus_demo/data/services/smart_door_service.dart';
+import 'package:efa_smartconnect_modbus_demo/modules/settings/controllers/settings_controller.dart';
+import 'package:efa_smartconnect_modbus_demo/modules/settings/models/application_setttings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/door_overview_controller.dart';
 
 class DoorOverviewPage extends GetView<DoorOverviewController> {
-  const DoorOverviewPage({super.key});
+  DoorOverviewPage({super.key}) {
+    eventHighlightTime = Get.find<SettingsController<AppSettingKeys>>()
+        .getSettingFromKey(AppSettingKeys.eventHighlightingTime)
+        ?.valueObs as Rx<int>;
+    eventHighlightCycles = Get.find<SettingsController<AppSettingKeys>>()
+        .getSettingFromKey(AppSettingKeys.eventHighlightingCycles)
+        ?.valueObs as Rx<int>;
+  }
+
+  late final Rx<int> eventHighlightTime;
+  late final Rx<int> eventHighlightCycles;
 
   static const List<(String, dynamic)> columnTitles = [
     ('Status', ColumnSize.S),
@@ -136,6 +148,16 @@ class DoorOverviewPage extends GetView<DoorOverviewController> {
   DataRow _buildDataRow(
       BuildContext context, SmartDoorService smartDoorService) {
     var door = smartDoorService.door;
+    var lastEvent = door.doorControl.value?.eventEntries.firstOrNull;
+    var doorCycles = door.cycleCounter.value;
+    var eventCycles = lastEvent?.cycleCounter;
+    var eventDateTime = lastEvent?.dateTime;
+    var highlightEvent = (doorCycles != null &&
+            eventCycles != null &&
+            doorCycles - eventCycles < eventHighlightCycles.value) ||
+        (eventDateTime != null &&
+            DateTime.now().difference(eventDateTime) <
+                Duration(hours: eventHighlightTime.value));
     return DataRow(
       onLongPress: () {
         smartDoorService.selected.value = true;
@@ -214,10 +236,20 @@ class DoorOverviewPage extends GetView<DoorOverviewController> {
             '${door.openingStatus.value.toString()} (${(door.openingPosition.value! * 100).round()} %)',
           _ => door.openingStatus.value.toString(),
         })),
-        DataCell(
-          Text(door.doorControl.value?.eventEntries.firstOrNull?.toString() ??
-              '?'),
-        ),
+        if (lastEvent != null)
+          DataCell(
+            Tooltip(
+              message: lastEvent.toString(),
+              child: Text(lastEvent.code,
+                  style: highlightEvent
+                      ? TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                          fontWeight: FontWeight.bold)
+                      : null),
+            ),
+          )
+        else
+          const DataCell(Text('?'))
       ],
     );
   }
@@ -231,21 +263,23 @@ class DoorOverviewPage extends GetView<DoorOverviewController> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Obx(() => IconButton(
-                onPressed: enabled.value
-                    ? () async {
-                        if (action != null) {
-                          if (action is Future<void> Function()) {
-                            await action();
-                          } else {
-                            action();
-                          }
-                          controller.leaveEditMode();
+          Obx(
+            () => IconButton(
+              onPressed: enabled.value
+                  ? () async {
+                      if (action != null) {
+                        if (action is Future<void> Function()) {
+                          await action();
+                        } else {
+                          action();
                         }
+                        controller.leaveEditMode();
                       }
-                    : null,
-                icon: Icon(icon),
-              )),
+                    }
+                  : null,
+              icon: Icon(icon),
+            ),
+          ),
           Text(label),
         ],
       ),

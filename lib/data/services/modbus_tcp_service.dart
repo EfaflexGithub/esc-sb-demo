@@ -12,6 +12,8 @@ import 'package:efa_smartconnect_modbus_demo/data/repositories/modbus_register.d
 import 'package:efa_smartconnect_modbus_demo/data/repositories/modbus_register_map.g.dart';
 import 'package:efa_smartconnect_modbus_demo/data/repositories/modbus_register_types.dart';
 import 'package:efa_smartconnect_modbus_demo/data/services/modbus_register_service.dart';
+import 'package:efa_smartconnect_modbus_demo/modules/settings/controllers/settings_controller.dart';
+import 'package:efa_smartconnect_modbus_demo/modules/settings/models/application_setttings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:modbus/modbus.dart';
@@ -72,11 +74,13 @@ base class ModbusTcpService extends SmartDoorService {
   }
 
   ModbusTcpService(String ip,
-      {int port = 502,
-      Duration timeout = const Duration(seconds: 3),
-      ModbusClient? client})
+      {int port = 502, Duration? timeout, ModbusClient? client})
       : this.fromConfig(
-            ModbusTcpServiceConfiguration(ip: ip, port: port, timeout: timeout),
+            ModbusTcpServiceConfiguration(
+                ip: ip,
+                port: port,
+                timeout: Get.find<SettingsController<AppSettingKeys>>()
+                    .getValueFromKey(AppSettingKeys.defaultModbusTcpTimeout)),
             client: client);
 
   ModbusTcpService.fromConfig(this.configuration,
@@ -787,7 +791,7 @@ class ModbusTcpServiceConfiguration {
   ModbusTcpServiceConfiguration({
     required this.ip,
     this.port = 502,
-    this.refreshRate = const Duration(seconds: 1000),
+    this.refreshRate = const Duration(seconds: 1),
     this.timeout = const Duration(seconds: 5),
   });
 

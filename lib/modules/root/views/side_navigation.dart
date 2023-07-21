@@ -34,7 +34,7 @@ class SideNavigation extends StatelessWidget {
               icon: const Icon(Icons.settings),
               tooltip: 'Settings',
               onPressed: () =>
-                  Get.to(() => const SettingsPage<ApplicationSettingKeys>()),
+                  Get.to(() => const SettingsPage<AppSettingKeys>()),
             ),
             IconButton(
               icon: const Icon(Icons.help),
