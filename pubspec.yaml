@@ -11,7 +11,12 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_launcher_icons:
-  get:
+  get: ^4.6.5
+  # get:
+  #   git:
+  #     url: https://github.com/jonataslaw/getx.git
+  #     #ref: 6c2ff16 # branch master on 2023-07-24
+  #     ref: 9d2b872 # branch 4.6.5 on 2023-07-24
   modbus:
   version:
   yaml:

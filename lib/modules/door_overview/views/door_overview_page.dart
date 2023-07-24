@@ -3,6 +3,7 @@ import 'package:efa_smartconnect_modbus_demo/data/models/door.dart';
 import 'package:efa_smartconnect_modbus_demo/data/services/smart_door_service.dart';
 import 'package:efa_smartconnect_modbus_demo/modules/settings/controllers/settings_controller.dart';
 import 'package:efa_smartconnect_modbus_demo/modules/settings/models/application_setttings.dart';
+import 'package:efa_smartconnect_modbus_demo/routes/pages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/door_overview_controller.dart';
@@ -34,40 +35,42 @@ class DoorOverviewPage extends GetView<DoorOverviewController> {
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Obx(
-          () => DataTable2(
-            columnSpacing: 1,
-            horizontalMargin: 0,
-            minWidth: 1000,
-            showCheckboxColumn: controller.showCheckboxColumn.value,
-            columns: [
-              DataColumn2(
-                label: Visibility(
-                  visible: controller
-                      .doorCollectionService.smartDoorServices.isNotEmpty,
-                  child: IconButton(
-                      iconSize: 20,
-                      icon: Icon(controller.showCheckboxColumn.value
-                          ? Icons.cancel
-                          : Icons.edit),
-                      onPressed: () {
-                        controller.showCheckboxColumn.toggle();
-                        if (controller.showCheckboxColumn.value) {
-                          _enterEditMode(context);
-                        } else {
-                          controller.leaveEditMode();
-                        }
-                      }),
+        child: Builder(builder: (context) {
+          return Obx(
+            () => DataTable2(
+              columnSpacing: 1,
+              horizontalMargin: 0,
+              minWidth: 1000,
+              showCheckboxColumn: controller.showCheckboxColumn.value,
+              columns: [
+                DataColumn2(
+                  label: Visibility(
+                    visible: controller
+                        .doorCollectionService.smartDoorServices.isNotEmpty,
+                    child: IconButton(
+                        iconSize: 20,
+                        icon: Icon(controller.showCheckboxColumn.value
+                            ? Icons.cancel
+                            : Icons.edit),
+                        onPressed: () {
+                          controller.showCheckboxColumn.toggle();
+                          if (controller.showCheckboxColumn.value) {
+                            _enterEditMode(context);
+                          } else {
+                            controller.leaveEditMode();
+                          }
+                        }),
+                  ),
+                  fixedWidth: 50,
                 ),
-                fixedWidth: 50,
-              ),
-              ...columnTitles.map<DataColumn>(_buildColumnTitle).toList()
-            ],
-            rows: controller.doorCollectionService.smartDoorServices
-                .map((service) => _buildDataRow(context, service))
-                .toList(),
-          ),
-        ),
+                ...columnTitles.map<DataColumn>(_buildColumnTitle).toList()
+              ],
+              rows: controller.doorCollectionService.smartDoorServices
+                  .map((service) => _buildDataRow(context, service))
+                  .toList(),
+            ),
+          );
+        }),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -177,8 +180,7 @@ class DoorOverviewPage extends GetView<DoorOverviewController> {
             smartDoorService.selected.value = value;
             controller.updateIconStates();
           } else {
-            // TODO
-            print('TODO: open details for door ${smartDoorService.uuid}');
+            Get.rootDelegate.toNamed(Routes.doorDetails(smartDoorService.uuid));
           }
         }
       },
