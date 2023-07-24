@@ -40,6 +40,6 @@ class EventEntry implements Comparable<EventEntry> {
 
   @override
   String toString() {
-    return '$code on ${DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime)} at $cycleCounter cycles';
+    return '$code on ${DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime)} at ${NumberFormat.decimalPattern('en_US').format(cycleCounter)} cycles';
   }
 }
