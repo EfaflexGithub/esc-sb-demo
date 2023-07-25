@@ -11,17 +11,20 @@ class RootView extends GetView<RootController> {
   Widget build(BuildContext context) {
     return GetRouterOutlet.builder(
       builder: (context, delegate, current) {
-        return Row(
-          children: [
-            SideNavigation(),
-            const VerticalDivider(thickness: 1, width: 1),
-            Expanded(
-              child: GetRouterOutlet(
-                initialRoute: AppPages.initial,
-                anchorRoute: Routes.root,
+        return Container(
+          color: Theme.of(context).colorScheme.background,
+          child: Row(
+            children: [
+              SideNavigation(),
+              const VerticalDivider(thickness: 1, width: 1),
+              Expanded(
+                child: GetRouterOutlet(
+                  initialRoute: AppPages.initial,
+                  anchorRoute: Routes.root,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         );
       },
     );

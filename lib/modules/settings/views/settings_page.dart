@@ -9,27 +9,21 @@ class SettingsPage<K> extends GetView<SettingsController<K>> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: Scaffold(
-            primary: false,
-            backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-            appBar: AppBar(
-              automaticallyImplyLeading: false,
-              // backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-              title: const Text('Application Settings'),
-            ),
-            body: Row(
-              children: [
-                Container(
-                  color: Theme.of(context).colorScheme.background,
-                  child: Obx(
+    return Container(
+      color: Theme.of(context).colorScheme.background,
+      child: Column(
+        children: [
+          Expanded(
+            child: Scaffold(
+              primary: false,
+              appBar: AppBar(
+                automaticallyImplyLeading: false,
+                title: const Text('Application Settings'),
+              ),
+              body: Row(
+                children: [
+                  Obx(
                     () => NavigationDrawer(
-                      backgroundColor: Colors.transparent,
-                      surfaceTintColor: Colors.transparent,
-                      indicatorColor:
-                          Theme.of(context).colorScheme.surfaceVariant,
                       onDestinationSelected:
                           controller.handleDrawerDestinationSelected,
                       selectedIndex: controller.selectedCategoryIndex.value,
@@ -45,44 +39,42 @@ class SettingsPage<K> extends GetView<SettingsController<K>> {
                       ],
                     ),
                   ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Obx(
-                      () => ListView(
-                          children: controller.selectedCategory?.groups
-                                  .map(
-                                    (group) => Padding(
-                                      padding:
-                                          const EdgeInsets.only(bottom: 16),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(group.label,
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .titleMedium),
-                                          const SizedBox(height: 8),
-                                          _buildSettingsGroupCard(group,
-                                              context: context),
-                                        ],
+                  const VerticalDivider(width: 1),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Obx(
+                        () => ListView(
+                            children: controller.selectedCategory?.groups
+                                    .map(
+                                      (group) => Padding(
+                                        padding:
+                                            const EdgeInsets.only(bottom: 16),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(group.label,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleMedium),
+                                            const SizedBox(height: 8),
+                                            _buildSettingsGroupCard(group,
+                                                context: context),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  )
-                                  .toList() ??
-                              []),
+                                    )
+                                    .toList() ??
+                                []),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-        Container(
-          color: Theme.of(context).colorScheme.background,
-          child: ButtonBar(
+          ButtonBar(
             children: [
               Obx(() => OutlinedButton(
                     onPressed: controller.changes.value
@@ -99,18 +91,14 @@ class SettingsPage<K> extends GetView<SettingsController<K>> {
               ),
             ],
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget _buildSettingsGroupCard(SettingsGroup<K> settingsGroup,
       {required BuildContext context}) {
-    ColorScheme colorScheme = Theme.of(context).colorScheme;
     return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-      color: colorScheme.background,
-      surfaceTintColor: Colors.transparent,
       child: Column(
         children: [
           for (var setting in settingsGroup.settings)

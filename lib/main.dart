@@ -47,12 +47,12 @@ class MyApp extends StatelessWidget {
     final themeMode = darkModeSetting?.value ? ThemeMode.dark : ThemeMode.light;
 
     final ColorScheme colorSchemeLight = ColorScheme.fromSeed(
-      seedColor: Colors.orange,
+      seedColor: const Color.fromARGB(255, 246, 120, 40),
       brightness: Brightness.light,
     );
 
     final ColorScheme colorSchemeDark = ColorScheme.fromSeed(
-      seedColor: Colors.orange,
+      seedColor: const Color.fromARGB(255, 246, 120, 40),
       brightness: Brightness.dark,
     );
 
@@ -63,6 +63,14 @@ class MyApp extends StatelessWidget {
         appBarTheme: AppBarTheme(
           backgroundColor: colorSchemeLight.inversePrimary,
         ),
+        cardTheme: CardTheme(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          surfaceTintColor: Colors.transparent,
+        ),
+        scaffoldBackgroundColor:
+            colorSchemeLight.surfaceVariant.withOpacity(0.3),
         useMaterial3: true,
       ),
       darkTheme: ThemeData(
@@ -70,6 +78,14 @@ class MyApp extends StatelessWidget {
         appBarTheme: AppBarTheme(
           backgroundColor: colorSchemeDark.inversePrimary,
         ),
+        cardTheme: CardTheme(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          surfaceTintColor: Colors.transparent,
+        ),
+        scaffoldBackgroundColor:
+            colorSchemeDark.surfaceVariant.withOpacity(0.3),
         useMaterial3: true,
       ),
       themeMode: themeMode,

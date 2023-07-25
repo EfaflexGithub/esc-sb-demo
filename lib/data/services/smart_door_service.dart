@@ -18,6 +18,10 @@ abstract base class SmartDoorService {
 
   final Rx<Color> _statusColor = Colors.grey.obs;
 
+  Map<String, String> get uiConfiguration;
+
+  Map<String, List<Map<String, String>>> get additionalUiGroups;
+
   SmartDoorService([String? uuid]) : uuid = uuid ?? const Uuid().v4();
 
   set statusColor(StatusColor color) {

@@ -14,6 +14,7 @@ import 'package:efa_smartconnect_modbus_demo/data/repositories/modbus_register_t
 import 'package:efa_smartconnect_modbus_demo/data/services/modbus_register_service.dart';
 import 'package:efa_smartconnect_modbus_demo/modules/settings/controllers/settings_controller.dart';
 import 'package:efa_smartconnect_modbus_demo/modules/settings/models/application_setttings.dart';
+import 'package:efa_smartconnect_modbus_demo/shared/extensions/numeric_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:modbus/modbus.dart';
@@ -35,6 +36,44 @@ base class ModbusTcpService extends SmartDoorService {
   @override
   String getServiceName() => serviceName;
 
+  @override
+  Map<String, String> get uiConfiguration => {
+        'IP Address': configuration.ip,
+        'Port': configuration.port.toString(),
+        'Connection Timeout [ms]':
+            configuration.timeout.inMilliseconds.toString(),
+        'Refresh Rate [ms]':
+            configuration.refreshRate.inMilliseconds.toString(),
+      };
+
+  @override
+  Map<String, List<Map<String, String>>> get additionalUiGroups {
+    var result = <String, List<Map<String, String>>>{};
+    var scm = _smartConnectModule;
+    if (scm != null) {
+      result['Cycle Analysis'] = [
+        {
+          'Daily Cycles (Day)':
+              scm.cycleAnalysis.dailyCyclesDay.value?.localized ?? '?',
+          'Daily Cycles (Week)':
+              scm.cycleAnalysis.dailyCyclesWeek.value?.localized ?? '?',
+          'Daily Cycles (Month)':
+              scm.cycleAnalysis.dailyCyclesMonth.value?.localized ?? '?',
+          'Daily Cycles (Year)':
+              scm.cycleAnalysis.dailyCyclesYear.value?.localized ?? '?',
+        },
+      ];
+      result['EFA-SmartConnect Module'] = [
+        {
+          "Material Number": scm.materialNumber.value ?? '?',
+          "Serial Number": scm.serialNumber.value?.toString() ?? '?',
+          "Firmware": scm.firmwareVersion.value?.toString() ?? '?',
+        },
+      ];
+    }
+    return result;
+  }
+
   bool isConnected = false;
 
   bool _blockClient = false;
@@ -48,6 +87,12 @@ base class ModbusTcpService extends SmartDoorService {
   _LicenseActivationResult? _licenseActivationResult;
 
   DateTime? _licenseExpirationDate;
+
+  SmartConnectModule? get _smartConnectModule =>
+      (door.doorControl.value is EfaTronic)
+          ? (door.doorControl.value as EfaTronic)
+              .findExtensionBoardByType<SmartConnectModule>()
+          : null;
 
   final _rootMachine = Machine<_ModbusTcpServiceState>();
 
@@ -408,34 +453,28 @@ base class ModbusTcpService extends SmartDoorService {
         door.profile.value = value;
         break;
 
+      case ModbusRegisterName.doorControlSeries when value is String:
+        door.doorControl.value?.series.value = value;
+        break;
+
+      case ModbusRegisterName.doorControlSerial when value is int:
+        door.doorControl.value?.serialNumber.value = value;
+        break;
+
+      case ModbusRegisterName.doorControlFirmwareVersion when value is String:
+        door.doorControl.value?.firmwareVersion.value = value;
+        break;
+
       case ModbusRegisterName.smartConnectMaterialNumber when value is String:
-        DoorControl? control = door.doorControl.value;
-        if (control is EfaTronic) {
-          control
-              .findExtensionBoardByType<SmartConnectModule>()
-              ?.materialNumber
-              .value = value;
-        }
+        _smartConnectModule?.materialNumber.value = value;
         break;
 
       case ModbusRegisterName.smartConnectSerialNumber when value is int:
-        DoorControl? control = door.doorControl.value;
-        if (control is EfaTronic) {
-          control
-              .findExtensionBoardByType<SmartConnectModule>()
-              ?.serialNumber
-              .value = value;
-        }
+        _smartConnectModule?.serialNumber.value = value;
         break;
 
       case ModbusRegisterName.smartConnectFirmwareVersion when value is Version:
-        DoorControl? control = door.doorControl.value;
-        if (control is EfaTronic) {
-          control
-              .findExtensionBoardByType<SmartConnectModule>()
-              ?.firmwareVersion
-              .value = value;
-        }
+        _smartConnectModule?.firmwareVersion.value = value;
         break;
 
       case ModbusRegisterName.currentCycleCounter when value is int:
@@ -443,47 +482,19 @@ base class ModbusTcpService extends SmartDoorService {
         break;
 
       case ModbusRegisterName.dailyCyclesDay when value is int:
-        DoorControl? control = door.doorControl.value;
-        if (control is EfaTronic) {
-          control
-              .findExtensionBoardByType<SmartConnectModule>()
-              ?.cycleAnalysis
-              .dailyCyclesDay
-              .value = value;
-        }
+        _smartConnectModule?.cycleAnalysis.dailyCyclesDay.value = value;
         break;
 
       case ModbusRegisterName.dailyCyclesWeek when value is int:
-        DoorControl? control = door.doorControl.value;
-        if (control is EfaTronic) {
-          control
-              .findExtensionBoardByType<SmartConnectModule>()
-              ?.cycleAnalysis
-              .dailyCyclesWeek
-              .value = value;
-        }
+        _smartConnectModule?.cycleAnalysis.dailyCyclesWeek.value = value;
         break;
 
       case ModbusRegisterName.dailyCyclesMonth when value is int:
-        DoorControl? control = door.doorControl.value;
-        if (control is EfaTronic) {
-          control
-              .findExtensionBoardByType<SmartConnectModule>()
-              ?.cycleAnalysis
-              .dailyCyclesMonth
-              .value = value;
-        }
+        _smartConnectModule?.cycleAnalysis.dailyCyclesMonth.value = value;
         break;
 
       case ModbusRegisterName.dailyCyclesYear when value is int:
-        DoorControl? control = door.doorControl.value;
-        if (control is EfaTronic) {
-          control
-              .findExtensionBoardByType<SmartConnectModule>()
-              ?.cycleAnalysis
-              .dailyCyclesYear
-              .value = value;
-        }
+        _smartConnectModule?.cycleAnalysis.dailyCyclesYear.value = value;
         break;
 
       case ModbusRegisterName.currentStatus when value is int:
