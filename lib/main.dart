@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:hive_flutter/adapters.dart';
 import './routes/pages.dart';
 
@@ -34,6 +35,34 @@ void _registerServices() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  ThemeData _buildThemeData(
+      {required BuildContext context,
+      Brightness brightness = Brightness.light,
+      Color seedColor = const Color.fromARGB(255, 246, 120, 40)}) {
+    final ColorScheme colorScheme = ColorScheme.fromSeed(
+      seedColor: seedColor,
+      brightness: brightness,
+    );
+
+    return ThemeData(
+      colorScheme: colorScheme,
+      appBarTheme: AppBarTheme(
+        backgroundColor: colorScheme.inversePrimary,
+      ),
+      cardTheme: CardTheme(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        surfaceTintColor: Colors.transparent,
+      ),
+      dropdownMenuTheme: DropdownMenuThemeData(
+        textStyle: Theme.of(context).textTheme.bodyMedium,
+      ),
+      scaffoldBackgroundColor: colorScheme.surfaceVariant.withOpacity(0.3),
+      useMaterial3: true,
+    );
+  }
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -46,48 +75,10 @@ class MyApp extends StatelessWidget {
 
     final themeMode = darkModeSetting?.value ? ThemeMode.dark : ThemeMode.light;
 
-    final ColorScheme colorSchemeLight = ColorScheme.fromSeed(
-      seedColor: const Color.fromARGB(255, 246, 120, 40),
-      brightness: Brightness.light,
-    );
-
-    final ColorScheme colorSchemeDark = ColorScheme.fromSeed(
-      seedColor: const Color.fromARGB(255, 246, 120, 40),
-      brightness: Brightness.dark,
-    );
-
     return GetMaterialApp.router(
       title: 'EFA-SmartConnect Modbus Demo',
-      theme: ThemeData(
-        colorScheme: colorSchemeLight,
-        appBarTheme: AppBarTheme(
-          backgroundColor: colorSchemeLight.inversePrimary,
-        ),
-        cardTheme: CardTheme(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-          surfaceTintColor: Colors.transparent,
-        ),
-        scaffoldBackgroundColor:
-            colorSchemeLight.surfaceVariant.withOpacity(0.3),
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData(
-        colorScheme: colorSchemeDark,
-        appBarTheme: AppBarTheme(
-          backgroundColor: colorSchemeDark.inversePrimary,
-        ),
-        cardTheme: CardTheme(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-          surfaceTintColor: Colors.transparent,
-        ),
-        scaffoldBackgroundColor:
-            colorSchemeDark.surfaceVariant.withOpacity(0.3),
-        useMaterial3: true,
-      ),
+      theme: _buildThemeData(context: context),
+      darkTheme: _buildThemeData(context: context, brightness: Brightness.dark),
       themeMode: themeMode,
       getPages: AppPages.routes,
       defaultTransition: Transition.noTransition,

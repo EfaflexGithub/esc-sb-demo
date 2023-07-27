@@ -1,25 +1,13 @@
 import 'package:data_table_2/data_table_2.dart';
 import 'package:efa_smartconnect_modbus_demo/data/models/door.dart';
 import 'package:efa_smartconnect_modbus_demo/data/services/smart_door_service.dart';
-import 'package:efa_smartconnect_modbus_demo/modules/settings/controllers/settings_controller.dart';
-import 'package:efa_smartconnect_modbus_demo/modules/settings/models/application_setttings.dart';
 import 'package:efa_smartconnect_modbus_demo/routes/pages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/door_overview_controller.dart';
 
 class DoorOverviewPage extends GetView<DoorOverviewController> {
-  DoorOverviewPage({super.key}) {
-    eventHighlightTime = Get.find<SettingsController<AppSettingKeys>>()
-        .getSettingFromKey(AppSettingKeys.eventHighlightingTime)
-        ?.valueObs as Rx<int>;
-    eventHighlightCycles = Get.find<SettingsController<AppSettingKeys>>()
-        .getSettingFromKey(AppSettingKeys.eventHighlightingCycles)
-        ?.valueObs as Rx<int>;
-  }
-
-  late final Rx<int> eventHighlightTime;
-  late final Rx<int> eventHighlightCycles;
+  const DoorOverviewPage({super.key});
 
   static const List<(String, dynamic)> columnTitles = [
     ('Status', ColumnSize.S),
@@ -44,24 +32,29 @@ class DoorOverviewPage extends GetView<DoorOverviewController> {
               showCheckboxColumn: controller.showCheckboxColumn.value,
               columns: [
                 DataColumn2(
-                  label: Visibility(
-                    visible: controller
-                        .doorCollectionService.smartDoorServices.isNotEmpty,
-                    child: IconButton(
-                        iconSize: 20,
-                        icon: Icon(controller.showCheckboxColumn.value
-                            ? Icons.cancel
-                            : Icons.edit),
-                        onPressed: () {
-                          controller.showCheckboxColumn.toggle();
-                          if (controller.showCheckboxColumn.value) {
-                            _enterEditMode(context);
-                          } else {
-                            controller.leaveEditMode();
-                          }
-                        }),
+                  fixedWidth: 100,
+                  label: Row(
+                    children: [
+                      Visibility(
+                        visible: controller
+                            .doorCollectionService.smartDoorServices.isNotEmpty,
+                        child: IconButton(
+                            iconSize: 20,
+                            icon: Icon(controller.showCheckboxColumn.value
+                                ? Icons.cancel
+                                : Icons.edit),
+                            onPressed: () {
+                              controller.showCheckboxColumn.toggle();
+                              if (controller.showCheckboxColumn.value) {
+                                _enterEditMode(context);
+                              } else {
+                                controller.leaveEditMode();
+                              }
+                            }),
+                      ),
+                      const Center(child: Text('Actions'))
+                    ],
                   ),
-                  fixedWidth: 50,
                 ),
                 ...columnTitles.map<DataColumn>(_buildColumnTitle).toList()
               ],
@@ -157,10 +150,10 @@ class DoorOverviewPage extends GetView<DoorOverviewController> {
     var eventDateTime = lastEvent?.dateTime;
     var highlightEvent = (doorCycles != null &&
             eventCycles != null &&
-            doorCycles - eventCycles < eventHighlightCycles.value) ||
+            doorCycles - eventCycles < controller.eventHighlightCycles.value) ||
         (eventDateTime != null &&
             DateTime.now().difference(eventDateTime) <
-                Duration(hours: eventHighlightTime.value));
+                Duration(hours: controller.eventHighlightTime.value));
     return DataRow(
       onLongPress: () {
         smartDoorService.selected.value = true;
@@ -186,17 +179,71 @@ class DoorOverviewPage extends GetView<DoorOverviewController> {
       },
       cells: [
         DataCell(
-          Row(
+          ListView(
+            scrollDirection: Axis.horizontal,
             children: [
-              Visibility(
-                visible: !smartDoorService.isServiceRunning.value,
-                child: IconButton(
-                  iconSize: 20,
-                  icon: const Icon(Icons.play_arrow),
-                  color: Colors.green,
-                  tooltip: 'Start Service',
-                  onPressed: () => smartDoorService.start(),
-                ),
+              Row(
+                children: [
+                  Visibility(
+                    visible: !smartDoorService.isServiceRunning.value,
+                    child: IconButton(
+                      iconSize: 20,
+                      visualDensity: VisualDensity.compact,
+                      icon: const Icon(Icons.play_arrow),
+                      color: Colors.green,
+                      tooltip: 'Start Service',
+                      onPressed: () => smartDoorService.start(),
+                    ),
+                  ),
+                  ...smartDoorService.userApplications.map((app) {
+                    if (app == null) {
+                      return Container();
+                    }
+                    int slot = smartDoorService.userApplications.indexOf(app);
+                    bool visible = true;
+                    if (!app.enabled) {
+                      visible = false;
+                    }
+                    if (!controller.showUnknownUserApplications.value &&
+                        app.unknown) {
+                      visible = false;
+                    }
+
+                    return Visibility(
+                      visible: visible,
+                      child: Obx(() => Tooltip(
+                            message: <String>[
+                              app.label,
+                              app.description,
+                              'User Application $slot',
+                            ].join('\n'),
+                            child: IconButton(
+                                iconSize: 20,
+                                visualDensity: VisualDensity.compact,
+                                icon: Icon(app.icon),
+                                isSelected: app.selected.value,
+                                selectedIcon: app.selectedIcon != null
+                                    ? Icon(app.selectedIcon)
+                                    : null,
+                                onPressed: () async {
+                                  if (app.selectable) {
+                                    app.selected.value = !app.selected.value!;
+                                    await smartDoorService
+                                        .setUserApplicationState(
+                                            slot, app.selected.value!);
+                                  } else {
+                                    await smartDoorService
+                                        .setUserApplicationState(slot, true);
+                                    await Future.delayed(
+                                        const Duration(milliseconds: 250));
+                                    await smartDoorService
+                                        .setUserApplicationState(slot, false);
+                                  }
+                                }),
+                          )),
+                    );
+                  }),
+                ],
               ),
             ],
           ),

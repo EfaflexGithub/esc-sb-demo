@@ -16,6 +16,21 @@ class DoorOverviewController extends GetxController {
 
   final enableRemoveIcon = false.obs;
 
+  late final Rx<int> eventHighlightTime;
+  late final Rx<int> eventHighlightCycles;
+  late final Rx<bool> showUnknownUserApplications;
+
+  @override
+  void onInit() {
+    super.onInit();
+    eventHighlightTime = SettingsController.find<AppSettingKeys>()
+        .getObservableValueFromKey<int>(AppSettingKeys.eventHighlightingTime);
+    eventHighlightCycles = SettingsController.find<AppSettingKeys>()
+        .getObservableValueFromKey(AppSettingKeys.eventHighlightingCycles);
+    showUnknownUserApplications = SettingsController.find<AppSettingKeys>()
+        .getObservableValueFromKey(AppSettingKeys.showUnknownUserApplications);
+  }
+
   PersistentBottomSheetController? bottomSheetController;
 
   void updateIconStates() {

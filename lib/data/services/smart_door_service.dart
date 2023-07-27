@@ -1,4 +1,5 @@
 import 'package:efa_smartconnect_modbus_demo/data/models/door.dart';
+import 'package:efa_smartconnect_modbus_demo/data/models/user_application.dart';
 import 'package:efa_smartconnect_modbus_demo/shared/extensions/hive_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -21,6 +22,14 @@ abstract base class SmartDoorService {
   Map<String, String> get uiConfiguration;
 
   Map<String, List<Map<String, String>>> get additionalUiGroups;
+
+  List<UserApplicationData> get supportedUserApplications;
+
+  RxList<UserApplication?> get userApplications;
+
+  Future<bool> configureUserApplication(int slot, String value);
+
+  Future<bool> setUserApplicationState(int slot, bool state);
 
   SmartDoorService([String? uuid]) : uuid = uuid ?? const Uuid().v4();
 

@@ -71,7 +71,7 @@ class SettingsController<K> extends GetxController {
     changes.value = false;
   }
 
-  Setting? getSettingFromKey(K key) {
+  Setting<K, dynamic> getSettingFromKey(K key) {
     for (var category in applicationSettings.categories) {
       for (var group in category.groups) {
         for (var setting in group.settings) {
@@ -81,10 +81,10 @@ class SettingsController<K> extends GetxController {
         }
       }
     }
-    return null;
+    throw Exception('Setting not found');
   }
 
-  T? getValueFromKey<T>(K key) {
+  T getValueFromKey<T>(K key) {
     for (var category in applicationSettings.categories) {
       for (var group in category.groups) {
         for (var setting in group.settings) {
@@ -94,6 +94,23 @@ class SettingsController<K> extends GetxController {
         }
       }
     }
-    return null;
+    throw Exception('Setting not found');
+  }
+
+  Rx<T> getObservableValueFromKey<T>(K key) {
+    for (var category in applicationSettings.categories) {
+      for (var group in category.groups) {
+        for (var setting in group.settings) {
+          if (setting.storageKey == key) {
+            return setting.valueObs as Rx<T>;
+          }
+        }
+      }
+    }
+    throw Exception('Setting not found');
+  }
+
+  static SettingsController<K> find<K>() {
+    return Get.find<SettingsController<K>>();
   }
 }

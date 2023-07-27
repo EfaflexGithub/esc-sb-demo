@@ -32,7 +32,7 @@ class DoorDetailsPage extends GetView<DoorDetailsController> {
               context: context,
               title: 'Smart Door Configuration',
               children: [
-                _buildPropertiesCard(
+                _buildTextPropertiesCard(
                   context: context,
                   properties: service.uiConfiguration,
                 ),
@@ -42,7 +42,7 @@ class DoorDetailsPage extends GetView<DoorDetailsController> {
               context: context,
               title: 'Door Information',
               children: [
-                Obx(() => _buildPropertiesCard(
+                Obx(() => _buildTextPropertiesCard(
                       context: context,
                       properties: {
                         "Individual Name": door.individualName.value ?? '?',
@@ -51,7 +51,7 @@ class DoorDetailsPage extends GetView<DoorDetailsController> {
                         "Construction Type": door.profile.value ?? '?',
                       },
                     )),
-                Obx(() => _buildPropertiesCard(
+                Obx(() => _buildTextPropertiesCard(
                       context: context,
                       properties: {
                         "Status": door.openingStatus.value.toString(),
@@ -66,7 +66,7 @@ class DoorDetailsPage extends GetView<DoorDetailsController> {
               context: context,
               title: 'Door Control',
               children: [
-                Obx(() => _buildPropertiesCard(
+                Obx(() => _buildTextPropertiesCard(
                       context: context,
                       properties: {
                         "Series": door.doorControl.value?.series.value ?? '?',
@@ -81,7 +81,7 @@ class DoorDetailsPage extends GetView<DoorDetailsController> {
                             door.cycleCounter.value?.localized ?? '?',
                       },
                     )),
-                Obx(() => _buildPropertiesCard(
+                Obx(() => _buildTextPropertiesCard(
                       context: context,
                       properties: {
                         "Display Content":
@@ -124,14 +124,63 @@ class DoorDetailsPage extends GetView<DoorDetailsController> {
                 title: uiGroup.key,
                 children: [
                   ...uiGroup.value.map((cardProperties) {
-                    return _buildPropertiesCard(
+                    return _buildTextPropertiesCard(
                       context: context,
                       properties: cardProperties,
                     );
                   })
                 ],
               );
-            })
+            }),
+            _buildGroup(
+              context: context,
+              title: "User Applications",
+              children: [
+                _buildWidgetPropertiesCard(
+                  context: context,
+                  actions: [
+                    FilledButton.tonal(
+                      onPressed: () async {
+                        await controller.saveUserApplications();
+                      },
+                      child: const Text('Save'),
+                    )
+                  ],
+                  properties: {
+                    for (var i = 0; i < controller.userApplicationsCount; i++)
+                      "User Application $i": DropdownMenu<String>(
+                        enableFilter: false,
+                        enableSearch: false,
+                        requestFocusOnTap: false,
+                        initialSelection: service.userApplications[i]?.value,
+                        leadingIcon: Icon(service.userApplications[i]?.icon),
+                        onSelected: (value) {
+                          if (value != null) {
+                            controller.userApplicationsTempValues[i] = value;
+                          }
+                        },
+                        dropdownMenuEntries: service.supportedUserApplications
+                            .map((userApplication) => DropdownMenuEntry<String>(
+                                value: userApplication.value,
+                                label: userApplication.label,
+                                leadingIcon: Icon(userApplication.icon),
+                                trailingIcon: Tooltip(
+                                  message: userApplication.description,
+                                  child: Icon(
+                                    Icons.info_outline_rounded,
+                                    size: 17,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onBackground
+                                        .withOpacity(0.4),
+                                  ),
+                                )))
+                            .toList(),
+                      )
+                  },
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -160,23 +209,45 @@ class DoorDetailsPage extends GetView<DoorDetailsController> {
     required BuildContext context,
     double verticalPadding = 8,
     double horizontalPadding = 8,
+    List<Widget>? actions,
   }) {
     return Card(
       child: Padding(
         padding: EdgeInsets.symmetric(
             vertical: verticalPadding, horizontal: horizontalPadding),
-        child: child,
+        child: Column(
+          children: [
+            child,
+            if (actions != null)
+              ButtonBar(
+                children: actions,
+              ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildPropertiesCard({
+  Widget _buildTextPropertiesCard({
     required BuildContext context,
     required Map<String, String> properties,
+  }) {
+    return _buildWidgetPropertiesCard(
+      context: context,
+      properties: properties.map((key, value) => MapEntry(key, Text(value))),
+    );
+  }
+
+  Widget _buildWidgetPropertiesCard({
+    required BuildContext context,
+    required Map<String, Widget> properties,
+    List<Widget>? actions,
   }) {
     return _buildCard(
       context: context,
       horizontalPadding: 0,
+      verticalPadding: 0,
+      actions: actions,
       child: Column(
         children: [
           ...properties.entries.map((mapEntry) {
@@ -185,21 +256,20 @@ class DoorDetailsPage extends GetView<DoorDetailsController> {
                 if (mapEntry.key != properties.entries.first.key)
                   const Divider(thickness: 1, height: 1),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Container(
-                    constraints: const BoxConstraints(minHeight: 35),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(mapEntry.key),
-                        Text(mapEntry.value),
-                      ],
-                    ),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 23),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(mapEntry.key),
+                      mapEntry.value,
+                    ],
                   ),
                 ),
               ],
             );
           }),
+          if (actions != null) const Divider(height: 1, thickness: 1),
         ],
       ),
     );

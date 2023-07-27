@@ -4,10 +4,10 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:efa_smartconnect_modbus_demo/data/models/door.dart';
-import 'package:efa_smartconnect_modbus_demo/data/models/door_control.dart';
 import 'package:efa_smartconnect_modbus_demo/data/models/efa_tronic.dart';
 import 'package:efa_smartconnect_modbus_demo/data/models/event_entry.dart';
 import 'package:efa_smartconnect_modbus_demo/data/models/smart_connect_module.dart';
+import 'package:efa_smartconnect_modbus_demo/data/models/user_application.dart';
 import 'package:efa_smartconnect_modbus_demo/data/repositories/modbus_register.dart';
 import 'package:efa_smartconnect_modbus_demo/data/repositories/modbus_register_map.g.dart';
 import 'package:efa_smartconnect_modbus_demo/data/repositories/modbus_register_types.dart';
@@ -25,8 +25,14 @@ import 'package:async/async.dart';
 import './smart_door_service.dart';
 
 base class ModbusTcpService extends SmartDoorService {
+  static const _userApplicationsCount = 2;
+
   final ModbusTcpServiceConfiguration configuration;
+
   final ModbusDataConfiguration _dataConfiguration = ModbusDataConfiguration();
+
+  late final RxList<UserApplication?> _userApplications = RxList(List.generate(
+      _userApplicationsCount, (_) => _userApplicationByValue(-1, false)));
 
   static const String serviceName = 'modbus_tcp_service';
 
@@ -74,6 +80,48 @@ base class ModbusTcpService extends SmartDoorService {
     return result;
   }
 
+  @override
+  List<UserApplicationData> get supportedUserApplications =>
+      _supportedUserApplications;
+
+  @override
+  RxList<UserApplication?> get userApplications => _userApplications;
+
+  @override
+  Future<bool> configureUserApplication(int slot, String value) async {
+    int intValue = int.parse(value);
+    if (slot > _userApplicationsCount || intValue < 0) {
+      return false;
+    }
+
+    ModbusRegisterName modbusRegisterName = switch (slot) {
+      0 => ModbusRegisterName.userApplication1Configuration,
+      1 => ModbusRegisterName.userApplication2Configuration,
+      _ => throw Exception('Unknown slot'),
+    };
+
+    await _writeRegisterByName(modbusRegisterName, intValue);
+    _userApplications[slot] = _userApplicationByValue(
+        intValue, _userApplications[slot]?.selected.value);
+    return true;
+  }
+
+  @override
+  Future<bool> setUserApplicationState(int slot, bool state) async {
+    if (slot > _userApplicationsCount) {
+      return false;
+    }
+
+    ModbusRegisterName modbusRegisterName = switch (slot) {
+      0 => ModbusRegisterName.userApplication1,
+      1 => ModbusRegisterName.userApplication2,
+      _ => throw Exception('Unknown slot'),
+    };
+
+    await _writeRegisterByName(modbusRegisterName, state);
+    return true;
+  }
+
   bool isConnected = false;
 
   bool _blockClient = false;
@@ -93,6 +141,14 @@ base class ModbusTcpService extends SmartDoorService {
           ? (door.doorControl.value as EfaTronic)
               .findExtensionBoardByType<SmartConnectModule>()
           : null;
+
+  UserApplication _userApplicationByValue(int value, bool? selected) {
+    final userApplicationData = _supportedUserApplications.firstWhereOrNull(
+            (userApplication) => userApplication.value == value.toString()) ??
+        _supportedUserApplications[0];
+    return UserApplication.fromData(userApplicationData)
+      ..selected.value = selected;
+  }
 
   final _rootMachine = Machine<_ModbusTcpServiceState>();
 
@@ -151,6 +207,7 @@ base class ModbusTcpService extends SmartDoorService {
     _disconnectTimer ??=
         RestartableTimer(const Duration(milliseconds: 500), () async {
       await _disconnect();
+      _blockClient = false;
     });
 
     // configure root state machine
@@ -164,9 +221,6 @@ base class ModbusTcpService extends SmartDoorService {
       _setStatus(_ModbusTcpServiceState.started);
     });
     startedState.addNested(_startedMachine);
-    startedState.onExit(() async {
-      await _disconnect();
-    });
 
     // configure started state machine
     final offlineState =
@@ -185,11 +239,15 @@ base class ModbusTcpService extends SmartDoorService {
         await updateDoorModelByGroup(
             ModbusRegisterGroup.dataConfigurationRegisters);
         _startedMachine.current = _ModbusTcpServiceState.checkingLicense;
-      } on SocketException {
-        _blockClient = false;
-        // Nothing to do here as we want to stay inside the offlineState on a
-        // SocketException (normally caused by a timeout if the modbus server
-        // is not reachable)
+      } catch (e) {
+        if (e is SocketException || e.toString().contains('MODBUS ERROR')) {
+          _blockClient = false;
+          // Nothing to do here as we want to stay inside the offlineState on a
+          // SocketException (normally caused by a timeout if the modbus server
+          // is not reachable)
+        } else {
+          rethrow;
+        }
       }
     });
 
@@ -199,7 +257,16 @@ base class ModbusTcpService extends SmartDoorService {
 
     checkingLicenseState.onEntry(() async {
       _setStatus(_ModbusTcpServiceState.checkingLicense);
-      await updateDoorModelByGroup(ModbusRegisterGroup.licensing);
+      try {
+        await updateDoorModelByGroup(ModbusRegisterGroup.licensing);
+      } catch (e) {
+        if (e is SocketException || e.toString().contains('MODBUS ERROR')) {
+          _blockClient = false;
+          _startedMachine.current = _ModbusTcpServiceState.offline;
+        } else {
+          rethrow;
+        }
+      }
       if (_licenseActivated!) {
         _startedMachine.current = _ModbusTcpServiceState.online;
       } else if (_licenseExpirationDate!.year < 2000) {
@@ -209,8 +276,18 @@ base class ModbusTcpService extends SmartDoorService {
       }
     });
     checkingLicenseState.onExit(() async {
-      await updateDoorModelByGroup(ModbusRegisterGroup.doorData);
-      await updateDoorModelByGroup(ModbusRegisterGroup.operatingInformation);
+      try {
+        await updateDoorModelByGroup(ModbusRegisterGroup.doorData);
+        await updateDoorModelByGroup(ModbusRegisterGroup.operatingInformation);
+        await updateDoorModelByGroup(ModbusRegisterGroup.doorInteraction);
+      } catch (e) {
+        if (e is SocketException || e.toString().contains('MODBUS ERROR')) {
+          _blockClient = false;
+          _startedMachine.current = _ModbusTcpServiceState.offline;
+        } else {
+          rethrow;
+        }
+      }
       await saveToCache();
     });
 
@@ -220,9 +297,13 @@ base class ModbusTcpService extends SmartDoorService {
       _setStatus(_ModbusTcpServiceState.online);
       try {
         await _readAndProcessChangeNotificationFlags();
-      } on SocketException {
-        _startedMachine.current = _ModbusTcpServiceState.offline;
-        _blockClient = false;
+      } catch (e) {
+        if (e is SocketException || e.toString().contains('MODBUS ERROR')) {
+          _blockClient = false;
+          _startedMachine.current = _ModbusTcpServiceState.offline;
+        } else {
+          rethrow;
+        }
       }
     });
 
@@ -266,12 +347,12 @@ base class ModbusTcpService extends SmartDoorService {
     if (newConfiguration.byteSwap) {
       swapOptions |= 0x0004;
     }
-    await _writeRegister(ModbusRegisterName.swapOptions, swapOptions);
+    await _writeRegisterByName(ModbusRegisterName.swapOptions, swapOptions);
     _dataConfiguration.dWordSwap = newConfiguration.dWordSwap;
     _dataConfiguration.wordSwap = newConfiguration.wordSwap;
     _dataConfiguration.byteSwap = newConfiguration.byteSwap;
 
-    await _writeRegister(ModbusRegisterName.dateTimeFormat,
+    await _writeRegisterByName(ModbusRegisterName.dateTimeFormat,
         newConfiguration.dateTimeFormat.index);
     _dataConfiguration.dateTimeFormat = newConfiguration.dateTimeFormat;
   }
@@ -557,6 +638,24 @@ base class ModbusTcpService extends SmartDoorService {
             value;
         break;
 
+      case ModbusRegisterName.userApplication1Configuration when value is int:
+        _userApplications[0] = _userApplicationByValue(
+            value, _userApplications[0]?.selected.value);
+        break;
+
+      case ModbusRegisterName.userApplication2Configuration when value is int:
+        _userApplications[1] = _userApplicationByValue(
+            value, _userApplications[1]?.selected.value);
+        break;
+
+      case ModbusRegisterName.userApplication1 when value is bool:
+        _userApplications[0]?.selected.value = value;
+        break;
+
+      case ModbusRegisterName.userApplication2 when value is bool:
+        _userApplications[1]?.selected.value = value;
+        break;
+
       default:
         break;
     }
@@ -641,12 +740,20 @@ base class ModbusTcpService extends SmartDoorService {
     return retval;
   }
 
-  Future<void> _writeRegister(
+  Future<void> _writeRegisterByName(
       ModbusRegisterName modbusRegisterName, dynamic value) async {
+    while (_blockClient) {
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+    _blockClient = true;
+    _disconnectTimer?.reset();
     await _ensureConnected();
     var register = _modbusRegisterService.getModbusRegister(modbusRegisterName);
     if (register is ModbusBitRegister) {
-      throw UnimplementedError();
+      if (register.type != ModbusRegisterType.coil) {
+        throw "It is not possible to write to register of type ${register.type}";
+      }
+      await client.writeSingleCoil(register.address - 1, value as bool);
     } else if (register is ModbusWordRegister) {
       if (register.type != ModbusRegisterType.holdingRegister) {
         throw "It is not possible to write to register of type ${register.type}";
@@ -663,7 +770,7 @@ base class ModbusTcpService extends SmartDoorService {
           await client.writeMultipleRegisters(register.address - 1, words);
       }
     }
-    await _disconnect();
+    _blockClient = false;
   }
 
   static dynamic _decodeModbusData(Uint16List list, ModbusDataType type,
@@ -942,3 +1049,118 @@ enum _LicenseActivationResult {
   invalidKey,
   expired;
 }
+
+const _supportedUserApplications = [
+  UserApplicationData.selectable(
+    value: '-1',
+    label: 'Unknown',
+    description: 'Unknown user application',
+    icon: Icons.question_mark_outlined,
+    selectedIcon: Icons.question_mark,
+  ),
+  UserApplicationData.disabled(
+    value: '0',
+    label: 'Disabled',
+    description: 'User application disabled',
+  ),
+  UserApplicationData.selectable(
+    value: '1',
+    label: 'Disable openings',
+    description: 'Disables all opening commands',
+    icon: Icons.expand_circle_down_outlined,
+    selectedIcon: Icons.expand_circle_down,
+  ),
+  UserApplicationData.selectable(
+    value: '2',
+    label: 'Disable openings (outside)',
+    description: 'Disables opening commands from outside',
+    icon: Icons.expand_circle_down_outlined,
+    selectedIcon: Icons.expand_circle_down,
+  ),
+  UserApplicationData.selectable(
+    value: '3',
+    label: 'Disable openings (coils)',
+    description: 'Disables opening commands from coils',
+    icon: Icons.expand_circle_down_outlined,
+    selectedIcon: Icons.expand_circle_down,
+  ),
+  UserApplicationData.selectable(
+    value: '4',
+    label: 'Disable travels (foil)',
+    description: 'Disable travels with foil keypad',
+    icon: Icons.expand_circle_down_outlined,
+    selectedIcon: Icons.expand_circle_down,
+  ),
+  UserApplicationData.selectable(
+    value: '5',
+    label: 'Disable automatic mode',
+    description: 'Travels are only possible with foil keypad',
+    icon: Icons.sync_problem_outlined,
+    selectedIcon: Icons.sync_problem,
+  ),
+  UserApplicationData.selectable(
+    value: '6',
+    label: 'Disable keep open time',
+    description: 'Disables the keep open time',
+    icon: Icons.timer_off_outlined,
+    selectedIcon: Icons.timer_off,
+  ),
+  UserApplicationData.selectable(
+    value: '7',
+    label: 'Disable intermediate stop',
+    description: 'Disables the intermediate stop',
+    icon: Icons.report_off_outlined,
+    selectedIcon: Icons.report_off,
+  ),
+  UserApplicationData.selectable(
+    value: '8',
+    label: 'Force slow travels',
+    description: 'Force slow travels for the door',
+    icon: Icons.speed_outlined,
+    selectedIcon: Icons.speed,
+  ),
+  UserApplicationData(
+    value: '9',
+    label: 'Open (impulse)',
+    description: 'Open door and stay in opened position',
+    icon: Icons.arrow_upward_outlined,
+  ),
+  UserApplicationData(
+    value: '10',
+    label: 'Open (time)',
+    description: 'Open door and automatically close after auto-close delay',
+    icon: Icons.arrow_upward_outlined,
+  ),
+  UserApplicationData(
+    value: '11',
+    label: 'Intermediate (impulse)',
+    description: 'Travel to intermediate position and stay there',
+    icon: Icons.vertical_align_center_outlined,
+  ),
+  UserApplicationData(
+    value: '12',
+    label: 'Intermediate (time)',
+    description:
+        'Travel to intermediate position and automatically close after auto-close delay',
+    icon: Icons.vertical_align_center_outlined,
+  ),
+  UserApplicationData(
+    value: '13',
+    label: 'Close',
+    description: 'Close door and stay in closed position',
+    icon: Icons.arrow_downward_outlined,
+  ),
+  UserApplicationData(
+    value: '14',
+    label: 'Stop',
+    description: 'Stop the current door travel',
+    icon: Icons.stop_outlined,
+  ),
+  UserApplicationData(
+    value: '15',
+    label: 'Smoke extraction',
+    description:
+        'Travel to smoke extraction position with slow speed and disable automatic mode',
+    icon: Icons.cloud_sync_outlined,
+  ),
+];
