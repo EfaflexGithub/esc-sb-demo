@@ -20,57 +20,63 @@ class SettingsPage<K> extends GetView<SettingsController<K>> {
                 automaticallyImplyLeading: false,
                 title: const Text('Application Settings'),
               ),
-              body: Row(
-                children: [
-                  Obx(
-                    () => NavigationDrawer(
-                      onDestinationSelected:
-                          controller.handleDrawerDestinationSelected,
-                      selectedIndex: controller.selectedCategoryIndex.value,
-                      children: [
-                        const SizedBox(height: 16),
-                        ...controller.applicationSettings.categories
-                            .map((category) {
-                          return NavigationDrawerDestination(
-                            label: Text(category.label),
-                            icon: Icon(category.icon),
-                          );
-                        }).toList()
-                      ],
-                    ),
-                  ),
-                  const VerticalDivider(width: 1),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Obx(
-                        () => ListView(
-                            children: controller.selectedCategory?.groups
-                                    .map(
-                                      (group) => Padding(
-                                        padding:
-                                            const EdgeInsets.only(bottom: 16),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(group.label,
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .titleMedium),
-                                            const SizedBox(height: 8),
-                                            _buildSettingsGroupCard(group,
-                                                context: context),
-                                          ],
-                                        ),
-                                      ),
-                                    )
-                                    .toList() ??
-                                []),
+              body: Container(
+                color: Theme.of(context)
+                    .colorScheme
+                    .surfaceVariant
+                    .withOpacity(0.3),
+                child: Row(
+                  children: [
+                    Obx(
+                      () => NavigationDrawer(
+                        onDestinationSelected:
+                            controller.handleDrawerDestinationSelected,
+                        selectedIndex: controller.selectedCategoryIndex.value,
+                        children: [
+                          const SizedBox(height: 16),
+                          ...controller.applicationSettings.categories
+                              .map((category) {
+                            return NavigationDrawerDestination(
+                              label: Text(category.label),
+                              icon: Icon(category.icon),
+                            );
+                          }).toList()
+                        ],
                       ),
                     ),
-                  ),
-                ],
+                    const VerticalDivider(width: 1),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Obx(
+                          () => ListView(
+                              children: controller.selectedCategory?.groups
+                                      .map(
+                                        (group) => Padding(
+                                          padding:
+                                              const EdgeInsets.only(bottom: 16),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(group.label,
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .titleMedium),
+                                              const SizedBox(height: 8),
+                                              _buildSettingsGroupCard(group,
+                                                  context: context),
+                                            ],
+                                          ),
+                                        ),
+                                      )
+                                      .toList() ??
+                                  []),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

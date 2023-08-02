@@ -57,7 +57,6 @@ class MyApp extends StatelessWidget {
       dropdownMenuTheme: DropdownMenuThemeData(
         textStyle: Theme.of(context).textTheme.bodyMedium,
       ),
-      scaffoldBackgroundColor: colorScheme.surfaceVariant.withOpacity(0.3),
       useMaterial3: true,
     );
   }
