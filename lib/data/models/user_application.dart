@@ -1,96 +1,106 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class UserApplicationData {
+enum UserApplicationType {
+  disabled,
+  momentary,
+  toggle,
+}
+
+class UserApplicationDefinition {
   final String value;
   final String label;
   final String description;
   final IconData? icon;
   final IconData? selectedIcon;
-  bool get selectable => selectedIcon != null;
-  bool get enabled => icon != null;
-  bool get unknown => value == '-1';
+  final int momentaryDelay;
 
-  const UserApplicationData({
+  UserApplicationType get _userApplicationType =>
+      switch ((icon, selectedIcon)) {
+        (null, null) => UserApplicationType.disabled,
+        (_, null) => UserApplicationType.momentary,
+        _ => UserApplicationType.toggle,
+      };
+
+  const UserApplicationDefinition.disabled({
     required this.value,
     required this.label,
     required this.description,
-    required IconData icon,
-  })  : icon = icon,
-        selectedIcon = null;
+  })  : icon = null,
+        selectedIcon = null,
+        momentaryDelay = 0;
 
-  const UserApplicationData.selectable({
+  const UserApplicationDefinition.momentary({
+    required this.value,
+    required this.label,
+    required this.description,
+    required this.icon,
+  })  : selectedIcon = null,
+        momentaryDelay = 0;
+
+  const UserApplicationDefinition.toggle({
     required this.value,
     required this.label,
     required this.description,
     required this.icon,
     IconData? selectedIcon,
-    bool selected = false,
+    this.momentaryDelay = 250,
   }) : selectedIcon = selectedIcon ?? icon;
-
-  const UserApplicationData.disabled({
-    required this.value,
-    required this.label,
-    required this.description,
-  })  : icon = null,
-        selectedIcon = null;
 }
 
-class UserApplication extends UserApplicationData {
-  Rxn<bool> selected;
+class UserApplication {
+  final Future<void> Function(bool state) onStateChanged;
+  UserApplicationType? get type => definition?._userApplicationType;
 
-  UserApplication({
-    required super.value,
-    required super.label,
-    required super.description,
-    required super.icon,
-  }) : selected = Rxn<bool>();
-
-  UserApplication.selectable({
-    required String value,
-    required String label,
-    required String description,
-    required IconData icon,
-    IconData? selectedIcon,
-    bool selected = false,
-  })  : selected = Rxn<bool>(selected),
-        super.selectable(
-            value: value,
-            label: label,
-            description: description,
-            icon: icon,
-            selectedIcon: selectedIcon);
-
-  UserApplication.disabled({
-    required String value,
-    required String label,
-    required String description,
-  })  : selected = Rxn<bool>(false),
-        super.disabled(value: value, label: label, description: description);
-
-  factory UserApplication.fromData(UserApplicationData userApplication) {
-    if (!userApplication.enabled) {
-      return UserApplication.disabled(
-        value: userApplication.value,
-        label: userApplication.label,
-        description: userApplication.description,
-      );
-    }
-    if (userApplication.selectable) {
-      return UserApplication.selectable(
-        value: userApplication.value,
-        label: userApplication.label,
-        description: userApplication.description,
-        icon: userApplication.icon!,
-        selectedIcon: userApplication.selectedIcon,
-      );
-    } else {
-      return UserApplication(
-        value: userApplication.value,
-        label: userApplication.label,
-        description: userApplication.description,
-        icon: userApplication.icon!,
-      );
+  final Rxn<UserApplicationDefinition> _definition;
+  UserApplicationDefinition? get definition => _definition.value;
+  set definition(UserApplicationDefinition? newDefinition) {
+    _definition.value = newDefinition;
+    if (type == UserApplicationType.momentary && state == true) {
+      onStateChanged.call(false).then((_) => state = false);
     }
   }
+
+  final Rxn<bool> _state;
+  bool? get state => _state.value;
+  set state(bool? newState) {
+    var oldState = _state.value;
+    _state.value = newState;
+    if (oldState == null &&
+        _state.value == true &&
+        type == UserApplicationType.momentary) {
+      onStateChanged.call(false).then((_) => _state.value = false);
+    }
+  }
+
+  Future<void> activate() async {
+    // create variables that hold non-modifiable references
+    var state2 = state;
+    var type2 = type;
+    var definition2 = definition;
+
+    // return if either state or the definition is uninitialized
+    if (definition2 == null || type2 == null || state2 == null) {
+      return;
+    }
+
+    if (type == UserApplicationType.toggle) {
+      await onStateChanged.call(!state2);
+      state = !state2;
+    }
+    if (type == UserApplicationType.momentary) {
+      await onStateChanged.call(true);
+      state = true;
+      await Future.delayed(Duration(milliseconds: definition2.momentaryDelay));
+      await onStateChanged.call(false);
+      state = false;
+    }
+  }
+
+  UserApplication({
+    required UserApplicationDefinition? definition,
+    bool? state,
+    required this.onStateChanged,
+  })  : _definition = Rxn<UserApplicationDefinition>(definition),
+        _state = Rxn<bool>(state);
 }

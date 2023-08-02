@@ -19,13 +19,15 @@ abstract base class SmartDoorService {
 
   final Rx<Color> _statusColor = Colors.grey.obs;
 
+  final status = Rx<SmartDoorServiceStatus>(SmartDoorServiceStatus.unknown);
+
   Map<String, String> get uiConfiguration;
 
   Map<String, List<Map<String, String>>> get additionalUiGroups;
 
-  List<UserApplicationData> get supportedUserApplications;
+  List<UserApplicationDefinition> get supportedUserApplications;
 
-  RxList<UserApplication?> get userApplications;
+  List<UserApplication> get userApplications;
 
   Future<bool> configureUserApplication(int slot, String value);
 
@@ -33,12 +35,13 @@ abstract base class SmartDoorService {
 
   SmartDoorService([String? uuid]) : uuid = uuid ?? const Uuid().v4();
 
-  set statusColor(StatusColor color) {
-    _statusColor.value = switch (color) {
-      StatusColor.unknown => Colors.grey,
-      StatusColor.okay => Colors.green,
-      StatusColor.warn => Colors.yellow,
-      StatusColor.error => Colors.red,
+  set smartDoorServiceStatus(SmartDoorServiceStatus newStatus) {
+    status.value = newStatus;
+    _statusColor.value = switch (newStatus) {
+      SmartDoorServiceStatus.unknown => Colors.grey,
+      SmartDoorServiceStatus.okay => Colors.green,
+      SmartDoorServiceStatus.warn => Colors.yellow,
+      SmartDoorServiceStatus.error => Colors.red,
     };
   }
 
@@ -84,7 +87,7 @@ abstract base class SmartDoorService {
   }
 }
 
-enum StatusColor {
+enum SmartDoorServiceStatus {
   unknown,
   okay,
   warn,

@@ -15,10 +15,11 @@ class DoorDetailsController extends GetxController {
   }
 
   Future<void> saveUserApplications() async {
-    for (int i = 0; i < userApplicationsCount; i++) {
-      if (userApplicationsTempValues[i] != userApplications[i]?.value) {
+    for (int slot = 0; slot < userApplicationsCount; slot++) {
+      if (userApplicationsTempValues[slot] !=
+          userApplications[slot]?.definition?.value) {
         await smartDoorService.configureUserApplication(
-            i, userApplicationsTempValues[i]);
+            slot, userApplicationsTempValues[slot]);
       }
     }
   }

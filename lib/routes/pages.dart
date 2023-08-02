@@ -26,7 +26,7 @@ abstract class AppPages {
       children: [
         GetPage(
           name: _Paths.doorOverview,
-          page: () => DoorOverviewPage(),
+          page: () => const DoorOverviewPage(),
           binding: DoorOverviewBinding(),
           children: [
             GetPage(

@@ -152,8 +152,8 @@ class DoorDetailsPage extends GetView<DoorDetailsController> {
                         enableFilter: false,
                         enableSearch: false,
                         requestFocusOnTap: false,
-                        initialSelection: service.userApplications[i]?.value,
-                        leadingIcon: Icon(service.userApplications[i]?.icon),
+                        initialSelection:
+                            service.userApplications[i].definition?.value,
                         onSelected: (value) {
                           if (value != null) {
                             controller.userApplicationsTempValues[i] = value;

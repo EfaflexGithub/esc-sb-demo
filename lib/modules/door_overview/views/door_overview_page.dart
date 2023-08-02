@@ -1,5 +1,6 @@
 import 'package:data_table_2/data_table_2.dart';
 import 'package:efa_smartconnect_modbus_demo/data/models/door.dart';
+import 'package:efa_smartconnect_modbus_demo/data/models/user_application.dart';
 import 'package:efa_smartconnect_modbus_demo/data/services/smart_door_service.dart';
 import 'package:efa_smartconnect_modbus_demo/routes/pages.dart';
 import 'package:flutter/material.dart';
@@ -196,52 +197,36 @@ class DoorOverviewPage extends GetView<DoorOverviewController> {
                     ),
                   ),
                   ...smartDoorService.userApplications.map((app) {
-                    if (app == null) {
-                      return Container();
-                    }
-                    int slot = smartDoorService.userApplications.indexOf(app);
-                    bool visible = true;
-                    if (!app.enabled) {
-                      visible = false;
-                    }
-                    if (!controller.showUnknownUserApplications.value &&
-                        app.unknown) {
-                      visible = false;
-                    }
-
-                    return Visibility(
-                      visible: visible,
-                      child: Obx(() => Tooltip(
-                            message: <String>[
-                              app.label,
-                              app.description,
-                              'User Application $slot',
+                    return Obx(() => Visibility(
+                          visible: app.type != null &&
+                              app.type != UserApplicationType.disabled &&
+                              (controller.showUnknownUserApplications.value ||
+                                  app.definition?.label.toLowerCase() !=
+                                      "unknown"),
+                          child: Tooltip(
+                            message: [
+                              app.definition?.label,
+                              app.definition?.description,
                             ].join('\n'),
                             child: IconButton(
-                                iconSize: 20,
-                                visualDensity: VisualDensity.compact,
-                                icon: Icon(app.icon),
-                                isSelected: app.selected.value,
-                                selectedIcon: app.selectedIcon != null
-                                    ? Icon(app.selectedIcon)
-                                    : null,
-                                onPressed: () async {
-                                  if (app.selectable) {
-                                    app.selected.value = !app.selected.value!;
-                                    await smartDoorService
-                                        .setUserApplicationState(
-                                            slot, app.selected.value!);
-                                  } else {
-                                    await smartDoorService
-                                        .setUserApplicationState(slot, true);
-                                    await Future.delayed(
-                                        const Duration(milliseconds: 250));
-                                    await smartDoorService
-                                        .setUserApplicationState(slot, false);
-                                  }
-                                }),
-                          )),
-                    );
+                              iconSize: 20,
+                              visualDensity: VisualDensity.compact,
+                              icon: Icon(app.definition?.icon),
+                              isSelected: app.type == UserApplicationType.toggle
+                                  ? app.state
+                                  : null,
+                              selectedIcon: app.definition?.selectedIcon != null
+                                  ? Icon(app.definition?.selectedIcon)
+                                  : null,
+                              onPressed: smartDoorService.status.value !=
+                                      SmartDoorServiceStatus.okay
+                                  ? null
+                                  : () async {
+                                      await app.activate();
+                                    },
+                            ),
+                          ),
+                        ));
                   }),
                 ],
               ),

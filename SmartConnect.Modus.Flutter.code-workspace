@@ -19,7 +19,8 @@
 		// "conventionalCommits.showEditor": true,
 		"conventionalCommits.lineBreak": "\\n",
 		"conventionalCommits.scopes": [
-			"workspace"
+			"workspace",
+			"user-applications"
 		],
 	},
 	"extensions": {

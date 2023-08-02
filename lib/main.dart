@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:hive_flutter/adapters.dart';
 import './routes/pages.dart';
 
@@ -69,11 +68,11 @@ class MyApp extends StatelessWidget {
     final darkModeSetting = Get.find<SettingsController<AppSettingKeys>>()
         .getSettingFromKey(AppSettingKeys.appDarkMode);
 
-    darkModeSetting?.temporaryValueObs.listen((value) {
+    darkModeSetting.temporaryValueObs.listen((value) {
       Get.changeThemeMode(value ? ThemeMode.dark : ThemeMode.light);
     });
 
-    final themeMode = darkModeSetting?.value ? ThemeMode.dark : ThemeMode.light;
+    final themeMode = darkModeSetting.value ? ThemeMode.dark : ThemeMode.light;
 
     return GetMaterialApp.router(
       title: 'EFA-SmartConnect Modbus Demo',

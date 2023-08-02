@@ -31,8 +31,16 @@ base class ModbusTcpService extends SmartDoorService {
 
   final ModbusDataConfiguration _dataConfiguration = ModbusDataConfiguration();
 
-  late final RxList<UserApplication?> _userApplications = RxList(List.generate(
-      _userApplicationsCount, (_) => _userApplicationByValue(-1, false)));
+  late final List<UserApplication> _userApplications = RxList(List.generate(
+    _userApplicationsCount,
+    (slot) => UserApplication(
+      definition: null,
+      state: null,
+      onStateChanged: (state) async {
+        await setUserApplicationState(slot, state);
+      },
+    ),
+  ));
 
   static const String serviceName = 'modbus_tcp_service';
 
@@ -81,11 +89,11 @@ base class ModbusTcpService extends SmartDoorService {
   }
 
   @override
-  List<UserApplicationData> get supportedUserApplications =>
-      _supportedUserApplications;
+  List<UserApplicationDefinition> get supportedUserApplications =>
+      _userApplicationDefinitions;
 
   @override
-  RxList<UserApplication?> get userApplications => _userApplications;
+  List<UserApplication> get userApplications => _userApplications;
 
   @override
   Future<bool> configureUserApplication(int slot, String value) async {
@@ -101,8 +109,8 @@ base class ModbusTcpService extends SmartDoorService {
     };
 
     await _writeRegisterByName(modbusRegisterName, intValue);
-    _userApplications[slot] = _userApplicationByValue(
-        intValue, _userApplications[slot]?.selected.value);
+    userApplications[slot].definition =
+        _userApplicationDefinitionByValue(value);
     return true;
   }
 
@@ -142,12 +150,10 @@ base class ModbusTcpService extends SmartDoorService {
               .findExtensionBoardByType<SmartConnectModule>()
           : null;
 
-  UserApplication _userApplicationByValue(int value, bool? selected) {
-    final userApplicationData = _supportedUserApplications.firstWhereOrNull(
-            (userApplication) => userApplication.value == value.toString()) ??
-        _supportedUserApplications[0];
-    return UserApplication.fromData(userApplicationData)
-      ..selected.value = selected;
+  UserApplicationDefinition _userApplicationDefinitionByValue(String value) {
+    return _userApplicationDefinitions.firstWhereOrNull(
+            (userApplication) => userApplication.value == value) ??
+        _userApplicationDefinitions.first;
   }
 
   final _rootMachine = Machine<_ModbusTcpServiceState>();
@@ -314,23 +320,23 @@ base class ModbusTcpService extends SmartDoorService {
     switch (serviceState) {
       case _ModbusTcpServiceState.stopped:
         statusString.value = stateMessage ?? 'Service Stopped';
-        statusColor = StatusColor.warn;
+        smartDoorServiceStatus = SmartDoorServiceStatus.warn;
         break;
       case _ModbusTcpServiceState.started:
         statusString.value = stateMessage ?? 'Starting Service';
-        statusColor = StatusColor.unknown;
+        smartDoorServiceStatus = SmartDoorServiceStatus.unknown;
         break;
       case _ModbusTcpServiceState.offline:
         statusString.value = stateMessage ?? 'Offline';
-        statusColor = StatusColor.error;
+        smartDoorServiceStatus = SmartDoorServiceStatus.error;
         break;
       case _ModbusTcpServiceState.checkingLicense:
         statusString.value = stateMessage ?? 'Checking license';
-        statusColor = StatusColor.warn;
+        smartDoorServiceStatus = SmartDoorServiceStatus.warn;
         break;
       case _ModbusTcpServiceState.online:
         statusString.value = stateMessage ?? 'Online';
-        statusColor = StatusColor.okay;
+        smartDoorServiceStatus = SmartDoorServiceStatus.okay;
         break;
     }
   }
@@ -639,21 +645,21 @@ base class ModbusTcpService extends SmartDoorService {
         break;
 
       case ModbusRegisterName.userApplication1Configuration when value is int:
-        _userApplications[0] = _userApplicationByValue(
-            value, _userApplications[0]?.selected.value);
+        userApplications[0].definition =
+            _userApplicationDefinitionByValue(value.toString());
         break;
 
       case ModbusRegisterName.userApplication2Configuration when value is int:
-        _userApplications[1] = _userApplicationByValue(
-            value, _userApplications[1]?.selected.value);
+        userApplications[1].definition =
+            _userApplicationDefinitionByValue(value.toString());
         break;
 
       case ModbusRegisterName.userApplication1 when value is bool:
-        _userApplications[0]?.selected.value = value;
+        userApplications[0].state = value;
         break;
 
       case ModbusRegisterName.userApplication2 when value is bool:
-        _userApplications[1]?.selected.value = value;
+        userApplications[1].state = value;
         break;
 
       default:
@@ -1050,117 +1056,118 @@ enum _LicenseActivationResult {
   expired;
 }
 
-const _supportedUserApplications = [
-  UserApplicationData.selectable(
+const _userApplicationDefinitions = [
+  UserApplicationDefinition.toggle(
     value: '-1',
     label: 'Unknown',
     description: 'Unknown user application',
     icon: Icons.question_mark_outlined,
     selectedIcon: Icons.question_mark,
   ),
-  UserApplicationData.disabled(
+  UserApplicationDefinition.disabled(
     value: '0',
     label: 'Disabled',
     description: 'User application disabled',
   ),
-  UserApplicationData.selectable(
+  UserApplicationDefinition.toggle(
     value: '1',
     label: 'Disable openings',
     description: 'Disables all opening commands',
     icon: Icons.expand_circle_down_outlined,
     selectedIcon: Icons.expand_circle_down,
   ),
-  UserApplicationData.selectable(
+  UserApplicationDefinition.toggle(
     value: '2',
     label: 'Disable openings (outside)',
     description: 'Disables opening commands from outside',
     icon: Icons.expand_circle_down_outlined,
     selectedIcon: Icons.expand_circle_down,
   ),
-  UserApplicationData.selectable(
+  UserApplicationDefinition.toggle(
     value: '3',
     label: 'Disable openings (coils)',
     description: 'Disables opening commands from coils',
     icon: Icons.expand_circle_down_outlined,
     selectedIcon: Icons.expand_circle_down,
   ),
-  UserApplicationData.selectable(
+  UserApplicationDefinition.toggle(
     value: '4',
     label: 'Disable travels (foil)',
     description: 'Disable travels with foil keypad',
     icon: Icons.expand_circle_down_outlined,
     selectedIcon: Icons.expand_circle_down,
   ),
-  UserApplicationData.selectable(
+  UserApplicationDefinition.toggle(
     value: '5',
     label: 'Disable automatic mode',
     description: 'Travels are only possible with foil keypad',
     icon: Icons.sync_problem_outlined,
     selectedIcon: Icons.sync_problem,
   ),
-  UserApplicationData.selectable(
+  UserApplicationDefinition.toggle(
     value: '6',
     label: 'Disable keep open time',
     description: 'Disables the keep open time',
     icon: Icons.timer_off_outlined,
     selectedIcon: Icons.timer_off,
   ),
-  UserApplicationData.selectable(
+  UserApplicationDefinition.toggle(
     value: '7',
     label: 'Disable intermediate stop',
     description: 'Disables the intermediate stop',
     icon: Icons.report_off_outlined,
     selectedIcon: Icons.report_off,
   ),
-  UserApplicationData.selectable(
+  UserApplicationDefinition.toggle(
     value: '8',
     label: 'Force slow travels',
     description: 'Force slow travels for the door',
     icon: Icons.speed_outlined,
     selectedIcon: Icons.speed,
   ),
-  UserApplicationData(
+  UserApplicationDefinition.momentary(
     value: '9',
     label: 'Open (impulse)',
     description: 'Open door and stay in opened position',
     icon: Icons.arrow_upward_outlined,
   ),
-  UserApplicationData(
+  UserApplicationDefinition.momentary(
     value: '10',
     label: 'Open (time)',
     description: 'Open door and automatically close after auto-close delay',
     icon: Icons.arrow_upward_outlined,
   ),
-  UserApplicationData(
+  UserApplicationDefinition.momentary(
     value: '11',
     label: 'Intermediate (impulse)',
     description: 'Travel to intermediate position and stay there',
     icon: Icons.vertical_align_center_outlined,
   ),
-  UserApplicationData(
+  UserApplicationDefinition.momentary(
     value: '12',
     label: 'Intermediate (time)',
     description:
         'Travel to intermediate position and automatically close after auto-close delay',
     icon: Icons.vertical_align_center_outlined,
   ),
-  UserApplicationData(
+  UserApplicationDefinition.momentary(
     value: '13',
     label: 'Close',
     description: 'Close door and stay in closed position',
     icon: Icons.arrow_downward_outlined,
   ),
-  UserApplicationData(
+  UserApplicationDefinition.momentary(
     value: '14',
     label: 'Stop',
     description: 'Stop the current door travel',
     icon: Icons.stop_outlined,
   ),
-  UserApplicationData(
+  UserApplicationDefinition.toggle(
     value: '15',
     label: 'Smoke extraction',
     description:
         'Travel to smoke extraction position with slow speed and disable automatic mode',
     icon: Icons.cloud_sync_outlined,
+    selectedIcon: Icons.cloud_sync,
   ),
 ];
