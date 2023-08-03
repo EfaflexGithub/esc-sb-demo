@@ -12,5 +12,21 @@
             "program": "${workspaceFolder:Sources}/main.dart",
             "cwd": "${workspaceFolder:Project}",
         },
+        {
+            "name": "Release Application",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release",
+            "program": "${workspaceFolder:Sources}/main.dart",
+            "cwd": "${workspaceFolder:Project}",
+        },
+        {
+            "name": "Profile Application",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile",
+            "program": "${workspaceFolder:Sources}/main.dart",
+            "cwd": "${workspaceFolder:Project}",
+        },
     ]
 }

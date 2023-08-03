@@ -20,7 +20,8 @@
 		"conventionalCommits.lineBreak": "\\n",
 		"conventionalCommits.scopes": [
 			"workspace",
-			"user-applications"
+			"user-applications",
+			"application-events"
 		],
 	},
 	"extensions": {

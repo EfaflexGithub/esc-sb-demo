@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:efa_smartconnect_modbus_demo/data/models/application_event.dart';
 import 'package:efa_smartconnect_modbus_demo/data/models/door.dart';
 import 'package:efa_smartconnect_modbus_demo/data/models/efa_tronic.dart';
 import 'package:efa_smartconnect_modbus_demo/data/models/event_entry.dart';
@@ -11,6 +12,7 @@ import 'package:efa_smartconnect_modbus_demo/data/models/user_application.dart';
 import 'package:efa_smartconnect_modbus_demo/data/repositories/modbus_register.dart';
 import 'package:efa_smartconnect_modbus_demo/data/repositories/modbus_register_map.g.dart';
 import 'package:efa_smartconnect_modbus_demo/data/repositories/modbus_register_types.dart';
+import 'package:efa_smartconnect_modbus_demo/data/services/application_event_service.dart';
 import 'package:efa_smartconnect_modbus_demo/data/services/modbus_register_service.dart';
 import 'package:efa_smartconnect_modbus_demo/modules/settings/controllers/settings_controller.dart';
 import 'package:efa_smartconnect_modbus_demo/modules/settings/models/application_setttings.dart';
@@ -611,6 +613,8 @@ base class ModbusTcpService extends SmartDoorService {
         if (eventEntries != null && eventEntries.contains(value) == false) {
           eventEntries.add(value);
           eventEntries.sort((a, b) => b.compareTo(a));
+          Get.find<ApplicationEventService>().addEvent(
+              ApplicationEvent.fromDoorControlEvent(uuid: uuid, event: value));
         }
         break;
 

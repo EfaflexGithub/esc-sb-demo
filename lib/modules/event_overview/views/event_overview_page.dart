@@ -1,3 +1,5 @@
+import 'package:data_table_2/data_table_2.dart';
+import 'package:efa_smartconnect_modbus_demo/modules/event_overview/models/application_event_data_source.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/event_overview_controller.dart';
@@ -8,10 +10,31 @@ class EventOverviewPage extends GetView<EventOverviewController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(child: Obx(() => Text('${controller.count} unread events'))),
-      floatingActionButton: FloatingActionButton(
-        onPressed: controller.increment,
-        child: const Icon(Icons.warning),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+        child: AsyncPaginatedDataTable2(
+          columns: const [
+            DataColumn2(
+              label: Text('Date'),
+            ),
+            DataColumn2(
+              label: Text('Door'),
+            ),
+            DataColumn2(
+              label: Text('Description'),
+            ),
+          ],
+          source: ApplicationEventDataSource(),
+          autoRowsToHeight: true,
+          renderEmptyRowsInTheEnd: false,
+          wrapInCard: false,
+          loading: Container(
+            color: Theme.of(context).colorScheme.background.withOpacity(0.7),
+            child: const Center(
+              child: CircularProgressIndicator(),
+            ),
+          ),
+        ),
       ),
     );
   }

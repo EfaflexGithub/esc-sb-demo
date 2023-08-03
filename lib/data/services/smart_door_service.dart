@@ -76,13 +76,20 @@ abstract base class SmartDoorService {
   }
 
   Future<void> loadCachedData() async {
-    await Hive.withBox(_doorCacheBoxName, (box) {
-      var map = (box.get(uuid) as Map?)?.cast<String, dynamic>();
+    await Hive.withBox(_doorCacheBoxName, (box) async {
+      var map = await getCacheData(uuid);
       if (map == null) {
         return;
       }
       door.individualName.value = map['individual-name'];
       door.equipmentNumber.value = map['equipment-number'];
+    });
+  }
+
+  //TODO add option to query array of uuids for performance reasons.
+  static Future<Map<String, dynamic>?> getCacheData(String uuid) async {
+    return await Hive.withBox<Map<String, dynamic>>(_doorCacheBoxName, (box) {
+      return (box.get(uuid) as Map?)?.cast<String, dynamic>();
     });
   }
 }

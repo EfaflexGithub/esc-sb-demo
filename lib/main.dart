@@ -1,3 +1,4 @@
+import 'package:efa_smartconnect_modbus_demo/data/services/application_event_service.dart';
 import 'package:efa_smartconnect_modbus_demo/data/services/door_collection_service.dart';
 import 'package:efa_smartconnect_modbus_demo/data/services/modbus_register_service.dart';
 import 'package:efa_smartconnect_modbus_demo/modules/settings/controllers/settings_controller.dart';
@@ -27,6 +28,7 @@ Future<void> initializeApplication() async {
 void _registerServices() {
   Get.put(ModbusRegisterService(), permanent: true);
   Get.put(DoorCollectionService(), permanent: true);
+  Get.put(ApplicationEventService(), permanent: true);
   Get.put(SettingsController<AppSettingKeys>(applicationSettings),
       permanent: true);
 }
