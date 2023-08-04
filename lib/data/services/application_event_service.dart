@@ -7,8 +7,7 @@ import 'package:path_provider/path_provider.dart';
 
 class ApplicationEventService extends GetxService {
   late final Isar isar;
-  final _changedStream = GetStream<void>();
-  final test = 0.obs;
+  late final applicationEventsChanged = isar.applicationEvents.watchLazy();
 
   StreamSubscription<void> listen(
     void Function(void) onData, {
@@ -16,7 +15,7 @@ class ApplicationEventService extends GetxService {
     void Function()? onDone,
     bool? cancelOnError,
   }) =>
-      _changedStream.listen(
+      applicationEventsChanged.listen(
         onData,
         onError: onError,
         onDone: onDone,
@@ -26,7 +25,7 @@ class ApplicationEventService extends GetxService {
   @override
   Future<void> onInit() async {
     super.onInit();
-    var directory = await getApplicationDocumentsDirectory();
+    var directory = await getApplicationSupportDirectory();
     isar = await Isar.open([ApplicationEventSchema],
         directory: directory.path, name: 'application-events');
   }
@@ -37,23 +36,28 @@ class ApplicationEventService extends GetxService {
   }
 
   Future<void> addEvent(ApplicationEvent event) async {
-    bool notifyListeners = false;
     await isar.writeTxn(() async {
-      bool existing = await isar.applicationEvents
-              .filter()
-              .dateTimeEqualTo(event.dateTime)
-              .uuidEqualTo(event.uuid)
-              .typeEqualTo(event.type)
-              .dataEqualTo(event.data)
-              .count() >
-          0;
-      if (!existing) {
-        notifyListeners = true;
+      await isar.applicationEvents
+          .where()
+          .dateTimeEqualTo(event.dateTime)
+          .filter()
+          .uuidEqualTo(event.uuid)
+          .typeEqualTo(event.type)
+          .findAll()
+          .then((applicationEvents) async {
+        for (var e in applicationEvents) {
+          if (e.data.join(';') == event.data.join(';')) {
+            return;
+          }
+        }
         await isar.applicationEvents.put(event);
-      }
+      });
     });
-    if (notifyListeners) {
-      _changedStream.add(null);
-    }
+  }
+
+  Future<void> deleteAll() async {
+    await isar.writeTxn(() async {
+      await isar.applicationEvents.clear();
+    });
   }
 }

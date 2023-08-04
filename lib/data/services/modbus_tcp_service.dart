@@ -33,6 +33,8 @@ base class ModbusTcpService extends SmartDoorService {
 
   final ModbusDataConfiguration _dataConfiguration = ModbusDataConfiguration();
 
+  final appEventService = Get.find<ApplicationEventService>();
+
   late final List<UserApplication> _userApplications = RxList(List.generate(
     _userApplicationsCount,
     (slot) => UserApplication(
@@ -271,11 +273,16 @@ base class ModbusTcpService extends SmartDoorService {
         if (e is SocketException || e.toString().contains('MODBUS ERROR')) {
           _blockClient = false;
           _startedMachine.current = _ModbusTcpServiceState.offline;
+
+          appEventService.addEvent(ApplicationEvent.fromSmartDoorServiceEvent(
+              uuid: uuid, event: SmartDoorServiceEvent.connectionLost));
         } else {
           rethrow;
         }
       }
       if (_licenseActivated!) {
+        appEventService.addEvent(ApplicationEvent.fromSmartDoorServiceEvent(
+            uuid: uuid, event: SmartDoorServiceEvent.connectionEstablished));
         _startedMachine.current = _ModbusTcpServiceState.online;
       } else if (_licenseExpirationDate!.year < 2000) {
         _setStatus(_ModbusTcpServiceState.checkingLicense, 'Unlicensed');
@@ -292,6 +299,9 @@ base class ModbusTcpService extends SmartDoorService {
         if (e is SocketException || e.toString().contains('MODBUS ERROR')) {
           _blockClient = false;
           _startedMachine.current = _ModbusTcpServiceState.offline;
+
+          appEventService.addEvent(ApplicationEvent.fromSmartDoorServiceEvent(
+              uuid: uuid, event: SmartDoorServiceEvent.connectionLost));
         } else {
           rethrow;
         }
@@ -309,6 +319,8 @@ base class ModbusTcpService extends SmartDoorService {
         if (e is SocketException || e.toString().contains('MODBUS ERROR')) {
           _blockClient = false;
           _startedMachine.current = _ModbusTcpServiceState.offline;
+          appEventService.addEvent(ApplicationEvent.fromSmartDoorServiceEvent(
+              uuid: uuid, event: SmartDoorServiceEvent.connectionLost));
         } else {
           rethrow;
         }

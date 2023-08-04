@@ -13,18 +13,38 @@ class EventOverviewPage extends GetView<EventOverviewController> {
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
         child: AsyncPaginatedDataTable2(
+          header: const Text('Application Events'),
+          actions: [
+            IconButton(
+                icon: Icon(Icons.delete_sweep,
+                    color: Theme.of(context).colorScheme.error),
+                onPressed: () => controller.deleteAll()),
+          ],
           columns: const [
             DataColumn2(
-              label: Text('Date'),
+              label: Text(''),
+              fixedWidth: 50,
+            ),
+            DataColumn2(
+              label: Text('Date/Time'),
+              fixedWidth: 200,
             ),
             DataColumn2(
               label: Text('Door'),
+              size: ColumnSize.S,
             ),
             DataColumn2(
-              label: Text('Description'),
+              label: Text('Type'),
+              fixedWidth: 200,
+            ),
+            DataColumn2(
+              label: Text('Message'),
+              size: ColumnSize.L,
             ),
           ],
-          source: ApplicationEventDataSource(),
+          empty: const Center(child: Text('No events available.')),
+          source: ApplicationEventDataSource(
+              colorScheme: Theme.of(context).colorScheme),
           autoRowsToHeight: true,
           renderEmptyRowsInTheEnd: false,
           wrapInCard: false,
