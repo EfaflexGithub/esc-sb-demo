@@ -26,7 +26,6 @@ class ApplicationEventDataSource extends AsyncDataTableSource {
 
   @override
   Future<AsyncRowsResponse> getRows(int startIndex, int count) async {
-    print("rows requested: $startIndex, $count");
     final isar = service.isar;
     var totalCount = await isar.applicationEvents.count();
 

@@ -1,4 +1,5 @@
 import 'package:efa_smartconnect_modbus_demo/data/models/event_entry.dart';
+import 'package:efa_smartconnect_modbus_demo/data/services/smart_door_service.dart';
 import 'package:efa_smartconnect_modbus_demo/shared/extensions/numeric_extensions.dart';
 import 'package:isar/isar.dart';
 
@@ -24,6 +25,11 @@ class ApplicationEvent {
 
   @Name('data')
   final List<String> data;
+
+  Future<String> getIndividualName() async {
+    var cachedData = await SmartDoorService.getCacheData(uuid);
+    return cachedData?['individual-name'] ?? uuid;
+  }
 
   Future<String> getMessage() async {
     if (type == EventType.smartDoorService) {

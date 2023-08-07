@@ -1,6 +1,7 @@
 import 'package:efa_smartconnect_modbus_demo/data/services/application_event_service.dart';
 import 'package:efa_smartconnect_modbus_demo/data/services/door_collection_service.dart';
 import 'package:efa_smartconnect_modbus_demo/data/services/modbus_register_service.dart';
+import 'package:efa_smartconnect_modbus_demo/data/services/notification_service.dart';
 import 'package:efa_smartconnect_modbus_demo/modules/settings/controllers/settings_controller.dart';
 import 'package:efa_smartconnect_modbus_demo/modules/settings/models/application_setttings.dart';
 import 'package:flutter/foundation.dart';
@@ -26,11 +27,12 @@ Future<void> initializeApplication() async {
 }
 
 void _registerServices() {
+  Get.put(SettingsController<AppSettingKeys>(applicationSettings),
+      permanent: true);
+  Get.put(NotificationService(), permanent: true);
   Get.put(ModbusRegisterService(), permanent: true);
   Get.put(DoorCollectionService(), permanent: true);
   Get.put(ApplicationEventService(), permanent: true);
-  Get.put(SettingsController<AppSettingKeys>(applicationSettings),
-      permanent: true);
 }
 
 class MyApp extends StatelessWidget {
