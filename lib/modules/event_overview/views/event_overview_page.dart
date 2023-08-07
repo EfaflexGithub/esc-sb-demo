@@ -1,8 +1,7 @@
 import 'package:data_table_2/data_table_2.dart';
-import 'package:efa_smartconnect_modbus_demo/modules/event_overview/models/application_event_data_source.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/event_overview_controller.dart';
+import 'package:efa_smartconnect_modbus_demo/modules/event_overview/controllers/event_overview_controller.dart';
 
 class EventOverviewPage extends GetView<EventOverviewController> {
   const EventOverviewPage({super.key});
@@ -43,8 +42,7 @@ class EventOverviewPage extends GetView<EventOverviewController> {
             ),
           ],
           empty: const Center(child: Text('No events available.')),
-          source: ApplicationEventDataSource(
-              colorScheme: Theme.of(context).colorScheme),
+          source: controller.getDataSource(context),
           autoRowsToHeight: true,
           renderEmptyRowsInTheEnd: false,
           wrapInCard: false,
