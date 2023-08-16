@@ -5,10 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class EventOverviewController extends GetxController {
-  final _appEventService = Get.find<ApplicationEventService>();
-
   Future<void> deleteAll() async {
-    await _appEventService.deleteAll();
+    final appEventService = ApplicationEventService.find();
+    await appEventService.deleteAll();
   }
 
   AsyncDataTableSource getDataSource(BuildContext context) {

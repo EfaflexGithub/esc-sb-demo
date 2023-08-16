@@ -1,10 +1,10 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/adapters.dart';
 
 extension HiveExtension on HiveInterface {
-  Future<T?> withBox<T>(
-      String name, FutureOr<T?> Function(Box box) operation) async {
+  Future<T?> withBox<T>(String name, ComputeCallback<Box, T?> operation) async {
     late final Box box;
     late final bool wasClosed;
     try {

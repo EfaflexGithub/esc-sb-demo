@@ -4,12 +4,32 @@ import 'package:local_notifier/local_notifier.dart';
 class NotificationService extends GetxService {
   NotificationService();
 
-  factory NotificationService.find() => Get.find<NotificationService>();
+  static registerService({
+    NotificationService? notificationService,
+  }) {
+    if (notificationService != null) {
+      Get.put(
+        () => notificationService,
+        tag: 'default',
+      );
+    } else {
+      Get.putAsync(
+        () => NotificationService.initializedInstance(),
+        tag: 'default',
+      );
+    }
+  }
 
-  @override
-  Future<void> onInit() async {
-    super.onInit();
+  static unregisterService() {
+    Get.delete<NotificationService>(tag: 'default');
+  }
+
+  factory NotificationService.find() =>
+      Get.find<NotificationService>(tag: 'default');
+
+  static Future<NotificationService> initializedInstance() async {
     await localNotifier.setup(appName: "EFA-SmartConnect Modbus Demo");
+    return NotificationService();
   }
 
   Future<void> showNotification({

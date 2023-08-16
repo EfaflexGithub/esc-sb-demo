@@ -1,6 +1,5 @@
 import 'package:efa_smartconnect_modbus_demo/data/services/application_event_service.dart';
 import 'package:efa_smartconnect_modbus_demo/data/services/door_collection_service.dart';
-import 'package:efa_smartconnect_modbus_demo/data/services/modbus_register_service.dart';
 import 'package:efa_smartconnect_modbus_demo/data/services/notification_service.dart';
 import 'package:efa_smartconnect_modbus_demo/modules/settings/controllers/settings_controller.dart';
 import 'package:efa_smartconnect_modbus_demo/modules/settings/models/application_setttings.dart';
@@ -12,27 +11,29 @@ import 'package:hive_flutter/adapters.dart';
 import './routes/pages.dart';
 
 void main() async {
-  await initializeApplication();
+  await addCustomLicenses();
+  await initDatabases();
+
+  // register services
+  SettingsController.registerService<AppSettingKeys>(applicationSettings);
+  NotificationService.registerService();
+  DoorCollectionService.registerService();
+  ApplicationEventService.registerService();
+
+  // run app
   runApp(const MyApp());
 }
 
-Future<void> initializeApplication() async {
+Future<void> addCustomLicenses() async {
   // add LICENSE.md of the project to the LicenseRegistry
   LicenseRegistry.addLicense(() async* {
     final license = await rootBundle.loadString('LICENSE.md');
     yield LicenseEntryWithLineBreaks(['EFA-SmartConnect Modbus Demo'], license);
   });
-  await Hive.initFlutter();
-  _registerServices();
 }
 
-void _registerServices() {
-  Get.put(SettingsController<AppSettingKeys>(applicationSettings),
-      permanent: true);
-  Get.put(NotificationService(), permanent: true);
-  Get.put(ModbusRegisterService(), permanent: true);
-  Get.put(DoorCollectionService(), permanent: true);
-  Get.put(ApplicationEventService(), permanent: true);
+Future<void> initDatabases() async {
+  await Hive.initFlutter();
 }
 
 class MyApp extends StatelessWidget {
@@ -61,6 +62,10 @@ class MyApp extends StatelessWidget {
       dropdownMenuTheme: DropdownMenuThemeData(
         textStyle: Theme.of(context).textTheme.bodyMedium,
       ),
+      inputDecorationTheme: InputDecorationTheme(
+        isDense: true,
+        labelStyle: Theme.of(context).textTheme.bodyMedium,
+      ),
       useMaterial3: true,
     );
   }
@@ -68,7 +73,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    final darkModeSetting = Get.find<SettingsController<AppSettingKeys>>()
+    final darkModeSetting = SettingsController.find<AppSettingKeys>()
         .getSettingFromKey(AppSettingKeys.appDarkMode);
 
     darkModeSetting.temporaryValueObs.listen((value) {

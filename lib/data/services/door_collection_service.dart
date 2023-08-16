@@ -9,7 +9,27 @@ import 'package:get/get.dart';
 import 'package:hive_flutter/adapters.dart';
 
 class DoorCollectionService extends GetxService {
+  DoorCollectionService();
+
   static const String _configurationsBoxName = 'smartDoorServiceConfigurations';
+
+  static registerService({
+    DoorCollectionService? doorCollectionService,
+    bool permanent = true,
+  }) {
+    Get.put<DoorCollectionService>(
+      doorCollectionService ?? DoorCollectionService(),
+      permanent: permanent,
+      tag: 'default',
+    );
+  }
+
+  static unregisterService() {
+    Get.delete<DoorCollectionService>(tag: 'default');
+  }
+
+  factory DoorCollectionService.find() =>
+      Get.find<DoorCollectionService>(tag: 'default');
 
   @override
   void onReady() async {
@@ -33,30 +53,28 @@ class DoorCollectionService extends GetxService {
   }
 
   Future<void> removeWhere(bool Function(SmartDoorService) test) async {
-    _smartDoorServices.where(test).forEach((service) {
-      service.stop();
+    await Future.forEach(_smartDoorServices.where(test), (service) async {
+      await service.stop();
     });
-    await Hive.withBox(_configurationsBoxName, (box) {
+    await Hive.withBox(_configurationsBoxName, (box) async {
       var uuids = _smartDoorServices.where(test).map<String>((e) => e.uuid);
-      box.deleteAll(uuids);
+      await box.deleteAll(uuids);
     });
     _smartDoorServices.removeWhere(test);
   }
 
   Future<void> remove(SmartDoorService service) async {
     await service.stop();
-    await Hive.withBox(_configurationsBoxName, (box) {
-      box.delete(service.uuid);
+    await Hive.withBox(_configurationsBoxName, (box) async {
+      await box.delete(service.uuid);
     });
     _smartDoorServices.remove(service);
   }
 
   Future<void> saveConfigurations() async {
-    await Hive.withBox(_configurationsBoxName, (_) async {
-      for (SmartDoorService smartDoorService in _smartDoorServices) {
-        saveConfiguration(smartDoorService);
-      }
-    });
+    for (SmartDoorService smartDoorService in _smartDoorServices) {
+      await saveConfiguration(smartDoorService);
+    }
   }
 
   static Future<void> saveConfiguration(
@@ -71,8 +89,11 @@ class DoorCollectionService extends GetxService {
   }
 
   Future<void> loadConfigurations() async {
-    await Hive.withBox(_configurationsBoxName, (box) {
-      box.toMap().cast<String, dynamic>().forEach((uuid, map) async {
+    await Hive.withBox(_configurationsBoxName, (box) async {
+      await Future.forEach(box.toMap().cast<String, dynamic>().entries,
+          (entry) async {
+        var uuid = entry.key;
+        var map = entry.value;
         String serviceName = map['serviceName'];
         SmartDoorServiceFactory factory = switch (serviceName) {
           ModbusTcpService.serviceName => ModbusTcpServiceFactory(),

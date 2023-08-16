@@ -21,7 +21,6 @@ dependencies:
   version:
   yaml:
   build:
-  logger:
   statemachine:
   intl:
   async:
@@ -35,6 +34,7 @@ dependencies:
   context_menus: ^1.0.2
   path_provider: ^2.0.15
   local_notifier: ^0.1.5
+  logger: 2.0.1
 
 dev_dependencies:
   test:
@@ -46,6 +46,8 @@ dev_dependencies:
   code_builder:
   dart_style:
   isar_generator: ^3.1.0+1
+  plugin_platform_interface: ^2.1.5
+  path_provider_platform_interface: ^2.1.0
 
 flutter:
   uses-material-design: true

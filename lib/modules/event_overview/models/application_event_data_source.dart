@@ -4,13 +4,13 @@ import 'package:data_table_2/data_table_2.dart';
 import 'package:efa_smartconnect_modbus_demo/data/models/application_event.dart';
 import 'package:efa_smartconnect_modbus_demo/data/services/application_event_service.dart';
 import 'package:efa_smartconnect_modbus_demo/data/services/smart_door_service.dart';
-import 'package:efa_smartconnect_modbus_demo/shared/extensions/numeric_extensions.dart';
+import 'package:efa_smartconnect_modbus_demo/shared/extensions/datetime_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
 
 class ApplicationEventDataSource extends AsyncDataTableSource {
-  final service = Get.find<ApplicationEventService>();
+  final service = ApplicationEventService.find();
   final ColorScheme colorScheme;
   late final serviceListener = service.listen((_) {
     refreshDatasource();

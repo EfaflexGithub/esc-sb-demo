@@ -1,3 +1,4 @@
+import 'package:efa_smartconnect_modbus_demo/data/models/information_entry.dart';
 import 'package:efa_smartconnect_modbus_demo/data/models/user_application.dart';
 import 'package:efa_smartconnect_modbus_demo/data/services/smart_door_service.dart';
 import 'package:get/get.dart';
@@ -21,6 +22,20 @@ class DoorDetailsController extends GetxController {
         await smartDoorService.configureUserApplication(
             slot, userApplicationsTempValues[slot]);
       }
+    }
+  }
+
+  Future<void> saveInformationEntries(
+      List<InformationEntry> informationEntries) async {
+    for (var entry in informationEntries) {
+      if (!entry.editable) {
+        continue;
+      }
+      if (entry.value == entry.tempValue) {
+        continue;
+      }
+      await entry.triggerSave();
+      entry.value = entry.tempValue;
     }
   }
 }

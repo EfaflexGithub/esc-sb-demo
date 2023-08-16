@@ -4,6 +4,20 @@ import 'package:get/get.dart';
 class SettingsController<K> extends GetxController {
   SettingsController(this.applicationSettings);
 
+  static void registerService<K>(ApplicationSettings<K> applicationSettings) {
+    Get.lazyPut(
+      () => SettingsController<K>(applicationSettings),
+    );
+  }
+
+  static void unregisterService<K>() {
+    Get.delete<SettingsController<K>>();
+  }
+
+  static SettingsController<K> find<K>() {
+    return Get.find<SettingsController<K>>();
+  }
+
   @override
   void onInit() async {
     super.onInit();
@@ -108,9 +122,5 @@ class SettingsController<K> extends GetxController {
       }
     }
     throw Exception('Setting not found');
-  }
-
-  static SettingsController<K> find<K>() {
-    return Get.find<SettingsController<K>>();
   }
 }

@@ -1,16 +1,47 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:efa_smartconnect_modbus_demo/data/services/modbus_tcp_service.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get/get.dart';
 import 'package:modbus/modbus.dart';
-import 'package:logging/logging.dart';
+import 'package:logger/logger.dart';
 
 class FakeModbusClient extends Fake implements ModbusClient {
-  final _logger = Logger('FakeModbusClient');
+  FakeModbusClient(this._dataConfiguration);
+
+  final _logger = Logger();
   final ModbusDataConfiguration _dataConfiguration;
   var _isConnected = false;
 
-  FakeModbusClient(this._dataConfiguration);
+  final _holdingRegisterStream = GetStream<WordStreamData>();
+  final _coilStream = GetStream<BitStreamData>();
+
+  StreamSubscription<WordStreamData> listenWriteHoldingRegisters(
+    void Function(WordStreamData) onData, {
+    Function? onError,
+    void Function()? onDone,
+    bool? cancelOnError,
+  }) =>
+      _holdingRegisterStream.listen(
+        onData,
+        onError: onError,
+        onDone: onDone,
+        cancelOnError: cancelOnError,
+      );
+
+  StreamSubscription<BitStreamData> listenWriteCoils(
+    void Function(BitStreamData) onData, {
+    Function? onError,
+    void Function()? onDone,
+    bool? cancelOnError,
+  }) =>
+      _coilStream.listen(
+        onData,
+        onError: onError,
+        onDone: onDone,
+        cancelOnError: cancelOnError,
+      );
 
   void _throwIfNotConnected() {
     if (_isConnected == false) {
@@ -25,14 +56,14 @@ class FakeModbusClient extends Fake implements ModbusClient {
   @override
   Future<void> connect() {
     _isConnected = true;
-    _logger.info('FakeModbusClient successfully connected');
+    _logger.i('FakeModbusClient successfully connected');
     return Future.value();
   }
 
   @override
   Future<void> close() {
     _isConnected = false;
-    _logger.info('FakeModbusClient successfully closed');
+    _logger.i('FakeModbusClient successfully closed');
     return Future.value();
   }
 
@@ -235,6 +266,18 @@ class FakeModbusClient extends Fake implements ModbusClient {
   }
 
   @override
+  Future<bool> writeSingleCoil(int address, bool to_write) {
+    _coilStream.add(BitStreamData(address: address, data: [to_write]));
+    return Future.value(true);
+  }
+
+  @override
+  Future<void> writeMultipleCoils(int address, List<bool> values) {
+    _coilStream.add(BitStreamData(address: address, data: values));
+    return Future.value();
+  }
+
+  @override
   Future<int> writeSingleRegister(int address, int value) {
     _throwIfNotConnected();
     switch (address + 1) {
@@ -253,8 +296,36 @@ class FakeModbusClient extends Fake implements ModbusClient {
         break;
 
       default:
+        _holdingRegisterStream.add(WordStreamData(
+            address: address, data: Uint16List.fromList([value])));
         throw UnimplementedError();
     }
     return Future.value(0);
   }
+
+  @override
+  Future<void> writeMultipleRegisters(int address, Uint16List values) {
+    _holdingRegisterStream.add(WordStreamData(address: address, data: values));
+    return Future.value();
+  }
+}
+
+class BitStreamData {
+  final int address;
+  final List<bool> data;
+
+  BitStreamData({
+    required this.address,
+    required this.data,
+  });
+}
+
+class WordStreamData {
+  final int address;
+  final Uint16List data;
+
+  WordStreamData({
+    required this.address,
+    required this.data,
+  });
 }

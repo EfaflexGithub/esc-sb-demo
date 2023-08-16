@@ -13,9 +13,9 @@ import 'package:efa_smartconnect_modbus_demo/data/repositories/modbus_register.d
 import 'package:efa_smartconnect_modbus_demo/data/repositories/modbus_register_map.g.dart';
 import 'package:efa_smartconnect_modbus_demo/data/repositories/modbus_register_types.dart';
 import 'package:efa_smartconnect_modbus_demo/data/services/application_event_service.dart';
-import 'package:efa_smartconnect_modbus_demo/data/services/modbus_register_service.dart';
 import 'package:efa_smartconnect_modbus_demo/modules/settings/controllers/settings_controller.dart';
 import 'package:efa_smartconnect_modbus_demo/modules/settings/models/application_setttings.dart';
+import 'package:efa_smartconnect_modbus_demo/shared/utils/logging.dart';
 import 'package:efa_smartconnect_modbus_demo/shared/extensions/numeric_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -33,7 +33,7 @@ base class ModbusTcpService extends SmartDoorService {
 
   final ModbusDataConfiguration _dataConfiguration = ModbusDataConfiguration();
 
-  final appEventService = Get.find<ApplicationEventService>();
+  bool _ignoreParameterChange = false;
 
   late final List<UserApplication> _userApplications = RxList(List.generate(
     _userApplicationsCount,
@@ -112,7 +112,11 @@ base class ModbusTcpService extends SmartDoorService {
       _ => throw Exception('Unknown slot'),
     };
 
-    await _writeRegisterByName(modbusRegisterName, intValue);
+    try {
+      await _writeRegisterByName(modbusRegisterName, intValue);
+    } catch (e) {
+      // exceptions handled in catchedModbusTransaction
+    }
     userApplications[slot].definition =
         _userApplicationDefinitionByValue(value);
     return true;
@@ -164,9 +168,6 @@ base class ModbusTcpService extends SmartDoorService {
 
   final _startedMachine = Machine<_ModbusTcpServiceState>();
 
-  final ModbusRegisterService _modbusRegisterService =
-      Get.find<ModbusRegisterService>();
-
   @override
   Future<void> start() async {
     _rootMachine.current = _ModbusTcpServiceState.started;
@@ -188,10 +189,15 @@ base class ModbusTcpService extends SmartDoorService {
       {int port = 502, Duration? timeout, ModbusClient? client})
       : this.fromConfig(
             ModbusTcpServiceConfiguration(
-                ip: ip,
-                port: port,
-                timeout: Get.find<SettingsController<AppSettingKeys>>()
-                    .getValueFromKey(AppSettingKeys.defaultModbusTcpTimeout)),
+              ip: ip,
+              port: port,
+              timeout: timeout ??
+                  Duration(
+                    milliseconds: SettingsController.find<AppSettingKeys>()
+                        .getValueFromKey<int>(
+                            AppSettingKeys.defaultModbusTcpTimeout),
+                  ),
+            ),
             client: client);
 
   ModbusTcpService.fromConfig(this.configuration,
@@ -210,6 +216,7 @@ base class ModbusTcpService extends SmartDoorService {
     tooltip.value =
         'server: ${configuration.ip}:${configuration.port}\nrefresh rate: ${configuration.refreshRate.inMilliseconds} ms';
     initializeStateMachine();
+    registerParameterChangeListeners(efaTronic);
   }
 
   void initializeStateMachine() {
@@ -249,15 +256,8 @@ base class ModbusTcpService extends SmartDoorService {
         await updateDoorModelByGroup(
             ModbusRegisterGroup.dataConfigurationRegisters);
         _startedMachine.current = _ModbusTcpServiceState.checkingLicense;
-      } catch (e) {
-        if (e is SocketException || e.toString().contains('MODBUS ERROR')) {
-          _blockClient = false;
-          // Nothing to do here as we want to stay inside the offlineState on a
-          // SocketException (normally caused by a timeout if the modbus server
-          // is not reachable)
-        } else {
-          rethrow;
-        }
+      } catch (_) {
+        // state machine transitions handled in catchedModbusTransaction
       }
     });
 
@@ -266,28 +266,21 @@ base class ModbusTcpService extends SmartDoorService {
         checkingLicenseState.enter);
 
     checkingLicenseState.onEntry(() async {
+      final appEventService = ApplicationEventService.find();
       _setStatus(_ModbusTcpServiceState.checkingLicense);
       try {
         await updateDoorModelByGroup(ModbusRegisterGroup.licensing);
-      } catch (e) {
-        if (e is SocketException || e.toString().contains('MODBUS ERROR')) {
-          _blockClient = false;
-          _startedMachine.current = _ModbusTcpServiceState.offline;
-
+        if (_licenseActivated!) {
           appEventService.addEvent(ApplicationEvent.fromSmartDoorServiceEvent(
-              uuid: uuid, event: SmartDoorServiceEvent.connectionLost));
-        } else {
-          rethrow;
+              uuid: uuid, event: SmartDoorServiceEvent.connectionEstablished));
+          _startedMachine.current = _ModbusTcpServiceState.online;
+        } else if (_licenseExpirationDate!.year < 2000) {
+          _setStatus(_ModbusTcpServiceState.checkingLicense, 'Unlicensed');
+        } else if (_licenseExpirationDate!.isBefore(DateTime.now())) {
+          _setStatus(_ModbusTcpServiceState.checkingLicense, 'License Expired');
         }
-      }
-      if (_licenseActivated!) {
-        appEventService.addEvent(ApplicationEvent.fromSmartDoorServiceEvent(
-            uuid: uuid, event: SmartDoorServiceEvent.connectionEstablished));
-        _startedMachine.current = _ModbusTcpServiceState.online;
-      } else if (_licenseExpirationDate!.year < 2000) {
-        _setStatus(_ModbusTcpServiceState.checkingLicense, 'Unlicensed');
-      } else if (_licenseExpirationDate!.isBefore(DateTime.now())) {
-        _setStatus(_ModbusTcpServiceState.checkingLicense, 'License Expired');
+      } catch (_) {
+        // state machine transitions handled in catchedModbusTransaction
       }
     });
     checkingLicenseState.onExit(() async {
@@ -295,18 +288,10 @@ base class ModbusTcpService extends SmartDoorService {
         await updateDoorModelByGroup(ModbusRegisterGroup.doorData);
         await updateDoorModelByGroup(ModbusRegisterGroup.operatingInformation);
         await updateDoorModelByGroup(ModbusRegisterGroup.doorInteraction);
-      } catch (e) {
-        if (e is SocketException || e.toString().contains('MODBUS ERROR')) {
-          _blockClient = false;
-          _startedMachine.current = _ModbusTcpServiceState.offline;
-
-          appEventService.addEvent(ApplicationEvent.fromSmartDoorServiceEvent(
-              uuid: uuid, event: SmartDoorServiceEvent.connectionLost));
-        } else {
-          rethrow;
-        }
+        await saveToCache();
+      } catch (_) {
+        // state machine transitions handled in catchedModbusTransaction
       }
-      await saveToCache();
     });
 
     onlineState.onTimeout(configuration.refreshRate, onlineState.enter);
@@ -315,19 +300,56 @@ base class ModbusTcpService extends SmartDoorService {
       _setStatus(_ModbusTcpServiceState.online);
       try {
         await _readAndProcessChangeNotificationFlags();
-      } catch (e) {
-        if (e is SocketException || e.toString().contains('MODBUS ERROR')) {
-          _blockClient = false;
-          _startedMachine.current = _ModbusTcpServiceState.offline;
-          appEventService.addEvent(ApplicationEvent.fromSmartDoorServiceEvent(
-              uuid: uuid, event: SmartDoorServiceEvent.connectionLost));
-        } else {
-          rethrow;
-        }
+      } catch (_) {
+        // state machine transitions handled in catchedModbusTransaction
       }
     });
 
     _rootMachine.start();
+  }
+
+  void withIgnoreParameterChange(VoidCallback callback) {
+    _ignoreParameterChange = true;
+    callback.call();
+    _ignoreParameterChange = false;
+  }
+
+  void registerParameterChangeListeners(EfaTronic efaTronic) {
+    efaTronic.dateTime.listen((value) {
+      if (!_ignoreParameterChange && value != null) {
+        writeControllerDateTime(value);
+      }
+    });
+
+    efaTronic.daylightSavingTime.listen((value) {
+      if (!_ignoreParameterChange && value != null) {
+        writeControllerDaylightSavingTime(value.index);
+      }
+    });
+
+    efaTronic.keepOpenTimeAutomatic.listen((value) {
+      if (!_ignoreParameterChange && value != null) {
+        writeControllerKeepOpenTimeAutomatic(value);
+      }
+    });
+
+    efaTronic.keepOpenTimeIntermediateStop.listen((value) {
+      if (!_ignoreParameterChange && value != null) {
+        writeControllerKeepOpenTimeIntermediateStop(value);
+      }
+    });
+
+    efaTronic.openPositionAdjustment.listen((value) {
+      if (!_ignoreParameterChange && value != null) {
+        writeControllerOpenPositionAdjustment(value);
+      }
+    });
+
+    efaTronic.closedPositionAdjustment.listen((value) {
+      if (!_ignoreParameterChange && value != null) {
+        writeControllerClosedPositionAdjustment(value);
+      }
+    });
   }
 
   void _setStatus(_ModbusTcpServiceState serviceState, [String? stateMessage]) {
@@ -358,6 +380,7 @@ base class ModbusTcpService extends SmartDoorService {
   Future<void> writeModbusDataConfiguration(
       ModbusDataConfiguration newConfiguration) async {
     var swapOptions = 0;
+
     if (newConfiguration.dWordSwap) {
       swapOptions |= 0x0001;
     }
@@ -437,6 +460,38 @@ base class ModbusTcpService extends SmartDoorService {
   @visibleForTesting
   Future<EventEntry> readEventEntryTest() async {
     return await _readRegisterByName(ModbusRegisterName.eventEntryTest);
+  }
+
+  Future<void> syncControllerDateTime() async {
+    await writeControllerDateTime(DateTime.now());
+  }
+
+  Future<void> writeControllerDateTime(DateTime dateTime) async {
+    await _writeRegisterByName(ModbusRegisterName.currentDateAndTime, dateTime);
+  }
+
+  Future<void> writeControllerDaylightSavingTime(int value) async {
+    await _writeRegisterByName(ModbusRegisterName.daylightSavingTime, value);
+  }
+
+  Future<void> writeControllerKeepOpenTimeAutomatic(int value) async {
+    await _writeRegisterByName(
+        ModbusRegisterName.keepOpenTimeAutomaticMode, value);
+  }
+
+  Future<void> writeControllerKeepOpenTimeIntermediateStop(int value) async {
+    await _writeRegisterByName(
+        ModbusRegisterName.keepOpenTimeIntermediateStop, value);
+  }
+
+  Future<void> writeControllerOpenPositionAdjustment(int value) async {
+    await _writeRegisterByName(
+        ModbusRegisterName.openPositionAdjustment, value);
+  }
+
+  Future<void> writeControllerClosedPositionAdjustment(int value) async {
+    await _writeRegisterByName(
+        ModbusRegisterName.closedPositionAdjustment, value);
   }
 
   Future<void> _ensureConnected() async {
@@ -625,39 +680,54 @@ base class ModbusTcpService extends SmartDoorService {
         if (eventEntries != null && eventEntries.contains(value) == false) {
           eventEntries.add(value);
           eventEntries.sort((a, b) => b.compareTo(a));
-          Get.find<ApplicationEventService>().addEvent(
+          ApplicationEventService.find().addEvent(
               ApplicationEvent.fromDoorControlEvent(uuid: uuid, event: value));
         }
         break;
 
       case ModbusRegisterName.currentDateAndTime when value is DateTime:
-        (door.doorControl.value as EfaTronic).dateTime.value = value;
+        withIgnoreParameterChange(
+          () => (door.doorControl.value as EfaTronic).dateTime.value = value,
+        );
         break;
 
       case ModbusRegisterName.daylightSavingTime when value is int:
-        (door.doorControl.value as EfaTronic).daylightSavingTime.value =
-            DaylightSavingTime.values[value];
+        withIgnoreParameterChange(
+          () => (door.doorControl.value as EfaTronic).daylightSavingTime.value =
+              DaylightSavingTime.values[value],
+        );
         break;
 
       case ModbusRegisterName.keepOpenTimeAutomaticMode when value is int:
-        (door.doorControl.value as EfaTronic).keepOpenTimeAutomatic.value =
-            value;
+        withIgnoreParameterChange(
+          () => (door.doorControl.value as EfaTronic)
+              .keepOpenTimeAutomatic
+              .value = value,
+        );
         break;
 
       case ModbusRegisterName.keepOpenTimeIntermediateStop when value is int:
-        (door.doorControl.value as EfaTronic)
-            .keepOpenTimeIntermediateStop
-            .value = value;
+        withIgnoreParameterChange(
+          () => (door.doorControl.value as EfaTronic)
+              .keepOpenTimeIntermediateStop
+              .value = value,
+        );
         break;
 
       case ModbusRegisterName.closedPositionAdjustment when value is int:
-        (door.doorControl.value as EfaTronic).closedPositionAdjustment.value =
-            value;
+        withIgnoreParameterChange(
+          () => (door.doorControl.value as EfaTronic)
+              .closedPositionAdjustment
+              .value = value,
+        );
         break;
 
       case ModbusRegisterName.openPositionAdjustment when value is int:
-        (door.doorControl.value as EfaTronic).openPositionAdjustment.value =
-            value;
+        withIgnoreParameterChange(
+          () => (door.doorControl.value as EfaTronic)
+              .openPositionAdjustment
+              .value = value,
+        );
         break;
 
       case ModbusRegisterName.userApplication1Configuration when value is int:
@@ -685,7 +755,7 @@ base class ModbusTcpService extends SmartDoorService {
 
   Future<dynamic> _readRegisterByName(
       ModbusRegisterName modbusRegisterName) async {
-    var register = _modbusRegisterService.getModbusRegister(modbusRegisterName);
+    var register = ModbusRegister.find(modbusRegisterName);
     if (register is ModbusBitRegister) {
       return await _readRegisters(register.type, register.address, 1);
     }
@@ -703,8 +773,7 @@ base class ModbusTcpService extends SmartDoorService {
       ModbusRegisterGroup group) async {
     HashMap<ModbusRegisterName, dynamic> retval =
         HashMap<ModbusRegisterName, dynamic>();
-    var collections =
-        _modbusRegisterService.getModbusRegisterCollections(group);
+    var collections = ModbusRegisterCollection.byGroup(group);
 
     for (var collection in collections) {
       var result = await _readRegisters(
@@ -733,49 +802,98 @@ base class ModbusTcpService extends SmartDoorService {
     return retval;
   }
 
-  Future<dynamic> _readRegisters(
-      ModbusRegisterType type, int address, int length) async {
+  Future<R> catchedModbusTransaction<R>(
+      Future<R> Function(ModbusClient) f) async {
     while (_blockClient) {
       await Future.delayed(const Duration(milliseconds: 100));
     }
     _blockClient = true;
     _disconnectTimer?.reset();
+
+    try {
+      await _ensureConnected();
+      return await f(client);
+    } on SocketException catch (_, trace) {
+      if (_startedMachine.current != null &&
+          _startedMachine.current!.identifier !=
+              _ModbusTcpServiceState.offline) {
+        appLogger.i("socket exception", stackTrace: trace);
+        _blockClient = false;
+        _startedMachine.current = _ModbusTcpServiceState.offline;
+        ApplicationEventService.find().addEvent(
+          ApplicationEvent.fromSmartDoorServiceEvent(
+            uuid: uuid,
+            event: SmartDoorServiceEvent.connectionLost,
+          ),
+        );
+      }
+      rethrow;
+    } on ModbusConnectException catch (_, trace) {
+      appLogger.i("modbus connect exception", stackTrace: trace);
+      if (_startedMachine.current != null &&
+          _startedMachine.current!.identifier !=
+              _ModbusTcpServiceState.offline) {
+        _startedMachine.current = _ModbusTcpServiceState.offline;
+        ApplicationEventService.find().addEvent(
+          ApplicationEvent.fromSmartDoorServiceEvent(
+            uuid: uuid,
+            event: SmartDoorServiceEvent.connectionLost,
+          ),
+        );
+      }
+      rethrow;
+    } on ModbusException catch (_, trace) {
+      appLogger.e("modbus exception", stackTrace: trace);
+      if (_startedMachine.current != null &&
+          _startedMachine.current!.identifier !=
+              _ModbusTcpServiceState.offline) {
+        _startedMachine.current = _ModbusTcpServiceState.checkingLicense;
+      }
+      rethrow;
+    } on Exception catch (e, trace) {
+      appLogger.e("exception during modbus transaction",
+          error: e.runtimeType, stackTrace: trace);
+      rethrow;
+    } finally {
+      _blockClient = false;
+    }
+  }
+
+  Future<dynamic> _readRegisters(
+      ModbusRegisterType type, int address, int length) async {
     dynamic retval;
-    await _ensureConnected();
     switch (type) {
       case ModbusRegisterType.coil:
-        retval = await client.readCoils(address - 1, length);
+        retval = await catchedModbusTransaction(
+            (client) => client.readCoils(address - 1, length));
 
       case ModbusRegisterType.discreteInput:
-        retval = await client.readDiscreteInputs(address - 1, length);
+        retval = await catchedModbusTransaction(
+            (client) => client.readDiscreteInputs(address - 1, length));
 
       case ModbusRegisterType.holdingRegister:
-        retval = await client.readHoldingRegisters(address - 1, length);
+        retval = await catchedModbusTransaction(
+            (client) => client.readHoldingRegisters(address - 1, length));
 
       case ModbusRegisterType.inputRegister:
-        retval = await client.readInputRegisters(address - 1, length);
+        retval = await catchedModbusTransaction(
+            (client) => client.readInputRegisters(address - 1, length));
 
       default:
         throw "Unsupported type: $type";
     }
-    _blockClient = false;
     return retval;
   }
 
   Future<void> _writeRegisterByName(
       ModbusRegisterName modbusRegisterName, dynamic value) async {
-    while (_blockClient) {
-      await Future.delayed(const Duration(milliseconds: 100));
-    }
-    _blockClient = true;
-    _disconnectTimer?.reset();
-    await _ensureConnected();
-    var register = _modbusRegisterService.getModbusRegister(modbusRegisterName);
+    var register = ModbusRegister.find(modbusRegisterName);
     if (register is ModbusBitRegister) {
       if (register.type != ModbusRegisterType.coil) {
         throw "It is not possible to write to register of type ${register.type}";
       }
-      await client.writeSingleCoil(register.address - 1, value as bool);
+      await catchedModbusTransaction((client) =>
+          client.writeSingleCoil(register.address - 1, value as bool));
     } else if (register is ModbusWordRegister) {
       if (register.type != ModbusRegisterType.holdingRegister) {
         throw "It is not possible to write to register of type ${register.type}";
@@ -787,9 +905,11 @@ base class ModbusTcpService extends SmartDoorService {
         case 0:
           return;
         case 1:
-          await client.writeSingleRegister(register.address - 1, words.first);
+          await catchedModbusTransaction((client) =>
+              client.writeSingleRegister(register.address - 1, words.first));
         default:
-          await client.writeMultipleRegisters(register.address - 1, words);
+          await catchedModbusTransaction((client) =>
+              client.writeMultipleRegisters(register.address - 1, words));
       }
     }
     _blockClient = false;
@@ -906,7 +1026,24 @@ base class ModbusTcpService extends SmartDoorService {
     switch (type) {
       case ModbusDataType.int16 when value is int:
       case ModbusDataType.uint16 when value is int:
+        assert(registerCount == 1, "registerCount must be 1");
         return Uint16List.fromList([value]);
+
+      case ModbusDataType.int64 when value is int:
+      case ModbusDataType.uint64 when value is int:
+        assert(registerCount == 4, "registerCount must be 4");
+        var list = Uint16List.fromList([
+          (value >> 48) & 0xFFFF,
+          (value >> 32) & 0xFFFF,
+          (value >> 16) & 0xFFFF,
+          value & 0xFFFF,
+        ])
+            .byteData()
+            .applySwapConfiguration(dataConfiguration)
+            .fixEndianess()
+            .buffer
+            .asUint16List();
+        return list;
 
       case ModbusDataType.ascii when value is String:
         Uint16List result = Uint16List(registerCount);
@@ -916,6 +1053,24 @@ base class ModbusTcpService extends SmartDoorService {
           result[i >> 1] = (c1 << 8) + c2;
         }
         return result;
+
+      case ModbusDataType.dateTime when value is DateTime:
+        assert(registerCount == 4, "registerCount must be 4");
+        switch (dataConfiguration.dateTimeFormat) {
+          case DateTimeFormat.dateTimeFormat1:
+            final dateTime = value.add(value.timeZoneOffset);
+            final seconds = dateTime.millisecondsSinceEpoch ~/ 1000;
+            return _encodeModbusData(seconds, ModbusDataType.int64,
+                dataConfiguration, registerCount);
+
+          case DateTimeFormat.dateTimeFormat2:
+            Uint16List result = Uint16List(4);
+            result[0] = value.year;
+            result[1] = (value.month << 8) | value.day;
+            result[2] = (value.hour << 8) | value.minute;
+            result[3] = value.second;
+            return result;
+        }
 
       default:
         throw "Unsupported type $type or mismatching value type ${value.runtimeType}";

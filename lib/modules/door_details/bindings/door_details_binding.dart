@@ -8,7 +8,7 @@ class DoorDetailsBinding extends Bindings {
   void dependencies() {
     Get.lazyPut<DoorDetailsController>(
       () {
-        var smartDoorService = Get.find<DoorCollectionService>()
+        var smartDoorService = DoorCollectionService.find()
             .smartDoorServices
             .firstWhere((element) => element.uuid == Get.parameters['doorId']);
         return DoorDetailsController(smartDoorService);

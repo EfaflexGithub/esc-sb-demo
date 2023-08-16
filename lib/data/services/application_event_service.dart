@@ -4,14 +4,39 @@ import 'package:efa_smartconnect_modbus_demo/data/models/application_event.dart'
 import 'package:efa_smartconnect_modbus_demo/data/services/notification_service.dart';
 import 'package:efa_smartconnect_modbus_demo/modules/settings/controllers/settings_controller.dart';
 import 'package:efa_smartconnect_modbus_demo/modules/settings/models/application_setttings.dart';
-import 'package:efa_smartconnect_modbus_demo/shared/extensions/numeric_extensions.dart';
+import 'package:efa_smartconnect_modbus_demo/shared/extensions/datetime_extensions.dart';
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 
 class ApplicationEventService extends GetxService {
-  late final Isar isar;
-  late final Stream<void> applicationEventsChanged;
+  ApplicationEventService();
+
+  static registerService({
+    ApplicationEventService? applicationEventService,
+  }) {
+    if (applicationEventService != null) {
+      Get.put(
+        () => applicationEventService,
+        tag: 'default',
+      );
+    } else {
+      Get.putAsync(
+        () => ApplicationEventService.initializedInstance(),
+        tag: 'default',
+      );
+    }
+  }
+
+  static unregisterService() {
+    Get.delete<ApplicationEventService>(tag: 'default');
+  }
+
+  factory ApplicationEventService.find() =>
+      Get.find<ApplicationEventService>(tag: 'default');
+
+  late Isar isar;
+  late Stream<void> applicationEventsChanged;
 
   StreamSubscription<void> listen(
     void Function(void) onData, {
@@ -26,18 +51,24 @@ class ApplicationEventService extends GetxService {
         cancelOnError: cancelOnError,
       );
 
-  @override
-  Future<void> onInit() async {
-    super.onInit();
+  static Future<ApplicationEventService> initializedInstance() async {
+    var appEventService = ApplicationEventService();
     var directory = await getApplicationSupportDirectory();
-    isar = await Isar.open([ApplicationEventSchema],
+    await directory.create(recursive: true);
+    appEventService.isar = await Isar.open([ApplicationEventSchema],
         directory: directory.path, name: 'application-events');
+    return appEventService;
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
     applicationEventsChanged = isar.applicationEvents.watchLazy();
   }
 
   @override
-  Future<void> onClose() async {
-    await isar.close();
+  void onClose() {
+    isar.close();
   }
 
   Future<void> addEvent(ApplicationEvent event) async {

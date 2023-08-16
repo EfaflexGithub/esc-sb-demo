@@ -8,7 +8,7 @@ import 'package:get/get.dart';
 class DoorOverviewController extends GetxController {
   final showCheckboxColumn = false.obs;
 
-  final doorCollectionService = Get.find<DoorCollectionService>();
+  final doorCollectionService = DoorCollectionService.find();
 
   final enableStopServiceIcon = false.obs;
 
@@ -85,7 +85,7 @@ class DoorOverviewController extends GetxController {
   }
 
   void showAddModbusTcpDoorDialog() {
-    final settingsController = Get.find<SettingsController<AppSettingKeys>>();
+    final settingsController = SettingsController.find<AppSettingKeys>();
     final TextEditingController ipController = TextEditingController(
         text: settingsController.getValueFromKey<String>(
             AppSettingKeys.defaultModbusTcpHostAddress));
@@ -139,8 +139,6 @@ class DoorOverviewController extends GetxController {
         String port = portController.text;
         int refreshRate = int.parse(refreshRateController.text, radix: 10);
         // String licenseKey = licenseController.text;
-
-        final doorCollectionService = Get.find<DoorCollectionService>();
 
         var service = await doorCollectionService.add(
           ModbusTcpService.fromConfig(

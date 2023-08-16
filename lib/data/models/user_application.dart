@@ -1,3 +1,4 @@
+import 'package:efa_smartconnect_modbus_demo/shared/utils/callbacks.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -49,7 +50,7 @@ class UserApplicationDefinition {
 }
 
 class UserApplication {
-  final Future<void> Function(bool state) onStateChanged;
+  final AsyncValueChanged<bool> onStateChanged;
   UserApplicationType? get type => definition?._userApplicationType;
 
   final Rxn<UserApplicationDefinition> _definition;
