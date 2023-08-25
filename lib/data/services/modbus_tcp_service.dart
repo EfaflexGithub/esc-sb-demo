@@ -152,11 +152,10 @@ base class ModbusTcpService extends SmartDoorService {
 
   DateTime? _licenseExpirationDate;
 
-  SmartConnectModule? get _smartConnectModule =>
-      (door.doorControl.value is EfaTronic)
-          ? (door.doorControl.value as EfaTronic)
-              .findExtensionBoardByType<SmartConnectModule>()
-          : null;
+  SmartConnectModule? get _smartConnectModule => (door.doorControl is EfaTronic)
+      ? (door.doorControl as EfaTronic)
+          .findExtensionBoardByType<SmartConnectModule>()
+      : null;
 
   UserApplicationDefinition _userApplicationDefinitionByValue(String value) {
     return _userApplicationDefinitions.firstWhereOrNull(
@@ -211,7 +210,7 @@ base class ModbusTcpService extends SmartDoorService {
     // as we know that modbus_tcp_service uses the EFA-SmartConnect module,
     // add the specific door control implementation and the SmartConnectModule
     var efaTronic = EfaTronic();
-    door.doorControl.value = efaTronic;
+    door.doorControl = efaTronic;
     efaTronic.extensionBoards.add(SmartConnectModule());
     tooltip.value =
         'server: ${configuration.ip}:${configuration.port}\nrefresh rate: ${configuration.refreshRate.inMilliseconds} ms';
@@ -598,27 +597,27 @@ base class ModbusTcpService extends SmartDoorService {
         break;
 
       case ModbusRegisterName.individualName when value is String:
-        door.individualName.value = value;
+        door.individualName = value;
         break;
 
       case ModbusRegisterName.equipmentNumber when value is int:
-        door.equipmentNumber.value = value;
+        door.equipmentNumber = value;
         break;
 
       case ModbusRegisterName.doorProfile when value is String:
-        door.profile.value = value;
+        door.profile = value;
         break;
 
       case ModbusRegisterName.doorControlSeries when value is String:
-        door.doorControl.value?.series.value = value;
+        door.doorControl?.series.value = value;
         break;
 
       case ModbusRegisterName.doorControlSerial when value is int:
-        door.doorControl.value?.serialNumber.value = value;
+        door.doorControl?.serialNumber.value = value;
         break;
 
       case ModbusRegisterName.doorControlFirmwareVersion when value is String:
-        door.doorControl.value?.firmwareVersion.value = value;
+        door.doorControl?.firmwareVersion.value = value;
         break;
 
       case ModbusRegisterName.smartConnectMaterialNumber when value is String:
@@ -634,7 +633,7 @@ base class ModbusTcpService extends SmartDoorService {
         break;
 
       case ModbusRegisterName.currentCycleCounter when value is int:
-        door.cycleCounter.value = value;
+        door.cycleCounter = value;
         break;
 
       case ModbusRegisterName.dailyCyclesDay when value is int:
@@ -654,29 +653,29 @@ base class ModbusTcpService extends SmartDoorService {
         break;
 
       case ModbusRegisterName.currentStatus when value is int:
-        door.openingStatus.value = OpeningStatus.values[value];
+        door.openingStatus = OpeningStatus.values[value];
         break;
 
       case ModbusRegisterName.currentOpeningPosition when value is int:
-        door.openingPosition.value = value / 100.0;
+        door.openingPosition = value / 100.0;
         break;
 
       case ModbusRegisterName.currentSpeed when value is int:
-        door.currentSpeed.value = value;
+        door.currentSpeed = value;
         break;
 
       case ModbusRegisterName.displayContentLine1 when value is String:
-        (door.doorControl.value as EfaTronic).displayContentLine1 = value;
+        (door.doorControl as EfaTronic).displayContentLine1 = value;
         break;
 
       case ModbusRegisterName.displayContentLine2 when value is String:
-        (door.doorControl.value as EfaTronic).displayContentLine2 = value;
+        (door.doorControl as EfaTronic).displayContentLine2 = value;
         break;
 
       case >= ModbusRegisterName.eventEntry1 &&
               <= ModbusRegisterName.eventEntry20
           when value is EventEntry:
-        var eventEntries = door.doorControl.value?.eventEntries;
+        var eventEntries = door.doorControl?.eventEntries;
         if (eventEntries != null && eventEntries.contains(value) == false) {
           eventEntries.add(value);
           eventEntries.sort((a, b) => b.compareTo(a));
@@ -687,28 +686,27 @@ base class ModbusTcpService extends SmartDoorService {
 
       case ModbusRegisterName.currentDateAndTime when value is DateTime:
         withIgnoreParameterChange(
-          () => (door.doorControl.value as EfaTronic).dateTime.value = value,
+          () => (door.doorControl as EfaTronic).dateTime.value = value,
         );
         break;
 
       case ModbusRegisterName.daylightSavingTime when value is int:
         withIgnoreParameterChange(
-          () => (door.doorControl.value as EfaTronic).daylightSavingTime.value =
+          () => (door.doorControl as EfaTronic).daylightSavingTime.value =
               DaylightSavingTime.values[value],
         );
         break;
 
       case ModbusRegisterName.keepOpenTimeAutomaticMode when value is int:
         withIgnoreParameterChange(
-          () => (door.doorControl.value as EfaTronic)
-              .keepOpenTimeAutomatic
-              .value = value,
+          () => (door.doorControl as EfaTronic).keepOpenTimeAutomatic.value =
+              value,
         );
         break;
 
       case ModbusRegisterName.keepOpenTimeIntermediateStop when value is int:
         withIgnoreParameterChange(
-          () => (door.doorControl.value as EfaTronic)
+          () => (door.doorControl as EfaTronic)
               .keepOpenTimeIntermediateStop
               .value = value,
         );
@@ -716,17 +714,15 @@ base class ModbusTcpService extends SmartDoorService {
 
       case ModbusRegisterName.closedPositionAdjustment when value is int:
         withIgnoreParameterChange(
-          () => (door.doorControl.value as EfaTronic)
-              .closedPositionAdjustment
-              .value = value,
+          () => (door.doorControl as EfaTronic).closedPositionAdjustment.value =
+              value,
         );
         break;
 
       case ModbusRegisterName.openPositionAdjustment when value is int:
         withIgnoreParameterChange(
-          () => (door.doorControl.value as EfaTronic)
-              .openPositionAdjustment
-              .value = value,
+          () => (door.doorControl as EfaTronic).openPositionAdjustment.value =
+              value,
         );
         break;
 

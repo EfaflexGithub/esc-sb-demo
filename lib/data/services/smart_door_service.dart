@@ -7,6 +7,8 @@ import 'package:hive_flutter/adapters.dart';
 import 'package:uuid/uuid.dart';
 
 abstract base class SmartDoorService {
+  SmartDoorService([String? uuid]) : uuid = uuid ?? const Uuid().v4();
+
   static const String _doorCacheBoxName = 'doorCache';
 
   final String uuid;
@@ -32,8 +34,6 @@ abstract base class SmartDoorService {
   Future<bool> configureUserApplication(int slot, String value);
 
   Future<bool> setUserApplicationState(int slot, bool state);
-
-  SmartDoorService([String? uuid]) : uuid = uuid ?? const Uuid().v4();
 
   set smartDoorServiceStatus(SmartDoorServiceStatus newStatus) {
     status.value = newStatus;
@@ -68,8 +68,8 @@ abstract base class SmartDoorService {
   Future<void> saveToCache() async {
     await Hive.withBox(_doorCacheBoxName, (box) async {
       Map<String, dynamic> data = {
-        'individual-name': door.individualName.value,
-        'equipment-number': door.equipmentNumber.value,
+        'individual-name': door.individualName,
+        'equipment-number': door.equipmentNumber,
       };
       await box.put(uuid, data);
     });
@@ -81,8 +81,8 @@ abstract base class SmartDoorService {
       if (map == null) {
         return;
       }
-      door.individualName.value = map['individual-name'];
-      door.equipmentNumber.value = map['equipment-number'];
+      door.individualName = map['individual-name'];
+      door.equipmentNumber = map['equipment-number'];
     });
   }
 

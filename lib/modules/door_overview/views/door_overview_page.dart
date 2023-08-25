@@ -145,8 +145,8 @@ class DoorOverviewPage extends GetView<DoorOverviewController> {
   DataRow _buildDataRow(
       BuildContext context, SmartDoorService smartDoorService) {
     var door = smartDoorService.door;
-    var lastEvent = door.doorControl.value?.eventEntries.firstOrNull;
-    var doorCycles = door.cycleCounter.value;
+    var lastEvent = door.doorControl?.eventEntries.firstOrNull;
+    var doorCycles = door.cycleCounter;
     var eventCycles = lastEvent?.cycleCounter;
     var eventDateTime = lastEvent?.dateTime;
     var highlightEvent = (doorCycles != null &&
@@ -258,17 +258,17 @@ class DoorOverviewPage extends GetView<DoorOverviewController> {
             ),
           ),
         ),
-        DataCell(Text(door.equipmentNumber.value?.toString() ?? '?')),
-        DataCell(Text(door.individualName.value?.toString() ?? '?')),
-        DataCell(Center(
-            child: Text(door.doorControl.value?.displayContent.value ?? '?'))),
-        DataCell(Text(switch (door.openingStatus.value) {
+        DataCell(Text(door.equipmentNumber?.toString() ?? '?')),
+        DataCell(Text(door.individualName?.toString() ?? '?')),
+        DataCell(
+            Center(child: Text(door.doorControl?.displayContent.value ?? '?'))),
+        DataCell(Text(switch (door.openingStatus) {
           OpeningStatus.unknown => '?',
           OpeningStatus.opening ||
           OpeningStatus.intermediate ||
-          OpeningStatus.closing when door.openingPosition.value != null =>
-            '${door.openingStatus.value.toString()} (${(door.openingPosition.value! * 100).round()} %)',
-          _ => door.openingStatus.value.toString(),
+          OpeningStatus.closing when door.openingPosition != null =>
+            '${door.openingStatus.toString()} (${(door.openingPosition! * 100).round()} %)',
+          _ => door.openingStatus.toString(),
         })),
         if (lastEvent != null)
           DataCell(

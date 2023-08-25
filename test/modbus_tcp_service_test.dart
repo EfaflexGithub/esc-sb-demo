@@ -298,13 +298,13 @@ void main() async {
       await modbusTcpService
           .writeModbusDataConfiguration(defaultDataConfiguration);
 
-      expect(door.individualName.value, isNull);
+      expect(door.individualName, isNull);
 
       // read register group
       await modbusTcpService
           .updateDoorModelByName(ModbusRegisterName.individualName);
 
-      expect(door.individualName.value, equals("EFA-SmartConnect Mock"));
+      expect(door.individualName, equals("EFA-SmartConnect Mock"));
     });
 
     test('update model by group', () async {
@@ -316,17 +316,17 @@ void main() async {
       await modbusTcpService
           .writeModbusDataConfiguration(defaultDataConfiguration);
 
-      expect(door.individualName.value, isNull);
-      expect(door.equipmentNumber.value, isNull);
-      expect(door.profile.value, isNull);
+      expect(door.individualName, isNull);
+      expect(door.equipmentNumber, isNull);
+      expect(door.profile, isNull);
 
       // read register group
       await modbusTcpService
           .updateDoorModelByGroup(ModbusRegisterGroup.equipmentInformation);
 
-      expect(door.individualName.value, equals("EFA-SmartConnect Mock"));
-      expect(door.equipmentNumber.value, equals(8000123456));
-      expect(door.profile.value, equals("271"));
+      expect(door.individualName, equals("EFA-SmartConnect Mock"));
+      expect(door.equipmentNumber, equals(8000123456));
+      expect(door.profile, equals("271"));
     });
   });
 }

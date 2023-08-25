@@ -1,22 +1,47 @@
 import 'package:get/get.dart';
 import './door_control.dart';
 
+import 'package:isar/isar.dart';
+
+part 'door.g.dart';
+
+@collection
 class Door {
-  var individualName = Rxn<String>();
+  Id? id;
 
-  var equipmentNumber = Rxn<int>();
+  final _individualName = Rxn<String>();
+  String? get individualName => _individualName.value;
+  set individualName(String? value) => _individualName.value = value;
 
-  var profile = Rxn<String>();
+  final _equipmentNumber = Rxn<int>();
+  int? get equipmentNumber => _equipmentNumber.value;
+  set equipmentNumber(int? value) => _equipmentNumber.value = value;
 
-  var cycleCounter = Rxn<int>();
+  final _profile = Rxn<String>();
+  String? get profile => _profile.value;
+  set profile(String? value) => _profile.value = value;
 
-  Rx<OpeningStatus> openingStatus = Rx<OpeningStatus>(OpeningStatus.unknown);
+  final _cycleCounter = Rxn<int>();
+  int? get cycleCounter => _cycleCounter.value;
+  set cycleCounter(int? value) => _cycleCounter.value = value;
 
-  var openingPosition = Rxn<double>();
+  final _openingStatus = Rx<OpeningStatus>(OpeningStatus.unknown);
+  @enumerated
+  OpeningStatus get openingStatus => _openingStatus.value;
+  set openingStatus(OpeningStatus value) => _openingStatus.value = value;
 
-  var currentSpeed = Rxn<int>();
+  final _openingPosition = Rxn<double>();
+  double? get openingPosition => _openingPosition.value;
+  set openingPosition(double? value) => _openingPosition.value = value;
 
-  var doorControl = Rxn<DoorControl>();
+  final _currentSpeed = Rxn<int>();
+  int? get currentSpeed => _currentSpeed.value;
+  set currentSpeed(int? value) => _currentSpeed.value = value;
+
+  final _doorControl = Rxn<DoorControl>();
+  @ignore
+  DoorControl? get doorControl => _doorControl.value;
+  set doorControl(DoorControl? value) => _doorControl.value = value;
 }
 
 enum OpeningStatus {

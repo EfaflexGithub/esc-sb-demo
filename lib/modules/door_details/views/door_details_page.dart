@@ -20,7 +20,7 @@ class DoorDetailsPage extends GetView<DoorDetailsController> {
     final door = service.door;
     return Scaffold(
       appBar: AppBar(
-        title: Text(door.individualName.value ?? 'door details'),
+        title: Text(door.individualName ?? 'door details'),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -56,20 +56,19 @@ class DoorDetailsPage extends GetView<DoorDetailsController> {
                   Obx(() => _buildTextPropertiesCard(
                         context: context,
                         properties: {
-                          "Individual Name": door.individualName.value ?? '?',
+                          "Individual Name": door.individualName ?? '?',
                           "Equipment Number":
-                              door.equipmentNumber.value?.toString() ?? '?',
-                          "Construction Type": door.profile.value ?? '?',
+                              door.equipmentNumber?.toString() ?? '?',
+                          "Construction Type": door.profile ?? '?',
                         },
                       )),
                   Obx(() => _buildTextPropertiesCard(
                         context: context,
                         properties: {
-                          "Status": door.openingStatus.value.toString(),
+                          "Status": door.openingStatus.toString(),
                           "Opening Position":
-                              door.openingPosition.value?.toPercentage() ?? '?',
-                          "Current Speed":
-                              "${door.currentSpeed.value ?? '?'} Hz",
+                              door.openingPosition?.toPercentage() ?? '?',
+                          "Current Speed": "${door.currentSpeed ?? '?'} Hz",
                         },
                       )),
                 ],
@@ -81,28 +80,25 @@ class DoorDetailsPage extends GetView<DoorDetailsController> {
                   Obx(() => _buildTextPropertiesCard(
                         context: context,
                         properties: {
-                          "Series": door.doorControl.value?.series.value ?? '?',
-                          "Serial Number": door
-                                  .doorControl.value?.serialNumber.value
+                          "Series": door.doorControl?.series.value ?? '?',
+                          "Serial Number": door.doorControl?.serialNumber.value
                                   ?.toString() ??
                               '?',
                           "Firmware":
-                              door.doorControl.value?.firmwareVersion.value ??
-                                  '?',
+                              door.doorControl?.firmwareVersion.value ?? '?',
                           "Current Cycle Counter":
-                              door.cycleCounter.value?.localized ?? '?',
+                              door.cycleCounter?.localized ?? '?',
                         },
                       )),
                   Obx(() => _buildTextPropertiesCard(
                         context: context,
                         properties: {
                           "Display Content":
-                              door.doorControl.value?.displayContent.value ??
-                                  '?',
+                              door.doorControl?.displayContent.value ?? '?',
                         },
                       )),
-                  if (door.doorControl.value != null)
-                    ...door.doorControl.value!.controlInformation.map((e) =>
+                  if (door.doorControl != null)
+                    ...door.doorControl!.controlInformation.map((e) =>
                         _buildEditablePropertiesCard(
                             context: context, informationEntries: e)),
                 ],
@@ -114,7 +110,7 @@ class DoorDetailsPage extends GetView<DoorDetailsController> {
                   SizedBox(
                     height: 315,
                     child: Obx(() {
-                      var doorControl = door.doorControl.value;
+                      var doorControl = door.doorControl;
                       return switch (doorControl) {
                         null => const Text(
                             'Events not available as door control is not set'),
