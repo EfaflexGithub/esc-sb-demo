@@ -20,14 +20,15 @@ class DoorDetailsPage extends GetView<DoorDetailsController> {
     final door = service.door;
     return Scaffold(
       appBar: AppBar(
-          title: Text(door.individualName.value ?? 'door details'),
-          centerTitle: true,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
-              Get.rootDelegate.popRoute(popMode: PopMode.History);
-            },
-          )),
+        title: Text(door.individualName.value ?? 'door details'),
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Get.rootDelegate.popRoute(popMode: PopMode.History);
+          },
+        ),
+      ),
       body: Container(
         color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
         child: SingleChildScrollView(
@@ -176,6 +177,9 @@ class DoorDetailsPage extends GetView<DoorDetailsController> {
                               controller.userApplicationsTempValues[i] = value;
                             }
                           },
+                          inputDecorationTheme: const InputDecorationTheme(
+                            isDense: true,
+                          ),
                           dropdownMenuEntries: service.supportedUserApplications
                               .map(
                                 (userApplication) => DropdownMenuEntry<String>(

@@ -12,23 +12,23 @@ import 'package:path_provider/path_provider.dart';
 class ApplicationEventService extends GetxService {
   ApplicationEventService();
 
-  static registerService({
+  static Future<void> registerService({
     ApplicationEventService? applicationEventService,
-  }) {
+  }) async {
     if (applicationEventService != null) {
       Get.put(
         () => applicationEventService,
         tag: 'default',
       );
     } else {
-      Get.putAsync(
+      await Get.putAsync(
         () => ApplicationEventService.initializedInstance(),
         tag: 'default',
       );
     }
   }
 
-  static unregisterService() {
+  static void unregisterService() {
     Get.delete<ApplicationEventService>(tag: 'default');
   }
 

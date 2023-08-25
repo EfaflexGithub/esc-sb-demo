@@ -16,9 +16,9 @@ void main() async {
 
   // register services
   SettingsController.registerService<AppSettingKeys>(applicationSettings);
-  NotificationService.registerService();
+  await NotificationService.registerService();
+  await ApplicationEventService.registerService();
   DoorCollectionService.registerService();
-  ApplicationEventService.registerService();
 
   // run app
   runApp(const MyApp());

@@ -13,7 +13,7 @@ class DoorCollectionService extends GetxService {
 
   static const String _configurationsBoxName = 'smartDoorServiceConfigurations';
 
-  static registerService({
+  static void registerService({
     DoorCollectionService? doorCollectionService,
     bool permanent = true,
   }) {
@@ -24,7 +24,7 @@ class DoorCollectionService extends GetxService {
     );
   }
 
-  static unregisterService() {
+  static void unregisterService() {
     Get.delete<DoorCollectionService>(tag: 'default');
   }
 

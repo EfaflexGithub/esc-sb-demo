@@ -4,23 +4,23 @@ import 'package:local_notifier/local_notifier.dart';
 class NotificationService extends GetxService {
   NotificationService();
 
-  static registerService({
+  static Future<void> registerService({
     NotificationService? notificationService,
-  }) {
+  }) async {
     if (notificationService != null) {
       Get.put(
         () => notificationService,
         tag: 'default',
       );
     } else {
-      Get.putAsync(
+      await Get.putAsync(
         () => NotificationService.initializedInstance(),
         tag: 'default',
       );
     }
   }
 
-  static unregisterService() {
+  static void unregisterService() {
     Get.delete<NotificationService>(tag: 'default');
   }
 
