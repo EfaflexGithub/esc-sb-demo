@@ -2,6 +2,8 @@ import 'package:efa_smartconnect_modbus_demo/data/services/application_event_ser
 import 'package:get/get.dart';
 
 class EventOverviewController extends GetxController {
+  final filterSettingsVisible = false.obs;
+
   Future<void> deleteAll() async {
     final appEventService = ApplicationEventService.find();
     await appEventService.deleteAll();

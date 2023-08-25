@@ -1,16 +1,16 @@
-import 'package:data_table_2/data_table_2.dart';
+import 'package:efa_smartconnect_modbus_demo/modules/event_overview/controllers/event_overview_controller.dart';
 import 'package:efa_smartconnect_modbus_demo/modules/event_overview/models/application_event_data_source.dart';
 import 'package:efa_smartconnect_modbus_demo/shared/widgets/filters.dart';
+
+import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:efa_smartconnect_modbus_demo/modules/event_overview/controllers/event_overview_controller.dart';
 
 class EventOverviewPage extends GetView<EventOverviewController> {
   const EventOverviewPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final visible = false.obs;
     final dataSource =
         ApplicationEventDataSource(colorScheme: Theme.of(context).colorScheme);
 
@@ -28,8 +28,9 @@ class EventOverviewPage extends GetView<EventOverviewController> {
                   duration: const Duration(milliseconds: 150),
                   child: Obx(
                     () => SizedBox(
-                      width: visible.value ? 310 : null,
-                      child: visible.value
+                      width:
+                          controller.filterSettingsVisible.value ? 310 : null,
+                      child: controller.filterSettingsVisible.value
                           ? Column(
                               children: [
                                 const SizedBox(height: 67),
@@ -71,7 +72,8 @@ class EventOverviewPage extends GetView<EventOverviewController> {
                     header: Row(
                       children: [
                         FilterButton(
-                          onPressed: (value) => visible.value = value,
+                          onPressed: (value) =>
+                              controller.filterSettingsVisible.value = value,
                         ),
                         const ActiveFiltersView(),
                       ],
