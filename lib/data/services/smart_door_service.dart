@@ -1,17 +1,15 @@
 import 'package:efa_smartconnect_modbus_demo/data/models/door.dart';
+import 'package:efa_smartconnect_modbus_demo/data/models/isar_collection_mixin.dart';
 import 'package:efa_smartconnect_modbus_demo/data/models/user_application.dart';
-import 'package:efa_smartconnect_modbus_demo/shared/extensions/hive_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hive_flutter/adapters.dart';
-import 'package:uuid/uuid.dart';
 
-abstract base class SmartDoorService {
-  SmartDoorService([String? uuid]) : uuid = uuid ?? const Uuid().v4();
-
-  static const String _doorCacheBoxName = 'doorCache';
-
-  final String uuid;
+abstract base class SmartDoorService with IsarCollectionMixin {
+  SmartDoorService([int? id]) {
+    if (id != null) {
+      this.id = id;
+    }
+  }
 
   Door get door;
 
@@ -64,34 +62,6 @@ abstract base class SmartDoorService {
   String getServiceName();
 
   Map<String, dynamic> getConfiguration();
-
-  Future<void> saveToCache() async {
-    await Hive.withBox(_doorCacheBoxName, (box) async {
-      Map<String, dynamic> data = {
-        'individual-name': door.individualName,
-        'equipment-number': door.equipmentNumber,
-      };
-      await box.put(uuid, data);
-    });
-  }
-
-  Future<void> loadCachedData() async {
-    await Hive.withBox(_doorCacheBoxName, (box) async {
-      var map = await getCacheData(uuid);
-      if (map == null) {
-        return;
-      }
-      door.individualName = map['individual-name'];
-      door.equipmentNumber = map['equipment-number'];
-    });
-  }
-
-  //TODO add option to query array of uuids for performance reasons.
-  static Future<Map<String, dynamic>?> getCacheData(String uuid) async {
-    return await Hive.withBox<Map<String, dynamic>>(_doorCacheBoxName, (box) {
-      return (box.get(uuid) as Map?)?.cast<String, dynamic>();
-    });
-  }
 }
 
 enum SmartDoorServiceStatus {

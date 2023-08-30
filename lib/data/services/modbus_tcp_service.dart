@@ -9,6 +9,7 @@ import 'package:efa_smartconnect_modbus_demo/data/models/efa_tronic.dart';
 import 'package:efa_smartconnect_modbus_demo/data/models/event_entry.dart';
 import 'package:efa_smartconnect_modbus_demo/data/models/smart_connect_module.dart';
 import 'package:efa_smartconnect_modbus_demo/data/models/user_application.dart';
+import 'package:efa_smartconnect_modbus_demo/data/repositories/door_respository.dart';
 import 'package:efa_smartconnect_modbus_demo/data/repositories/modbus_register.dart';
 import 'package:efa_smartconnect_modbus_demo/data/repositories/modbus_register_map.g.dart';
 import 'package:efa_smartconnect_modbus_demo/data/repositories/modbus_register_types.dart';
@@ -27,6 +28,40 @@ import 'package:async/async.dart';
 import './smart_door_service.dart';
 
 base class ModbusTcpService extends SmartDoorService {
+  ModbusTcpService(String ip,
+      {int port = 502, Duration? timeout, ModbusClient? client})
+      : this.fromConfig(
+            ModbusTcpServiceConfiguration(
+              ip: ip,
+              port: port,
+              timeout: timeout ??
+                  Duration(
+                    milliseconds: SettingsController.find<AppSettingKeys>()
+                        .getValueFromKey<int>(
+                            AppSettingKeys.defaultModbusTcpTimeout),
+                  ),
+            ),
+            client: client);
+
+  ModbusTcpService.fromConfig(this.configuration,
+      {int? id, ModbusClient? client})
+      : client = client ??
+            createTcpClient(configuration.ip,
+                port: configuration.port,
+                timeout: configuration.timeout,
+                mode: ModbusMode.rtu),
+        super(id) {
+    // as we know that modbus_tcp_service uses the EFA-SmartConnect module,
+    // add the specific door control implementation and the SmartConnectModule
+    var efaTronic = EfaTronic();
+    door.doorControl = efaTronic;
+    efaTronic.extensionBoards.add(SmartConnectModule());
+    tooltip.value =
+        'server: ${configuration.ip}:${configuration.port}\nrefresh rate: ${configuration.refreshRate.inMilliseconds} ms';
+    initializeStateMachine();
+    registerParameterChangeListeners(efaTronic);
+  }
+
   static const _userApplicationsCount = 2;
 
   final ModbusTcpServiceConfiguration configuration;
@@ -184,40 +219,6 @@ base class ModbusTcpService extends SmartDoorService {
     return configuration.toMap();
   }
 
-  ModbusTcpService(String ip,
-      {int port = 502, Duration? timeout, ModbusClient? client})
-      : this.fromConfig(
-            ModbusTcpServiceConfiguration(
-              ip: ip,
-              port: port,
-              timeout: timeout ??
-                  Duration(
-                    milliseconds: SettingsController.find<AppSettingKeys>()
-                        .getValueFromKey<int>(
-                            AppSettingKeys.defaultModbusTcpTimeout),
-                  ),
-            ),
-            client: client);
-
-  ModbusTcpService.fromConfig(this.configuration,
-      {String? uuid, ModbusClient? client})
-      : client = client ??
-            createTcpClient(configuration.ip,
-                port: configuration.port,
-                timeout: configuration.timeout,
-                mode: ModbusMode.rtu),
-        super(uuid) {
-    // as we know that modbus_tcp_service uses the EFA-SmartConnect module,
-    // add the specific door control implementation and the SmartConnectModule
-    var efaTronic = EfaTronic();
-    door.doorControl = efaTronic;
-    efaTronic.extensionBoards.add(SmartConnectModule());
-    tooltip.value =
-        'server: ${configuration.ip}:${configuration.port}\nrefresh rate: ${configuration.refreshRate.inMilliseconds} ms';
-    initializeStateMachine();
-    registerParameterChangeListeners(efaTronic);
-  }
-
   void initializeStateMachine() {
     // configure disconnect timer
     _disconnectTimer ??=
@@ -270,24 +271,21 @@ base class ModbusTcpService extends SmartDoorService {
       try {
         await updateDoorModelByGroup(ModbusRegisterGroup.licensing);
         if (_licenseActivated!) {
+          await updateDoorModelByGroup(ModbusRegisterGroup.doorData);
+          await door.saveToCache();
+          await updateDoorModelByGroup(
+              ModbusRegisterGroup.operatingInformation);
+          await updateDoorModelByGroup(ModbusRegisterGroup.doorInteraction);
+          await door.saveToCache();
           appEventService.addEvent(ApplicationEvent.fromSmartDoorServiceEvent(
-              uuid: uuid, event: SmartDoorServiceEvent.connectionEstablished));
+              doorId: door.id,
+              event: SmartDoorServiceEvent.connectionEstablished));
           _startedMachine.current = _ModbusTcpServiceState.online;
         } else if (_licenseExpirationDate!.year < 2000) {
           _setStatus(_ModbusTcpServiceState.checkingLicense, 'Unlicensed');
         } else if (_licenseExpirationDate!.isBefore(DateTime.now())) {
           _setStatus(_ModbusTcpServiceState.checkingLicense, 'License Expired');
         }
-      } catch (_) {
-        // state machine transitions handled in catchedModbusTransaction
-      }
-    });
-    checkingLicenseState.onExit(() async {
-      try {
-        await updateDoorModelByGroup(ModbusRegisterGroup.doorData);
-        await updateDoorModelByGroup(ModbusRegisterGroup.operatingInformation);
-        await updateDoorModelByGroup(ModbusRegisterGroup.doorInteraction);
-        await saveToCache();
       } catch (_) {
         // state machine transitions handled in catchedModbusTransaction
       }
@@ -665,11 +663,11 @@ base class ModbusTcpService extends SmartDoorService {
         break;
 
       case ModbusRegisterName.displayContentLine1 when value is String:
-        (door.doorControl as EfaTronic).displayContentLine1 = value;
+        (door.doorControl as EfaTronic?)?.displayContentLine1 = value;
         break;
 
       case ModbusRegisterName.displayContentLine2 when value is String:
-        (door.doorControl as EfaTronic).displayContentLine2 = value;
+        (door.doorControl as EfaTronic?)?.displayContentLine2 = value;
         break;
 
       case >= ModbusRegisterName.eventEntry1 &&
@@ -680,48 +678,50 @@ base class ModbusTcpService extends SmartDoorService {
           eventEntries.add(value);
           eventEntries.sort((a, b) => b.compareTo(a));
           ApplicationEventService.find().addEvent(
-              ApplicationEvent.fromDoorControlEvent(uuid: uuid, event: value));
+              ApplicationEvent.fromDoorControlEvent(
+                  doorId: door.id, event: value));
         }
         break;
 
       case ModbusRegisterName.currentDateAndTime when value is DateTime:
         withIgnoreParameterChange(
-          () => (door.doorControl as EfaTronic).dateTime.value = value,
+          () => (door.doorControl as EfaTronic?)?.dateTime.value = value,
         );
         break;
 
       case ModbusRegisterName.daylightSavingTime when value is int:
         withIgnoreParameterChange(
-          () => (door.doorControl as EfaTronic).daylightSavingTime.value =
+          () => (door.doorControl as EfaTronic?)?.daylightSavingTime.value =
               DaylightSavingTime.values[value],
         );
         break;
 
       case ModbusRegisterName.keepOpenTimeAutomaticMode when value is int:
         withIgnoreParameterChange(
-          () => (door.doorControl as EfaTronic).keepOpenTimeAutomatic.value =
+          () => (door.doorControl as EfaTronic?)?.keepOpenTimeAutomatic.value =
               value,
         );
         break;
 
       case ModbusRegisterName.keepOpenTimeIntermediateStop when value is int:
         withIgnoreParameterChange(
-          () => (door.doorControl as EfaTronic)
-              .keepOpenTimeIntermediateStop
+          () => (door.doorControl as EfaTronic?)
+              ?.keepOpenTimeIntermediateStop
               .value = value,
         );
         break;
 
       case ModbusRegisterName.closedPositionAdjustment when value is int:
         withIgnoreParameterChange(
-          () => (door.doorControl as EfaTronic).closedPositionAdjustment.value =
-              value,
+          () => (door.doorControl as EfaTronic?)
+              ?.closedPositionAdjustment
+              .value = value,
         );
         break;
 
       case ModbusRegisterName.openPositionAdjustment when value is int:
         withIgnoreParameterChange(
-          () => (door.doorControl as EfaTronic).openPositionAdjustment.value =
+          () => (door.doorControl as EfaTronic?)?.openPositionAdjustment.value =
               value,
         );
         break;
@@ -818,7 +818,7 @@ base class ModbusTcpService extends SmartDoorService {
         _startedMachine.current = _ModbusTcpServiceState.offline;
         ApplicationEventService.find().addEvent(
           ApplicationEvent.fromSmartDoorServiceEvent(
-            uuid: uuid,
+            doorId: door.id,
             event: SmartDoorServiceEvent.connectionLost,
           ),
         );
@@ -832,7 +832,7 @@ base class ModbusTcpService extends SmartDoorService {
         _startedMachine.current = _ModbusTcpServiceState.offline;
         ApplicationEventService.find().addEvent(
           ApplicationEvent.fromSmartDoorServiceEvent(
-            uuid: uuid,
+            doorId: door.id,
             event: SmartDoorServiceEvent.connectionLost,
           ),
         );

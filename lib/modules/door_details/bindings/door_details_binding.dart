@@ -10,7 +10,9 @@ class DoorDetailsBinding extends Bindings {
       () {
         var smartDoorService = DoorCollectionService.find()
             .smartDoorServices
-            .firstWhere((element) => element.uuid == Get.parameters['doorId']);
+            .firstWhere((smartDoorService) =>
+                smartDoorService.id ==
+                int.parse(Get.parameters['smartDoorId']!));
         return DoorDetailsController(smartDoorService);
       },
     );

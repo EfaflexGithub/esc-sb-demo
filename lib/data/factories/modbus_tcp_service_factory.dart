@@ -6,11 +6,11 @@ class ModbusTcpServiceFactory
   @override
   ModbusTcpService createSmartDoorService(
     Map<String, dynamic> map,
-    String? uuid,
+    int? id,
   ) {
     return ModbusTcpService.fromConfig(
       ModbusTcpServiceConfiguration.fromMap(map),
-      uuid: uuid,
+      id: id,
     );
   }
 }

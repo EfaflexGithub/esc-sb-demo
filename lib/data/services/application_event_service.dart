@@ -1,12 +1,13 @@
 import 'dart:async';
 
 import 'package:efa_smartconnect_modbus_demo/data/models/application_event.dart';
+import 'package:efa_smartconnect_modbus_demo/data/providers/isar_provider.dart';
+import 'package:efa_smartconnect_modbus_demo/data/repositories/application_event_repository.dart';
 import 'package:efa_smartconnect_modbus_demo/data/services/notification_service.dart';
 import 'package:efa_smartconnect_modbus_demo/modules/settings/controllers/settings_controller.dart';
 import 'package:efa_smartconnect_modbus_demo/modules/settings/models/application_setttings.dart';
 import 'package:efa_smartconnect_modbus_demo/shared/extensions/datetime_extensions.dart';
 import 'package:get/get.dart';
-import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 
 class ApplicationEventService extends GetxService {
@@ -35,7 +36,6 @@ class ApplicationEventService extends GetxService {
   factory ApplicationEventService.find() =>
       Get.find<ApplicationEventService>(tag: 'default');
 
-  late Isar isar;
   late Stream<void> applicationEventsChanged;
 
   StreamSubscription<void> listen(
@@ -55,47 +55,27 @@ class ApplicationEventService extends GetxService {
     var appEventService = ApplicationEventService();
     var directory = await getApplicationSupportDirectory();
     await directory.create(recursive: true);
-    appEventService.isar = await Isar.open([ApplicationEventSchema],
-        directory: directory.path, name: 'application-events');
     return appEventService;
   }
 
   @override
   void onInit() {
     super.onInit();
-    applicationEventsChanged = isar.applicationEvents.watchLazy();
-  }
-
-  @override
-  void onClose() {
-    isar.close();
+    IsarProvider.application.then((isar) {
+      applicationEventsChanged = isar.applicationEvents.watchLazy();
+    });
   }
 
   Future<void> addEvent(ApplicationEvent event) async {
-    await isar.writeTxn(() async {
-      await isar.applicationEvents
-          .where()
-          .dateTimeEqualTo(event.dateTime)
-          .filter()
-          .uuidEqualTo(event.uuid)
-          .typeEqualTo(event.type)
-          .findAll()
-          .then((applicationEvents) async {
-        for (var e in applicationEvents) {
-          if (e.data.join(';') == event.data.join(';')) {
-            return;
-          }
-        }
-        await isar.applicationEvents.put(event);
-        await showEventNotification(event);
-      });
-    });
+    final repo = ApplicationEventRepository();
+    if (!await repo.containsByValue(event)) {
+      repo.create(event);
+    }
+    await showEventNotification(event);
   }
 
   Future<void> deleteAll() async {
-    await isar.writeTxn(() async {
-      await isar.applicationEvents.clear();
-    });
+    ApplicationEventRepository().deleteAll();
   }
 
   Future<void> showEventNotification(ApplicationEvent event) async {

@@ -1,5 +1,6 @@
 import 'package:efa_smartconnect_modbus_demo/data/models/event_entry.dart';
-import 'package:efa_smartconnect_modbus_demo/data/services/smart_door_service.dart';
+import 'package:efa_smartconnect_modbus_demo/data/models/isar_collection_mixin.dart';
+import 'package:efa_smartconnect_modbus_demo/data/repositories/door_respository.dart';
 import 'package:efa_smartconnect_modbus_demo/shared/extensions/numeric_extensions.dart';
 import 'package:isar/isar.dart';
 
@@ -7,9 +8,7 @@ part 'application_event.g.dart';
 
 @collection
 @Name('ApplicaitonEvent')
-class ApplicationEvent {
-  final Id id = Isar.autoIncrement;
-
+class ApplicationEvent with IsarCollectionMixin {
   @enumerated
   final Severity severity;
 
@@ -17,8 +16,8 @@ class ApplicationEvent {
   @Name('timestamp')
   final DateTime dateTime;
 
-  @Name('uuid')
-  final String uuid;
+  @Name('doorId')
+  final int doorId;
 
   @enumerated
   final EventType type;
@@ -27,8 +26,8 @@ class ApplicationEvent {
   final List<String> data;
 
   Future<String> getIndividualName() async {
-    var cachedData = await SmartDoorService.getCacheData(uuid);
-    return cachedData?['individual-name'] ?? uuid;
+    var cachedDoorData = await DoorRepository().getById(doorId);
+    return cachedDoorData?.individualName ?? doorId.toString();
   }
 
   Future<String> getMessage() async {
@@ -45,16 +44,16 @@ class ApplicationEvent {
     throw UnimplementedError('unknown type');
   }
 
-  const ApplicationEvent({
+  ApplicationEvent({
     required this.severity,
-    required this.uuid,
+    required this.doorId,
     required this.dateTime,
     required this.type,
     required this.data,
   });
 
   factory ApplicationEvent.fromSmartDoorServiceEvent({
-    required String uuid,
+    required int doorId,
     required SmartDoorServiceEvent event,
     DateTime? dateTime,
   }) {
@@ -67,7 +66,7 @@ class ApplicationEvent {
 
     return ApplicationEvent(
       severity: severity,
-      uuid: uuid,
+      doorId: doorId,
       dateTime: dateTime_,
       type: EventType.smartDoorService,
       data: [data],
@@ -75,7 +74,7 @@ class ApplicationEvent {
   }
 
   factory ApplicationEvent.fromDoorControlEvent({
-    required String uuid,
+    required int doorId,
     required EventEntry event,
   }) {
     var dateTime = event.dateTime;
@@ -87,7 +86,7 @@ class ApplicationEvent {
 
     return ApplicationEvent(
       severity: Severity.warning,
-      uuid: uuid,
+      doorId: doorId,
       dateTime: dateTime,
       type: type,
       data: data,

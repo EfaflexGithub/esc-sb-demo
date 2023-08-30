@@ -8,7 +8,7 @@ abstract class Routes {
   static const settings = _Paths.settings;
   static const helpAndFeedback = _Paths.helpAndFeedback;
 
-  static String doorDetails(String doorId) => '$doorOverview/$doorId';
+  static String doorDetails(int smartDoorId) => '$doorOverview/$smartDoorId';
 
   Routes._();
 }
@@ -16,7 +16,7 @@ abstract class Routes {
 abstract class _Paths {
   static const root = '/';
   static const doorOverview = '/door-overview';
-  static const doorDetails = '/:doorId';
+  static const doorDetails = '/:smartDoorId';
   static const eventOverview = '/event-overview';
   static const settings = '/settings';
   static const helpAndFeedback = '/help-and-feedback';

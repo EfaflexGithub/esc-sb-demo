@@ -44,7 +44,6 @@ class DoorDetailsPage extends GetView<DoorDetailsController> {
                     context: context,
                     properties: {
                       ...service.uiConfiguration,
-                      "UUID": service.uuid,
                     },
                   ),
                 ],

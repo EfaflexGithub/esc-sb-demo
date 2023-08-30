@@ -1,3 +1,4 @@
+import 'package:efa_smartconnect_modbus_demo/data/models/isar_collection_mixin.dart';
 import 'package:get/get.dart';
 import './door_control.dart';
 
@@ -6,9 +7,7 @@ import 'package:isar/isar.dart';
 part 'door.g.dart';
 
 @collection
-class Door {
-  Id? id;
-
+class Door with IsarCollectionMixin {
   final _individualName = Rxn<String>();
   String? get individualName => _individualName.value;
   set individualName(String? value) => _individualName.value = value;
@@ -42,6 +41,26 @@ class Door {
   @ignore
   DoorControl? get doorControl => _doorControl.value;
   set doorControl(DoorControl? value) => _doorControl.value = value;
+
+  void copyFrom(
+    Door door, {
+    bool copyId = false,
+    bool copyDoorControl = true,
+  }) {
+    if (copyId) {
+      id = door.id;
+    }
+    individualName = door.individualName;
+    equipmentNumber = door.equipmentNumber;
+    profile = door.profile;
+    cycleCounter = door.cycleCounter;
+    openingStatus = door.openingStatus;
+    openingPosition = door.openingPosition;
+    currentSpeed = door.currentSpeed;
+    if (copyDoorControl) {
+      doorControl = door.doorControl;
+    }
+  }
 }
 
 enum OpeningStatus {

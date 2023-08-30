@@ -2,10 +2,11 @@ import 'dart:async';
 
 import 'package:data_table_2/data_table_2.dart';
 import 'package:efa_smartconnect_modbus_demo/data/models/application_event.dart';
+import 'package:efa_smartconnect_modbus_demo/data/providers/isar_provider.dart';
 import 'package:efa_smartconnect_modbus_demo/data/services/application_event_service.dart';
-import 'package:efa_smartconnect_modbus_demo/data/services/smart_door_service.dart';
 import 'package:efa_smartconnect_modbus_demo/shared/widgets/filters.dart';
 import 'package:efa_smartconnect_modbus_demo/shared/extensions/datetime_extensions.dart';
+import 'package:efa_smartconnect_modbus_demo/data/repositories/door_respository.dart';
 import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 
@@ -84,7 +85,7 @@ class ApplicationEventDataSource extends AsyncDataTableSource {
 
   @override
   Future<AsyncRowsResponse> getRows(int startIndex, int count) async {
-    final isar = service.isar;
+    final isar = await IsarProvider.application;
 
     var query = _buildQuery(isar);
 
@@ -95,11 +96,11 @@ class ApplicationEventDataSource extends AsyncDataTableSource {
       totalCount,
       await Future.wait(events.map(
         (event) async {
-          var cachedDoorData = await SmartDoorService.getCacheData(event.uuid);
-          int? equipmentNumber = cachedDoorData?['equipment-number'];
-          String? individualName = cachedDoorData?['individual-name'];
+          var cachedDoorData = await DoorRepository().getById(event.doorId);
+          int? equipmentNumber = cachedDoorData?.equipmentNumber;
+          String? individualName = cachedDoorData?.individualName;
           Widget doorWidget = switch ((equipmentNumber, individualName)) {
-            (null, null) => Text(event.uuid),
+            (null, null) => Text(event.doorId.toString()),
             (null, _) => Text(individualName!),
             (_, null) => Text(equipmentNumber!.toString()),
             (_, _) => Column(

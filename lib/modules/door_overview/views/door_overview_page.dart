@@ -174,7 +174,7 @@ class DoorOverviewPage extends GetView<DoorOverviewController> {
             smartDoorService.selected.value = value;
             controller.updateIconStates();
           } else {
-            Get.rootDelegate.toNamed(Routes.doorDetails(smartDoorService.uuid));
+            Get.rootDelegate.toNamed(Routes.doorDetails(smartDoorService.id));
           }
         }
       },
