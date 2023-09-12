@@ -19,4 +19,27 @@ extension DoorRepositoryExtensions on Door {
 
 final class DoorRepository extends IsarRepository<Door> {
   DoorRepository() : super(isar: IsarProvider.application);
+
+  Future<List<int>> searchIdsByName({required String search}) async {
+    final isar = await this.isar;
+    return isar.txn(() async {
+      return isar.doors
+          .filter()
+          .individualNameContains(search)
+          .idProperty()
+          .findAll();
+    });
+  }
+
+  Future<List<int>> searchIdsByEquipmentNumber({required String search}) async {
+    final isar = await this.isar;
+    return isar.txn(() async {
+      var equipmentNumbers =
+          await isar.doors.where().distinctByEquipmentNumber().findAll();
+      return equipmentNumbers
+          .where((door) => door.equipmentNumber.toString().contains(search))
+          .map((door) => door.id)
+          .toList();
+    });
+  }
 }

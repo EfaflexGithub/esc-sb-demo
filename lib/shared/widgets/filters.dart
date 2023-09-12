@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
-abstract class Filter<T> {
-  Filter({this.category});
+abstract base class Filter<T> {
+  Filter({this.category, this.name});
 
   FilterCategory? category;
 
-  String get activeFilterText;
+  String get _activeFilterText;
+
+  String? name;
+
+  String get resolvedName => name ?? category?.name ?? 'unknown';
 
   bool get active;
 
@@ -18,8 +23,9 @@ abstract class Filter<T> {
   }
 }
 
-class ElementsFilter<T> extends Filter<T> {
+final class ElementsFilter<T> extends Filter<T> {
   ElementsFilter({
+    super.name,
     required Iterable<T> keys,
     bool initialValue = true,
   }) : elements =
@@ -31,8 +37,9 @@ class ElementsFilter<T> extends Filter<T> {
       elements.entries.where((element) => element.value).map((e) => e.key);
 
   @override
-  String get activeFilterText =>
-      '${category?.name}: ${activeElements.map((e) => e.toString()).join(', ')}';
+  String get _activeFilterText => activeElements.isEmpty
+      ? '$resolvedName: None'
+      : '$resolvedName: ${activeElements.map((e) => e.toString()).join(', ')}';
 
   @override
   bool get active => elements.values.any((value) => value == false);
@@ -53,11 +60,14 @@ class ElementsFilter<T> extends Filter<T> {
   }
 }
 
-class TextFilter extends Filter<String> {
+final class TextFilter extends Filter<String> {
   TextFilter({
-    super.category,
+    super.name,
+    this.inputFormatters,
     this.searchText,
   });
+
+  List<TextInputFormatter>? inputFormatters;
 
   String? searchText;
 
@@ -65,7 +75,7 @@ class TextFilter extends Filter<String> {
   bool get active => searchText?.isNotEmpty ?? false;
 
   @override
-  String get activeFilterText => '${category?.name} contains $searchText';
+  String get _activeFilterText => '$resolvedName contains $searchText';
 
   @override
   void reset() => searchText = '';
@@ -78,8 +88,9 @@ class TextFilter extends Filter<String> {
   }
 }
 
-abstract class RangeFilter<T extends Comparable<T>> extends Filter<T> {
+abstract base class RangeFilter<T extends Comparable<T>> extends Filter<T> {
   RangeFilter({
+    super.name,
     this.min,
     this.max,
   });
@@ -96,12 +107,11 @@ abstract class RangeFilter<T extends Comparable<T>> extends Filter<T> {
   String get rangePhrase => 'to';
 
   @override
-  String get activeFilterText => switch ((min, max)) {
+  String get _activeFilterText => switch ((min, max)) {
         (null, null) => 'none',
-        (null, _) => '${category?.name} $toPhrase ${format(max!)}',
-        (_, null) => '${category?.name} $fromPhrase ${format(min!)}',
-        (_, _) =>
-          '${category?.name} ${format(min!)} $rangePhrase ${format(max!)}',
+        (null, _) => '$resolvedName $toPhrase ${format(max!)}',
+        (_, null) => '$resolvedName $fromPhrase ${format(min!)}',
+        (_, _) => '$resolvedName ${format(min!)} $rangePhrase ${format(max!)}',
       };
 
   @override
@@ -125,8 +135,9 @@ abstract class RangeFilter<T extends Comparable<T>> extends Filter<T> {
   }
 }
 
-class DateRangeFilter extends RangeFilter<DateTime> {
+final class DateRangeFilter extends RangeFilter<DateTime> {
   DateRangeFilter({
+    super.name,
     super.min,
     super.max,
   });
@@ -137,11 +148,11 @@ class DateRangeFilter extends RangeFilter<DateTime> {
   }
 
   @override
-  String get activeFilterText => switch ((min, max)) {
+  String get _activeFilterText => switch ((min, max)) {
         (null, null) => 'none',
-        (null, _) => '${category?.name} before ${format(max!)}',
-        (_, null) => '${category?.name} after ${format(min!)}',
-        (_, _) => '${category?.name} from ${format(min!)} to ${format(max!)}',
+        (null, _) => '$resolvedName before ${format(max!)}',
+        (_, null) => '$resolvedName after ${format(min!)}',
+        (_, _) => '$resolvedName from ${format(min!)} to ${format(max!)}',
       };
 }
 
@@ -178,6 +189,17 @@ class FilterCategories with ChangeNotifier {
     for (var filterCategory in categories) {
       for (var filter in filterCategory.filters) {
         if (filter is T && filterCategory.name == name) {
+          return filter;
+        }
+      }
+    }
+    throw Exception('Filter $name of type $T not found');
+  }
+
+  T getFilterByName<T extends Filter>(String name) {
+    for (var filterCategory in categories) {
+      for (var filter in filterCategory.filters) {
+        if (filter is T && filter.name == name) {
           return filter;
         }
       }
@@ -282,11 +304,20 @@ class _FilterSettingsViewState extends State<FilterSettingsView> {
                       const Divider(thickness: 0.5),
                       for (var filter in filterCategory.filters)
                         if (filter is ElementsFilter)
-                          ..._buildElementsFilter(filter)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: _buildElementsFilter(filter),
+                          )
                         else if (filter is TextFilter)
-                          ..._buildTextFilter(filter)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: _buildTextFilter(filter),
+                          )
                         else if (filter is DateRangeFilter)
-                          ..._buildDateFilter(filter),
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: _buildDateFilter(filter),
+                          ),
                       const SizedBox(height: 20),
                     ],
                   ),
@@ -305,40 +336,45 @@ class _FilterSettingsViewState extends State<FilterSettingsView> {
     );
   }
 
-  Iterable<Widget> _buildElementsFilter(ElementsFilter filter) {
-    return filter.elements.keys.map(
-      (key) {
-        return CheckboxListTile(
-          value: filter.elements[key],
-          onChanged: (value) => setState(() {
-            filter.elements[key] = value ?? true;
-          }),
-          title: Text(key.toString()),
-        );
-      },
+  Widget _buildElementsFilter(ElementsFilter filter) {
+    return Column(
+      children: filter.elements.keys.map(
+        (key) {
+          return CheckboxListTile(
+            value: filter.elements[key],
+            onChanged: (value) => setState(() {
+              filter.elements[key] = value ?? true;
+            }),
+            title: Text(key.toString()),
+          );
+        },
+      ).toList(),
     );
   }
 
-  Iterable<Widget> _buildTextFilter(TextFilter filter) {
+  Widget _buildTextFilter(TextFilter filter) {
     var controller = TextEditingController(text: filter.searchText);
-    return [
-      TextField(
-        controller: controller,
-        style: Theme.of(context).inputDecorationTheme.labelStyle,
-        decoration: InputDecoration(
-          border: const OutlineInputBorder(),
-          hintText: 'Contains Text',
-          suffixIcon: IconButton(
-            onPressed: controller.clear,
-            icon: const Icon(Icons.clear),
-          ),
+    return TextField(
+      controller: controller,
+      style: Theme.of(context).inputDecorationTheme.labelStyle,
+      inputFormatters: filter.inputFormatters,
+      decoration: InputDecoration(
+        border: const OutlineInputBorder(),
+        hintText:
+            filter.name != null ? '${filter.name} contains' : 'Contains Text',
+        suffixIcon: IconButton(
+          onPressed: () {
+            controller.clear();
+            filter.reset();
+          },
+          icon: const Icon(Icons.clear),
         ),
-        onChanged: (value) => filter.searchText = value,
       ),
-    ];
+      onChanged: (value) => filter.searchText = value,
+    );
   }
 
-  Iterable<Widget> _buildDateFilter(DateRangeFilter filter) {
+  Widget _buildDateFilter(DateRangeFilter filter) {
     Widget buildDateTextField({
       DateTime? value,
       DateTime? firstDate,
@@ -392,23 +428,21 @@ class _FilterSettingsViewState extends State<FilterSettingsView> {
       );
     }
 
-    return [
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          buildDateTextField(
-            value: filter.min,
-            onPicked: (value) => filter.min = value,
-          ),
-          const Text('to'),
-          buildDateTextField(
-            value: filter.max,
-            onPicked: (value) =>
-                filter.max = value?.copyWith(hour: 23, minute: 59, second: 59),
-          )
-        ],
-      )
-    ];
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        buildDateTextField(
+          value: filter.min,
+          onPicked: (value) => filter.min = value,
+        ),
+        const Text('to'),
+        buildDateTextField(
+          value: filter.max,
+          onPicked: (value) =>
+              filter.max = value?.copyWith(hour: 23, minute: 59, second: 59),
+        )
+      ],
+    );
   }
 }
 
@@ -425,14 +459,15 @@ class ActiveFiltersView extends StatelessWidget {
     test.notifyListeners();
 
     return Wrap(
+      spacing: 8,
       children: filterCategories.activeFilters
           .map(
             (e) => InputChip(
               label: Container(
                 constraints: const BoxConstraints(maxWidth: 200),
                 child: Tooltip(
-                  message: e.activeFilterText,
-                  child: Text(e.activeFilterText),
+                  message: e._activeFilterText,
+                  child: Text(e._activeFilterText),
                 ),
               ),
               onDeleted: () {

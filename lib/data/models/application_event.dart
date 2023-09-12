@@ -109,6 +109,13 @@ enum Severity {
   error,
   warning,
   info;
+
+  @override
+  String toString() => switch (this) {
+        error => 'Error',
+        warning => 'Warning',
+        info => 'Info',
+      };
 }
 
 enum SmartDoorServiceEvent {

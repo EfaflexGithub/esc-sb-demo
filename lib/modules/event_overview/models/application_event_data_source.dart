@@ -8,6 +8,7 @@ import 'package:efa_smartconnect_modbus_demo/shared/widgets/filters.dart';
 import 'package:efa_smartconnect_modbus_demo/shared/extensions/datetime_extensions.dart';
 import 'package:efa_smartconnect_modbus_demo/data/repositories/door_respository.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:isar/isar.dart';
 
 class ApplicationEventDataSource extends AsyncDataTableSource {
@@ -20,6 +21,14 @@ class ApplicationEventDataSource extends AsyncDataTableSource {
   final FilterCategories filterCategories = FilterCategories(
     categories: [
       FilterCategory(
+        name: 'Severity',
+        filters: [
+          ElementsFilter<Severity>(
+            keys: Severity.values,
+          ),
+        ],
+      ),
+      FilterCategory(
         name: 'Date',
         filters: [
           DateRangeFilter(),
@@ -27,7 +36,15 @@ class ApplicationEventDataSource extends AsyncDataTableSource {
       ),
       FilterCategory(
         name: 'Door',
-        filters: [TextFilter()],
+        filters: [
+          TextFilter(
+            name: 'Name',
+          ),
+          TextFilter(
+            name: 'Equipment',
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          ),
+        ],
       ),
       FilterCategory(
         name: 'Event Types',
@@ -37,7 +54,11 @@ class ApplicationEventDataSource extends AsyncDataTableSource {
       ),
       FilterCategory(
         name: 'Message',
-        filters: [TextFilter()],
+        filters: [
+          TextFilter(
+            name: 'Error Code',
+          ),
+        ],
       ),
     ],
   );
@@ -52,11 +73,12 @@ class ApplicationEventDataSource extends AsyncDataTableSource {
     super.dispose();
   }
 
-  QueryBuilder<ApplicationEvent, ApplicationEvent, QAfterFilterCondition>
-      _buildQuery(Isar isar) {
+  Future<
+      QueryBuilder<ApplicationEvent, ApplicationEvent,
+          QAfterFilterCondition>?> _buildQuery(Isar isar) async {
     var where = isar.applicationEvents.where(sort: Sort.desc);
 
-    // apply date filter
+    // apply date where
     var dateFilter =
         filterCategories.getFilterOfCategory<DateRangeFilter>('Date');
     var filter = switch ((dateFilter.min, dateFilter.max)) {
@@ -72,6 +94,9 @@ class ApplicationEventDataSource extends AsyncDataTableSource {
     // apply event type filter
     var eventFilter = filterCategories
         .getFilterOfCategory<ElementsFilter<EventType>>('Event Types');
+    if (eventFilter.activeElements.isEmpty) {
+      return null;
+    }
     var filterBuilder = filter.optional(
       eventFilter.active,
       (query) => query.anyOf(
@@ -80,6 +105,53 @@ class ApplicationEventDataSource extends AsyncDataTableSource {
       ),
     );
 
+    // apply severity filter
+    var severityFilter = filterCategories
+        .getFilterOfCategory<ElementsFilter<Severity>>('Severity');
+    if (severityFilter.activeElements.isEmpty) {
+      return null;
+    }
+    filterBuilder = filterBuilder.optional(
+      severityFilter.active,
+      (query) => query.anyOf(
+        severityFilter.activeElements,
+        (q, severity) => q.severityEqualTo(severity),
+      ),
+    );
+
+    // apply door filters
+    var doorNameFilterText =
+        filterCategories.getFilterByName<TextFilter>('Name').searchText;
+    var equipmentFilterText =
+        filterCategories.getFilterByName<TextFilter>('Equipment').searchText;
+
+    if (doorNameFilterText != null && doorNameFilterText.isNotEmpty) {
+      var doorIds =
+          await DoorRepository().searchIdsByName(search: doorNameFilterText);
+      if (doorIds.isEmpty) {
+        return null;
+      }
+      filterBuilder =
+          filterBuilder.anyOf(doorIds, (q, doorId) => q.doorIdEqualTo(doorId));
+    }
+    if (equipmentFilterText != null && equipmentFilterText.isNotEmpty) {
+      var doorIds = await DoorRepository()
+          .searchIdsByEquipmentNumber(search: equipmentFilterText);
+      if (doorIds.isEmpty) {
+        return null;
+      }
+      filterBuilder =
+          filterBuilder.anyOf(doorIds, (q, doorId) => q.doorIdEqualTo(doorId));
+    }
+
+    // Apply Error Code Filter
+    var errorCodeFilterText =
+        filterCategories.getFilterByName<TextFilter>('Error Code').searchText;
+
+    if (errorCodeFilterText != null && errorCodeFilterText.isNotEmpty) {
+      filterBuilder = filterBuilder.dataElementContains(errorCodeFilterText);
+    }
+
     return filterBuilder;
   }
 
@@ -87,7 +159,11 @@ class ApplicationEventDataSource extends AsyncDataTableSource {
   Future<AsyncRowsResponse> getRows(int startIndex, int count) async {
     final isar = await IsarProvider.application;
 
-    var query = _buildQuery(isar);
+    var query = await _buildQuery(isar);
+
+    if (query == null) {
+      return AsyncRowsResponse(0, []);
+    }
 
     var totalCount = await query.count();
     var events = await query.offset(startIndex).limit(count).findAll();
@@ -101,12 +177,20 @@ class ApplicationEventDataSource extends AsyncDataTableSource {
           String? individualName = cachedDoorData?.individualName;
           Widget doorWidget = switch ((equipmentNumber, individualName)) {
             (null, null) => Text(event.doorId.toString()),
-            (null, _) => Text(individualName!),
+            (null, _) => Text(
+                individualName!,
+                overflow: TextOverflow.fade,
+                softWrap: false,
+              ),
             (_, null) => Text(equipmentNumber!.toString()),
             (_, _) => Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(individualName!),
+                  Text(
+                    individualName!,
+                    overflow: TextOverflow.fade,
+                    softWrap: false,
+                  ),
                   Opacity(
                       opacity: 0.6, child: Text(equipmentNumber!.toString())),
                 ],
