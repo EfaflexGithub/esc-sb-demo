@@ -459,6 +459,10 @@ base class ModbusTcpService extends SmartDoorService {
     return await _readRegisterByName(ModbusRegisterName.eventEntryTest);
   }
 
+  Future<void> writeIndividualName(String name) async {
+    await _writeRegisterByName(ModbusRegisterName.individualName, name);
+  }
+
   Future<void> syncControllerDateTime() async {
     await writeControllerDateTime(DateTime.now());
   }
@@ -582,15 +586,15 @@ base class ModbusTcpService extends SmartDoorService {
         _dataConfiguration.dateTimeFormat = DateTimeFormat.values[value];
         break;
 
-      case ModbusRegisterName.licenseActivationResult:
+      case ModbusRegisterName.licenseActivationResult when value is int:
         _licenseActivationResult = _LicenseActivationResult.values[value];
         break;
 
-      case ModbusRegisterName.licenseActivationState:
+      case ModbusRegisterName.licenseActivationState when value is bool:
         _licenseActivated = value;
         break;
 
-      case ModbusRegisterName.licenseExpirationDate:
+      case ModbusRegisterName.licenseExpirationDate when value is DateTime:
         _licenseExpirationDate = value;
         break;
 

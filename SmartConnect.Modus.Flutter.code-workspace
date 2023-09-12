@@ -21,7 +21,8 @@
 		"conventionalCommits.scopes": [
 			"workspace",
 			"user-applications",
-			"application-events"
+			"application-events",
+			"door-details"
 		],
 	},
 	"extensions": {

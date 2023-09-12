@@ -52,14 +52,25 @@ class DoorDetailsPage extends GetView<DoorDetailsController> {
                 context: context,
                 title: 'Door Information',
                 children: [
-                  Obx(() => _buildTextPropertiesCard(
+                  Obx(() => _buildEditablePropertiesCard(
                         context: context,
-                        properties: {
-                          "Individual Name": door.individualName ?? '?',
-                          "Equipment Number":
-                              door.equipmentNumber?.toString() ?? '?',
-                          "Construction Type": door.profile ?? '?',
-                        },
+                        informationEntries: [
+                          StringInformationEntry(
+                            description: "Individual Name",
+                            value: door.individualName,
+                            editable: true,
+                            onSaved: (value) =>
+                                controller.updateDoorName(value),
+                          ),
+                          IntInformationEntry(
+                            description: "Equipment Number",
+                            value: door.equipmentNumber,
+                          ),
+                          StringInformationEntry(
+                            description: "Construction Type",
+                            value: door.profile,
+                          ),
+                        ],
                       )),
                   Obx(() => _buildTextPropertiesCard(
                         context: context,
@@ -152,7 +163,7 @@ class DoorDetailsPage extends GetView<DoorDetailsController> {
                   _buildWidgetPropertiesCard(
                     context: context,
                     actions: [
-                      FilledButton.tonal(
+                      TextButton(
                         onPressed: () async {
                           await controller.saveUserApplications();
                         },

@@ -1,5 +1,6 @@
 import 'package:efa_smartconnect_modbus_demo/data/models/information_entry.dart';
 import 'package:efa_smartconnect_modbus_demo/data/models/user_application.dart';
+import 'package:efa_smartconnect_modbus_demo/data/services/modbus_tcp_service.dart';
 import 'package:efa_smartconnect_modbus_demo/data/services/smart_door_service.dart';
 import 'package:get/get.dart';
 
@@ -13,6 +14,12 @@ class DoorDetailsController extends GetxController {
     userApplicationsCount = smartDoorService.userApplications.length;
     userApplications = smartDoorService.userApplications;
     userApplicationsTempValues = List.filled(userApplicationsCount, "-1");
+  }
+
+  Future<void> updateDoorName(String value) async {
+    if (smartDoorService is ModbusTcpService) {
+      await (smartDoorService as ModbusTcpService).writeIndividualName(value);
+    }
   }
 
   Future<void> saveUserApplications() async {
