@@ -196,38 +196,8 @@ class DoorOverviewPage extends GetView<DoorOverviewController> {
                       onPressed: () => smartDoorService.start(),
                     ),
                   ),
-                  ...smartDoorService.userApplications.map((app) {
-                    return Obx(() => Visibility(
-                          visible: app.type != null &&
-                              app.type != UserApplicationType.disabled &&
-                              (controller.showUnknownUserApplications.value ||
-                                  app.definition?.label.toLowerCase() !=
-                                      "unknown"),
-                          child: Tooltip(
-                            message: [
-                              app.definition?.label,
-                              app.definition?.description,
-                            ].join('\n'),
-                            child: IconButton(
-                              iconSize: 20,
-                              visualDensity: VisualDensity.compact,
-                              icon: Icon(app.definition?.icon),
-                              isSelected: app.type == UserApplicationType.toggle
-                                  ? app.state
-                                  : null,
-                              selectedIcon: app.definition?.selectedIcon != null
-                                  ? Icon(app.definition?.selectedIcon)
-                                  : null,
-                              onPressed: smartDoorService.status.value !=
-                                      SmartDoorServiceStatus.okay
-                                  ? null
-                                  : () async {
-                                      await app.activate();
-                                    },
-                            ),
-                          ),
-                        ));
-                  }),
+                  ..._buildServiceActions(smartDoorService.serviceActions),
+                  ..._buildUserApplicationActions(smartDoorService),
                 ],
               ),
             ],
@@ -318,5 +288,57 @@ class DoorOverviewPage extends GetView<DoorOverviewController> {
         ],
       ),
     );
+  }
+
+  Iterable<Widget> _buildUserApplicationActions(
+      SmartDoorService smartDoorService) {
+    return smartDoorService.userApplications.map((app) {
+      return Obx(
+        () => Visibility(
+          visible: app.type != null &&
+              app.type != UserApplicationType.disabled &&
+              (controller.showUnknownUserApplications.value ||
+                  app.definition?.label.toLowerCase() != "unknown"),
+          child: Tooltip(
+            message: [
+              app.definition?.label,
+              app.definition?.description,
+            ].join('\n'),
+            child: IconButton(
+              iconSize: 20,
+              visualDensity: VisualDensity.compact,
+              icon: Icon(app.definition?.icon),
+              isSelected:
+                  app.type == UserApplicationType.toggle ? app.state : null,
+              selectedIcon: app.definition?.selectedIcon != null
+                  ? Icon(app.definition?.selectedIcon)
+                  : null,
+              onPressed:
+                  smartDoorService.status.value != SmartDoorServiceStatus.okay
+                      ? null
+                      : () async {
+                          await app.activate();
+                        },
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
+  Iterable<Widget> _buildServiceActions(RxList<ServiceAction> serviceActions) {
+    return serviceActions.map((serviceAction) {
+      return Tooltip(
+        message: [
+          serviceAction.name,
+          serviceAction.description,
+        ].join('\n'),
+        child: IconButton(
+            iconSize: 20,
+            visualDensity: VisualDensity.compact,
+            icon: Icon(serviceAction.iconData),
+            onPressed: serviceAction.onPressed),
+      );
+    });
   }
 }

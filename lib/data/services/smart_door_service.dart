@@ -17,6 +17,8 @@ abstract base class SmartDoorService with IsarCollectionMixin {
 
   final selected = false.obs;
 
+  final serviceActions = RxList<ServiceAction>();
+
   final Rx<Color> _statusColor = Colors.grey.obs;
 
   final status = Rx<SmartDoorServiceStatus>(SmartDoorServiceStatus.unknown);
@@ -59,6 +61,15 @@ abstract base class SmartDoorService with IsarCollectionMixin {
     isServiceRunning.value = false;
   }
 
+  void addServiceAction(ServiceAction serviceAction) {
+    serviceActions.add(serviceAction);
+  }
+
+  void removeServiceActionById(String id) {
+    var serviceAction = serviceActions.firstWhere((e) => e.id == id);
+    serviceActions.remove(serviceAction);
+  }
+
   String getServiceName();
 
   Map<String, dynamic> getConfiguration();
@@ -69,4 +80,22 @@ enum SmartDoorServiceStatus {
   okay,
   warn,
   error;
+}
+
+class ServiceAction {
+  ServiceAction({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.iconData,
+    this.onToggle,
+    this.onPressed,
+  });
+
+  final String id;
+  final String name;
+  final String description;
+  final IconData iconData;
+  final Future<void> Function()? onToggle;
+  final Future<void> Function()? onPressed;
 }

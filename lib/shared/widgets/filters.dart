@@ -463,6 +463,12 @@ class ActiveFiltersView extends StatelessWidget {
       children: filterCategories.activeFilters
           .map(
             (e) => InputChip(
+              color: MaterialStateProperty.resolveWith(
+                (_) => Theme.of(context)
+                    .colorScheme
+                    .primaryContainer
+                    .withOpacity(0.3),
+              ),
               label: Container(
                 constraints: const BoxConstraints(maxWidth: 200),
                 child: Tooltip(

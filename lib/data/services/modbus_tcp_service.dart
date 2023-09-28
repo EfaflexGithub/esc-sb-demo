@@ -20,6 +20,7 @@ import 'package:efa_smartconnect_modbus_demo/shared/utils/logging.dart';
 import 'package:efa_smartconnect_modbus_demo/shared/extensions/numeric_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:modbus/modbus.dart';
 import 'package:version/version.dart';
 import 'package:statemachine/statemachine.dart';
@@ -94,9 +95,16 @@ base class ModbusTcpService extends SmartDoorService {
         'IP Address': configuration.ip,
         'Port': configuration.port.toString(),
         'Connection Timeout [ms]':
-            configuration.timeout.inMilliseconds.toString(),
-        'Refresh Rate [ms]':
-            configuration.refreshRate.inMilliseconds.toString(),
+            configuration.timeout.inMilliseconds.localized,
+        'Refresh Rate [ms]': configuration.refreshRate.inMilliseconds.localized,
+        'License Activation State': switch (_licenseActivated) {
+          true => 'Activated',
+          false => 'Not Activated',
+          null => 'Unknown',
+        },
+        'Licensing Expiration Date': _licenseExpirationDate != null
+            ? DateFormat('yyyy-MM-dd').format(_licenseExpirationDate!)
+            : 'unknown',
       };
 
   @override
@@ -173,6 +181,57 @@ base class ModbusTcpService extends SmartDoorService {
     return true;
   }
 
+  ServiceAction get activateLicenseAction => ServiceAction(
+        id: 'activate_license',
+        name: 'Activate License',
+        description:
+            'Provide a license key to activate all Modbus TCP features',
+        iconData: Icons.key_outlined,
+        onPressed: () async {
+          var textEditingController = TextEditingController();
+          var errorText = RxnString();
+          var licenseKey = await Get.defaultDialog<String>(
+            title: "License Key",
+            contentPadding: const EdgeInsets.all(16),
+            content: Column(
+              children: [
+                const Text(
+                    "Provide a license key to activate all Modbus TCP features."),
+                const SizedBox(height: 16),
+                Obx(() => TextField(
+                      controller: textEditingController,
+                      autofocus: true,
+                      decoration: InputDecoration(
+                        hintText: 'XXXXX-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX',
+                        errorText: errorText.value,
+                      ),
+                    )),
+              ],
+            ),
+            barrierDismissible: false,
+            textConfirm: 'Apply',
+            onConfirm: () async {
+              var licenseKey = textEditingController.text;
+              var result = await writeLicenseKey(licenseKey);
+              if (result == LicenseActivationResult.success) {
+                _startedMachine.current =
+                    _ModbusTcpServiceState.checkingLicense;
+                Get.back();
+              } else {
+                errorText.value = result.description;
+              }
+            },
+            cancel: TextButton(
+              onPressed: () => Get.back<String>(),
+              child: const Text('Cancel'),
+            ),
+          );
+          if (licenseKey == null) {
+            return;
+          }
+        },
+      );
+
   bool isConnected = false;
 
   bool _blockClient = false;
@@ -183,7 +242,7 @@ base class ModbusTcpService extends SmartDoorService {
 
   bool? _licenseActivated;
 
-  _LicenseActivationResult? _licenseActivationResult;
+  LicenseActivationResult? _licenseActivationResult;
 
   DateTime? _licenseExpirationDate;
 
@@ -247,8 +306,9 @@ base class ModbusTcpService extends SmartDoorService {
     final onlineState = _startedMachine.newState(_ModbusTcpServiceState.online);
 
     offlineState.onTimeout(
-        Duration(milliseconds: configuration.timeout.inMilliseconds + 100),
-        offlineState.enter);
+      Duration(milliseconds: configuration.timeout.inMilliseconds + 100),
+      offlineState.enter,
+    );
 
     offlineState.onEntry(() async {
       _setStatus(_ModbusTcpServiceState.offline);
@@ -262,8 +322,9 @@ base class ModbusTcpService extends SmartDoorService {
     });
 
     checkingLicenseState.onTimeout(
-        Duration(milliseconds: configuration.timeout.inMilliseconds + 100),
-        checkingLicenseState.enter);
+      const Duration(minutes: 1),
+      checkingLicenseState.enter,
+    );
 
     checkingLicenseState.onEntry(() async {
       final appEventService = ApplicationEventService.find();
@@ -281,15 +342,27 @@ base class ModbusTcpService extends SmartDoorService {
               doorId: door.id,
               event: SmartDoorServiceEvent.connectionEstablished));
           _startedMachine.current = _ModbusTcpServiceState.online;
-        } else if (_licenseExpirationDate!.year < 2000) {
-          _setStatus(_ModbusTcpServiceState.checkingLicense, 'Unlicensed');
-        } else if (_licenseExpirationDate!.isBefore(DateTime.now())) {
-          _setStatus(_ModbusTcpServiceState.checkingLicense, 'License Expired');
+        } else {
+          addServiceAction(activateLicenseAction);
+          if (_licenseExpirationDate!.year < 2000) {
+            _setStatus(
+              _ModbusTcpServiceState.checkingLicense,
+              'Unlicensed',
+            );
+          } else if (_licenseExpirationDate!.isBefore(DateTime.now())) {
+            _setStatus(
+              _ModbusTcpServiceState.checkingLicense,
+              'License Expired',
+            );
+          }
         }
       } catch (_) {
         // state machine transitions handled in catchedModbusTransaction
       }
     });
+
+    checkingLicenseState
+        .onExit(() => removeServiceActionById(activateLicenseAction.id));
 
     onlineState.onTimeout(configuration.refreshRate, onlineState.enter);
 
@@ -459,6 +532,14 @@ base class ModbusTcpService extends SmartDoorService {
     return await _readRegisterByName(ModbusRegisterName.eventEntryTest);
   }
 
+  Future<LicenseActivationResult> writeLicenseKey(String key) async {
+    var strippedKey = key.replaceAll(RegExp(r'-'), '');
+    await _writeRegisterByName(ModbusRegisterName.licenseKey, strippedKey);
+    int activationResult =
+        await _readRegisterByName(ModbusRegisterName.licenseActivationResult);
+    return LicenseActivationResult.values[activationResult];
+  }
+
   Future<void> writeIndividualName(String name) async {
     await _writeRegisterByName(ModbusRegisterName.individualName, name);
   }
@@ -587,7 +668,7 @@ base class ModbusTcpService extends SmartDoorService {
         break;
 
       case ModbusRegisterName.licenseActivationResult when value is int:
-        _licenseActivationResult = _LicenseActivationResult.values[value];
+        _licenseActivationResult = LicenseActivationResult.values[value];
         break;
 
       case ModbusRegisterName.licenseActivationState when value is bool:
@@ -1220,11 +1301,18 @@ enum _ModbusTcpServiceState {
   online,
 }
 
-enum _LicenseActivationResult {
+enum LicenseActivationResult {
   success,
   invalidKeyFormat,
   invalidKey,
   expired;
+
+  String get description => switch (this) {
+        success => "License activated",
+        invalidKeyFormat => "Invalid key format",
+        invalidKey => "Invalid key",
+        expired => "License expired",
+      };
 }
 
 const _userApplicationDefinitions = [
