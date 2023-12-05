@@ -242,8 +242,6 @@ base class ModbusTcpService extends SmartDoorService {
 
   bool? _licenseActivated;
 
-  LicenseActivationResult? _licenseActivationResult;
-
   DateTime? _licenseExpirationDate;
 
   SmartConnectModule? get _smartConnectModule => (door.doorControl is EfaTronic)
@@ -665,10 +663,6 @@ base class ModbusTcpService extends SmartDoorService {
 
       case ModbusRegisterName.dateTimeFormat when value is int:
         _dataConfiguration.dateTimeFormat = DateTimeFormat.values[value];
-        break;
-
-      case ModbusRegisterName.licenseActivationResult when value is int:
-        _licenseActivationResult = LicenseActivationResult.values[value];
         break;
 
       case ModbusRegisterName.licenseActivationState when value is bool:

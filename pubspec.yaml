@@ -8,47 +8,46 @@ environment:
   sdk: '>=3.0.1 <4.0.0'
 
 dependencies:
+  async: ^2.11.0
+  build: ^2.4.1
+  context_menus: ^1.0.2
+  data_table_2: ^2.5.8
   flutter:
     sdk: flutter
-  flutter_launcher_icons:
+  flutter_launcher_icons: ^0.13.1
   get: ^4.6.5
   # get:
   #   git:
   #     url: https://github.com/jonataslaw/getx.git
   #     #ref: 6c2ff16 # branch master on 2023-07-24
   #     ref: 9d2b872 # branch 4.6.5 on 2023-07-24
-  modbus:
-  version:
-  yaml:
-  build:
-  statemachine:
-  intl:
-  async:
-  data_table_2:
-  hive:
-  hive_flutter:
-  uuid:
+  hive_flutter: ^1.1.0
+  hive: ^2.2.3
+  intl: ^0.18.1
   isar: ^3.1.0+1
   isar_flutter_libs: ^3.1.0+1
-  shared_preferences: ^2.2.0
-  context_menus: ^1.0.2
-  path_provider: ^2.0.15
   local_notifier: ^0.1.5
   logger: ^2.0.1
   meta: ^1.9.1
+  modbus: ^0.2.0
+  path_provider: ^2.0.15
+  shared_preferences: ^2.2.0
+  statemachine: ^3.3.1
+  version: ^3.0.2
+  yaml: ^3.1.2
 
 dev_dependencies:
-  test:
+  build_runner: ^2.4.5
+  code_builder: ^4.7.0
+  flutter_lints: ^2.0.3
   flutter_test:
     sdk: flutter
-  flutter_lints:
-  hive_generator:
-  build_runner: ^2.4.5
-  code_builder:
-  dart_style:
+  hive_generator: ^2.0.1
   isar_generator: ^3.1.0+1
-  plugin_platform_interface: ^2.1.5
+  msix: ^3.16.4
   path_provider_platform_interface: ^2.1.0
+  plugin_platform_interface: ^2.1.5
+  test: ^1.24.3
 
 flutter:
   uses-material-design: true
