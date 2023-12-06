@@ -8,7 +8,7 @@ name: Append installers to release
 on:
   release:
     types:
-      - created
+      - released
 
 jobs:
   build:
