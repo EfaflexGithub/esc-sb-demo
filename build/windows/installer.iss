@@ -9,7 +9,7 @@
 [Setup]
 PrivilegesRequired=lowest
 AppName=EFAFLEX SmartBuilding Demo
-AppVersion=1.0.0
+AppVersion={#GetFileVersion("x64\runner\Release\efa_smartconnect_modbus_demo.exe")}
 WizardStyle=modern
 ; LicenseFile=..\..\LICENSE.md
 DefaultDirName={autopf}\EFAFLEX SmartBuilding Demo
@@ -18,7 +18,7 @@ UninstallDisplayIcon={app}\efa_smartconnect_modbus_demo.exe
 Compression=lzma2
 SolidCompression=yes
 OutputDir=installer
-OutputBaseFilename=EfaflexSmartBuildingUserSetup-x64-{#SetupSetting("AppVersion")}
+OutputBaseFilename=EfaflexSmartBuildingDemoUserSetup-x64-{#SetupSetting("AppVersion")}
 ; "ArchitecturesAllowed=x64" specifies that Setup cannot run on
 ; anything but x64.
 ArchitecturesAllowed=x64
