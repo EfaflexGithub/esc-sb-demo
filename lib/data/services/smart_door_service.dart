@@ -29,9 +29,13 @@ abstract base class SmartDoorService with IsarCollectionMixin {
 
   List<UserApplicationDefinition> get supportedUserApplications;
 
+  List<UserApplication> get predefinedApplications;
+
   List<UserApplication> get userApplications;
 
   Future<bool> configureUserApplication(int slot, String value);
+
+  Future<bool> setPredefinedApplicationState(int index, bool state);
 
   Future<bool> setUserApplicationState(int slot, bool state);
 

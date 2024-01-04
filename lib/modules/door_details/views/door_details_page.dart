@@ -1,6 +1,7 @@
 import 'package:context_menus/context_menus.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:efa_smartconnect_modbus_demo/data/models/information_entry.dart';
+import 'package:efa_smartconnect_modbus_demo/data/models/user_application.dart';
 import 'package:efa_smartconnect_modbus_demo/modules/door_details/models/output_data_source.dart';
 import 'package:efa_smartconnect_modbus_demo/modules/door_details/models/input_data_source.dart';
 import 'package:efa_smartconnect_modbus_demo/shared/extensions/datetime_extensions.dart';
@@ -204,6 +205,28 @@ class DoorDetailsPage extends GetView<DoorDetailsController> {
                   ],
                 );
               }),
+              _buildGroup(
+                context: context,
+                title: "Predefined Applications",
+                children: [
+                  _buildWidgetPropertiesCard(
+                    context: context,
+                    properties: {
+                      for (var app in controller.predefinedApplications)
+                        app.definition!.label:
+                            app.type == UserApplicationType.momentary
+                                ? TextButton(
+                                    onPressed: app.activate,
+                                    child: const Text('Trigger'),
+                                  )
+                                : Obx(() => Switch(
+                                      value: app.state ?? false,
+                                      onChanged: (_) => app.activate(),
+                                    ))
+                    },
+                  ),
+                ],
+              ),
               _buildGroup(
                 context: context,
                 title: "User Applications",

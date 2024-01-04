@@ -8,11 +8,13 @@ class DoorDetailsController extends GetxController {
   final SmartDoorService smartDoorService;
   late final int userApplicationsCount;
   late final List<UserApplication?> userApplications;
+  late final List<UserApplication> predefinedApplications;
   late final List<String> userApplicationsTempValues;
 
   DoorDetailsController(this.smartDoorService) {
     userApplicationsCount = smartDoorService.userApplications.length;
     userApplications = smartDoorService.userApplications;
+    predefinedApplications = smartDoorService.predefinedApplications;
     userApplicationsTempValues = List.filled(userApplicationsCount, "-1");
   }
 

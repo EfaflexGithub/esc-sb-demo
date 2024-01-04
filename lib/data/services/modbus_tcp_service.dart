@@ -73,16 +73,32 @@ base class ModbusTcpService extends SmartDoorService {
 
   bool _ignoreParameterChange = false;
 
-  late final List<UserApplication> _userApplications = RxList(List.generate(
-    _userApplicationsCount,
-    (slot) => UserApplication(
-      definition: null,
-      state: null,
-      onStateChanged: (state) async {
-        await setUserApplicationState(slot, state);
-      },
+  late final List<UserApplication> _userApplications = RxList(
+    List.generate(
+      _userApplicationsCount,
+      (slot) => UserApplication(
+        definition: null,
+        state: null,
+        onStateChanged: (state) async {
+          await setUserApplicationState(slot, state);
+        },
+      ),
     ),
-  ));
+  );
+
+  late final List<UserApplication> _predefinedApplications =
+      _predefinedApplicationDefinitions
+          .map(
+            (userApplicationDefinition) => UserApplication(
+              definition: userApplicationDefinition,
+              state: false,
+              onStateChanged: (state) async {
+                await setPredefinedApplicationState(
+                    int.parse(userApplicationDefinition.value), state);
+              },
+            ),
+          )
+          .toList();
 
   static const String serviceName = 'modbus_tcp_service';
 
@@ -145,6 +161,9 @@ base class ModbusTcpService extends SmartDoorService {
   List<UserApplication> get userApplications => _userApplications;
 
   @override
+  List<UserApplication> get predefinedApplications => _predefinedApplications;
+
+  @override
   Future<bool> configureUserApplication(int slot, String value) async {
     int intValue = int.parse(value);
     if (slot > _userApplicationsCount || intValue < 0) {
@@ -164,6 +183,33 @@ base class ModbusTcpService extends SmartDoorService {
     }
     userApplications[slot].definition =
         _userApplicationDefinitionByValue(value);
+    return true;
+  }
+
+  @override
+  Future<bool> setPredefinedApplicationState(int index, bool state) async {
+    if (index >= _predefinedApplications.length) {
+      return false;
+    }
+
+    ModbusRegisterName modbusRegisterName = switch (index) {
+      0 => ModbusRegisterName.predefinedApplication1,
+      1 => ModbusRegisterName.predefinedApplication2,
+      2 => ModbusRegisterName.predefinedApplication3,
+      3 => ModbusRegisterName.predefinedApplication4,
+      4 => ModbusRegisterName.predefinedApplication5,
+      5 => ModbusRegisterName.predefinedApplication6,
+      6 => ModbusRegisterName.predefinedApplication7,
+      7 => ModbusRegisterName.predefinedApplication8,
+      8 => ModbusRegisterName.predefinedApplication9,
+      9 => ModbusRegisterName.predefinedApplication10,
+      10 => ModbusRegisterName.predefinedApplication11,
+      11 => ModbusRegisterName.predefinedApplication12,
+      12 => ModbusRegisterName.predefinedApplication13,
+      _ => throw Exception('Unknown slot'),
+    };
+
+    await _writeRegisterByName(modbusRegisterName, state);
     return true;
   }
 
@@ -1379,6 +1425,95 @@ enum LicenseActivationResult {
         expired => "License expired",
       };
 }
+
+const _predefinedApplicationDefinitions = [
+  UserApplicationDefinition.momentary(
+    value: '0',
+    label: 'Open (time)',
+    description: 'Open door and automatically close after auto-close delay',
+    icon: Icons.arrow_upward_outlined,
+  ),
+  UserApplicationDefinition.momentary(
+    value: '1',
+    label: 'Open (impulse)',
+    description: 'Open door and stay in opened position',
+    icon: Icons.arrow_upward_outlined,
+  ),
+  UserApplicationDefinition.momentary(
+    value: '2',
+    label: 'Stop',
+    description: 'Stop the current door travel',
+    icon: Icons.stop_outlined,
+  ),
+  UserApplicationDefinition.momentary(
+    value: '3',
+    label: 'Close',
+    description: 'Close door and stay in closed position',
+    icon: Icons.arrow_downward_outlined,
+  ),
+  UserApplicationDefinition.toggle(
+    value: '4',
+    label: 'Disable intermediate stop',
+    description: 'Disables the intermediate stop',
+    icon: Icons.report_off_outlined,
+    selectedIcon: Icons.report_off,
+  ),
+  UserApplicationDefinition.momentary(
+    value: '5',
+    label: 'Intermediate (impulse)',
+    description: 'Travel to intermediate position and stay there',
+    icon: Icons.vertical_align_center_outlined,
+  ),
+  UserApplicationDefinition.momentary(
+    value: '6',
+    label: 'Intermediate (time)',
+    description:
+        'Travel to intermediate position and automatically close after auto-close delay',
+    icon: Icons.vertical_align_center_outlined,
+  ),
+  UserApplicationDefinition.toggle(
+    value: '7',
+    label: 'Disable openings',
+    description: 'Disables all opening commands',
+    icon: Icons.expand_circle_down_outlined,
+    selectedIcon: Icons.expand_circle_down,
+  ),
+  UserApplicationDefinition.toggle(
+    value: '8',
+    label: 'Disable interlock',
+    description: 'Disables ther interlock between two doors',
+    icon: Icons.expand_circle_down_outlined,
+    selectedIcon: Icons.report_off,
+  ),
+  UserApplicationDefinition.toggle(
+    value: '9',
+    label: 'Disable travels (foil)',
+    description: 'Disable travels with foil keypad',
+    icon: Icons.expand_circle_down_outlined,
+    selectedIcon: Icons.expand_circle_down,
+  ),
+  UserApplicationDefinition.toggle(
+    value: '10',
+    label: 'Disable openings (outside)',
+    description: 'Disables opening commands from outside',
+    icon: Icons.expand_circle_down_outlined,
+    selectedIcon: Icons.expand_circle_down,
+  ),
+  UserApplicationDefinition.toggle(
+    value: '11',
+    label: 'Disable automatic mode',
+    description: 'Travels are only possible with foil keypad',
+    icon: Icons.sync_problem_outlined,
+    selectedIcon: Icons.sync_problem,
+  ),
+  UserApplicationDefinition.toggle(
+    value: '12',
+    label: 'Force slow travels',
+    description: 'Force slow travels for the door',
+    icon: Icons.speed_outlined,
+    selectedIcon: Icons.speed,
+  ),
+];
 
 const _userApplicationDefinitions = [
   UserApplicationDefinition.toggle(
