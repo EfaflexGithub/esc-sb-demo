@@ -36,8 +36,8 @@ class UserApplicationDefinition {
     required this.label,
     required this.description,
     required this.icon,
-  })  : selectedIcon = null,
-        momentaryDelay = 0;
+    this.momentaryDelay = 250,
+  }) : selectedIcon = null;
 
   const UserApplicationDefinition.toggle({
     required this.value,
@@ -45,8 +45,8 @@ class UserApplicationDefinition {
     required this.description,
     required this.icon,
     IconData? selectedIcon,
-    this.momentaryDelay = 250,
-  }) : selectedIcon = selectedIcon ?? icon;
+  })  : selectedIcon = selectedIcon ?? icon,
+        momentaryDelay = 0;
 }
 
 class UserApplication {

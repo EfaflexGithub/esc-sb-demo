@@ -103,6 +103,9 @@ groups:
   - name: Parameterization
     group: Door Interaction
 
+  - name: Predefined Applications
+    group: Door Interaction
+
   - name: User Applications
     group: Door Interaction
 
@@ -743,11 +746,11 @@ registers:
     address: 1003
     access: R/W
 
-  - name: Relay K4
+  - name: Tst Sra-A
     group: Physical Outputs
     registerType: Coil
     address: 1004
-    access: R
+    access: R/W
 
   - name: Relay K5
     group: Physical Outputs
@@ -827,19 +830,19 @@ registers:
     address: 1017
     access: R
 
-  - name: LED Open
+  - name: Led Open
     group: Physical Outputs
     registerType: Coil
     address: 1018
     access: R
 
-  - name: LED Stop
+  - name: Led Stop
     group: Physical Outputs
     registerType: Coil
     address: 1019
     access: R
 
-  - name: LED Close
+  - name: Led Close
     group: Physical Outputs
     registerType: Coil
     address: 1020
@@ -955,6 +958,96 @@ registers:
     address: 1518
     access: R
 
+  - name: Virtual Output 41
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1519
+    access: R
+
+  - name: Virtual Output 42
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1520
+    access: R
+
+  - name: Virtual Output 43
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1521
+    access: R
+
+  - name: Virtual Output 44
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1522
+    access: R
+
+  - name: Virtual Output 45
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1523
+    access: R
+
+  - name: Virtual Output 46
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1524
+    access: R
+
+  - name: Virtual Output 47
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1525
+    access: R
+
+  - name: Virtual Output 48
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1526
+    access: R
+
+  - name: Virtual Output 49
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1527
+    access: R
+
+  - name: Virtual Output 4A
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1528
+    access: R
+
+  - name: Virtual Output 4B
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1529
+    access: R
+
+  - name: Virtual Output 4C
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1530
+    access: R
+
+  - name: Virtual Output 4D
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1531
+    access: R
+
+  - name: Virtual Output 4E
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1532
+    access: R
+
+  - name: Virtual Output 4F
+    group: Virtual In- Outputs
+    registerType: Coil
+    address: 1533
+    access: R
+
   - name: Virtual Input 13
     group: Virtual In- Outputs
     registerType: DiscreteInput
@@ -1014,6 +1107,156 @@ registers:
     group: Virtual In- Outputs
     registerType: DiscreteInput
     address: 1512
+
+  - name: Virtual Input 41
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1513
+
+  - name: Virtual Input 42
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1514
+
+  - name: Virtual Input 43
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1515
+
+  - name: Virtual Input 44
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1516
+
+  - name: Virtual Input 45
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1517
+
+  - name: Virtual Input 46
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1518
+
+  - name: Virtual Input 47
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1519
+
+  - name: Virtual Input 48
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1520
+
+  - name: Virtual Input 49
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1521
+
+  - name: Virtual Input 4A
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1522
+
+  - name: Virtual Input 4B
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1523
+
+  - name: Virtual Input 4C
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1524
+
+  - name: Virtual Input 4D
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1525
+
+  - name: Virtual Input 4E
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1526
+
+  - name: Virtual Input 4F
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1527
+
+  - name: Virtual Input 51
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1528
+
+  - name: Virtual Input 52
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1529
+
+  - name: Virtual Input 53
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1530
+
+  - name: Virtual Input 54
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1531
+
+  - name: Virtual Input 55
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1532
+
+  - name: Virtual Input 56
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1533
+
+  - name: Virtual Input 57
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1534
+
+  - name: Virtual Input 58
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1535
+
+  - name: Virtual Input 59
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1536
+
+  - name: Virtual Input 5A
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1537
+
+  - name: Virtual Input 5B
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1538
+
+  - name: Virtual Input 5C
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1539
+
+  - name: Virtual Input 5D
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1540
+
+  - name: Virtual Input 5E
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1541
+
+  - name: Virtual Input 5F
+    group: Virtual In- Outputs
+    registerType: DiscreteInput
+    address: 1542
 
   # Parameterization
 
@@ -1080,6 +1323,86 @@ registers:
       range:
         min: -60
         max: 60
+
+  # Predefined Applications
+
+  - name: Predefined Application 1
+    group: Predefined Applications
+    registerType: Coil
+    address: 1
+    access: R/W
+
+  - name: Predefined Application 2
+    group: Predefined Applications
+    registerType: Coil
+    address: 2
+    access: R/W
+
+  - name: Predefined Application 3
+    group: Predefined Applications
+    registerType: Coil
+    address: 3
+    access: R/W
+
+  - name: Predefined Application 4
+    group: Predefined Applications
+    registerType: Coil
+    address: 4
+    access: R/W
+
+  - name: Predefined Application 5
+    group: Predefined Applications
+    registerType: Coil
+    address: 5
+    access: R/W
+
+  - name: Predefined Application 6
+    group: Predefined Applications
+    registerType: Coil
+    address: 6
+    access: R/W
+
+  - name: Predefined Application 7
+    group: Predefined Applications
+    registerType: Coil
+    address: 7
+    access: R/W
+
+  - name: Predefined Application 8
+    group: Predefined Applications
+    registerType: Coil
+    address: 8
+    access: R/W
+
+  - name: Predefined Application 9
+    group: Predefined Applications
+    registerType: Coil
+    address: 9
+    access: R/W
+
+  - name: Predefined Application 10
+    group: Predefined Applications
+    registerType: Coil
+    address: 10
+    access: R/W
+
+  - name: Predefined Application 11
+    group: Predefined Applications
+    registerType: Coil
+    address: 11
+    access: R/W
+
+  - name: Predefined Application 12
+    group: Predefined Applications
+    registerType: Coil
+    address: 12
+    access: R/W
+
+  - name: Predefined Application 13
+    group: Predefined Applications
+    registerType: Coil
+    address: 13
+    access: R/W
 
   # User Applications
  

@@ -2,7 +2,7 @@ name: efa_smartconnect_modbus_demo
 title: EFA-SmartConnect Modbus Demo
 description: This application demonstrates how to use the EFA-SmartConnect Modbus TCP interface.
 publish_to: 'none'
-version: 0.9.0
+version: 0.10.0
 
 environment:
   sdk: '>=3.0.1 <4.0.0'
@@ -23,7 +23,7 @@ dependencies:
   #     ref: 9d2b872 # branch 4.6.5 on 2023-07-24
   hive_flutter: ^1.1.0
   hive: ^2.2.3
-  intl: ^0.18.1
+  intl: ^0.19.0
   isar: ^3.1.0+1
   isar_flutter_libs: ^3.1.0+1
   local_notifier: ^0.1.5
@@ -46,7 +46,6 @@ dev_dependencies:
   isar_generator: ^3.1.0+1
   path_provider_platform_interface: ^2.1.1
   plugin_platform_interface: ^2.1.7
-  test: ^1.24.9
 
 flutter:
   uses-material-design: true

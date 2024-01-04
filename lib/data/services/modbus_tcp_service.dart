@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:efa_smartconnect_modbus_demo/data/models/application_event.dart';
+import 'package:efa_smartconnect_modbus_demo/data/models/control_output.dart';
 import 'package:efa_smartconnect_modbus_demo/data/models/door.dart';
 import 'package:efa_smartconnect_modbus_demo/data/models/efa_tronic.dart';
 import 'package:efa_smartconnect_modbus_demo/data/models/event_entry.dart';
@@ -55,6 +56,7 @@ base class ModbusTcpService extends SmartDoorService {
     // as we know that modbus_tcp_service uses the EFA-SmartConnect module,
     // add the specific door control implementation and the SmartConnectModule
     var efaTronic = EfaTronic();
+    efaTronic.onControlOutputChangeRequest.listen(onControlOutputChangeRequest);
     door.doorControl = efaTronic;
     efaTronic.extensionBoards.add(SmartConnectModule());
     tooltip.value =
@@ -418,6 +420,18 @@ base class ModbusTcpService extends SmartDoorService {
         writeControllerClosedPositionAdjustment(value);
       }
     });
+  }
+
+  void onControlOutputChangeRequest((ControlOutput, bool) event) {
+    var (output, value) = event;
+    var index = door.doorControl?.controlOutputs.indexOf(output);
+    if (index == null) {
+      return;
+    }
+    var modbusRegisterName =
+        ModbusRegisterName.values[ModbusRegisterName.relayK1.index + index];
+
+    _writeRegisterByName(modbusRegisterName, value);
   }
 
   void _setStatus(_ModbusTcpServiceState serviceState, [String? stateMessage]) {
@@ -822,6 +836,63 @@ base class ModbusTcpService extends SmartDoorService {
       case ModbusRegisterName.userApplication2 when value is bool:
         userApplications[1].state = value;
         break;
+
+      case >= ModbusRegisterName.relayK1 && <= ModbusRegisterName.ledClose
+          when value is bool:
+        var controlOutputs = (door.doorControl as EfaTronic?)?.controlOutputs;
+        if (controlOutputs == null) {
+          break;
+        }
+
+        var index = ModbusRegister.find(name).address -
+            ModbusRegister.find(ModbusRegisterName.relayK1).address;
+
+        controlOutputs[index].enabled.value = value;
+
+      case >= ModbusRegisterName.virtualOutput21 &&
+              <= ModbusRegisterName.virtualOutput4F
+          when value is bool:
+        var controlOutputs = (door.doorControl as EfaTronic?)?.controlOutputs;
+        if (controlOutputs == null) {
+          break;
+        }
+        var virtualOutputsOffset =
+            controlOutputs.indexWhere((element) => element.virtual);
+
+        var index = virtualOutputsOffset +
+            ModbusRegister.find(name).address -
+            ModbusRegister.find(ModbusRegisterName.virtualOutput21).address;
+
+        controlOutputs[index].enabled.value = value;
+
+      case >= ModbusRegisterName.inputE1 &&
+              <= ModbusRegisterName.foilKeyboardClose
+          when value is bool:
+        var controlInputs = (door.doorControl as EfaTronic?)?.controlInputs;
+        if (controlInputs == null) {
+          break;
+        }
+
+        var index = ModbusRegister.find(name).address -
+            ModbusRegister.find(ModbusRegisterName.inputE1).address;
+
+        controlInputs[index].enabled.value = value;
+
+      case >= ModbusRegisterName.virtualInput13 &&
+              <= ModbusRegisterName.virtualInput5F
+          when value is bool:
+        var controlInputs = (door.doorControl as EfaTronic?)?.controlInputs;
+        if (controlInputs == null) {
+          break;
+        }
+        var virtualInputsOffset =
+            controlInputs.indexWhere((element) => element.virtual);
+
+        var index = virtualInputsOffset +
+            ModbusRegister.find(name).address -
+            ModbusRegister.find(ModbusRegisterName.virtualInput13).address;
+
+        controlInputs[index].enabled.value = value;
 
       default:
         break;
@@ -1373,50 +1444,57 @@ const _userApplicationDefinitions = [
   ),
   UserApplicationDefinition.toggle(
     value: '8',
+    label: 'Disable interlock',
+    description: 'Disables ther interlock between two doors',
+    icon: Icons.expand_circle_down_outlined,
+    selectedIcon: Icons.report_off,
+  ),
+  UserApplicationDefinition.toggle(
+    value: '9',
     label: 'Force slow travels',
     description: 'Force slow travels for the door',
     icon: Icons.speed_outlined,
     selectedIcon: Icons.speed,
   ),
   UserApplicationDefinition.momentary(
-    value: '9',
+    value: '10',
     label: 'Open (impulse)',
     description: 'Open door and stay in opened position',
     icon: Icons.arrow_upward_outlined,
   ),
   UserApplicationDefinition.momentary(
-    value: '10',
+    value: '11',
     label: 'Open (time)',
     description: 'Open door and automatically close after auto-close delay',
     icon: Icons.arrow_upward_outlined,
   ),
   UserApplicationDefinition.momentary(
-    value: '11',
+    value: '12',
     label: 'Intermediate (impulse)',
     description: 'Travel to intermediate position and stay there',
     icon: Icons.vertical_align_center_outlined,
   ),
   UserApplicationDefinition.momentary(
-    value: '12',
+    value: '13',
     label: 'Intermediate (time)',
     description:
         'Travel to intermediate position and automatically close after auto-close delay',
     icon: Icons.vertical_align_center_outlined,
   ),
   UserApplicationDefinition.momentary(
-    value: '13',
+    value: '14',
     label: 'Close',
     description: 'Close door and stay in closed position',
     icon: Icons.arrow_downward_outlined,
   ),
   UserApplicationDefinition.momentary(
-    value: '14',
+    value: '15',
     label: 'Stop',
     description: 'Stop the current door travel',
     icon: Icons.stop_outlined,
   ),
   UserApplicationDefinition.toggle(
-    value: '15',
+    value: '16',
     label: 'Smoke extraction',
     description:
         'Travel to smoke extraction position with slow speed and disable automatic mode',

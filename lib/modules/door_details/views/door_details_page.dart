@@ -1,6 +1,8 @@
 import 'package:context_menus/context_menus.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:efa_smartconnect_modbus_demo/data/models/information_entry.dart';
+import 'package:efa_smartconnect_modbus_demo/modules/door_details/models/output_data_source.dart';
+import 'package:efa_smartconnect_modbus_demo/modules/door_details/models/input_data_source.dart';
 import 'package:efa_smartconnect_modbus_demo/shared/extensions/datetime_extensions.dart';
 import 'package:efa_smartconnect_modbus_demo/shared/extensions/numeric_extensions.dart';
 import 'package:efa_smartconnect_modbus_demo/shared/widgets/adaptive_text_field.dart';
@@ -111,6 +113,52 @@ class DoorDetailsPage extends GetView<DoorDetailsController> {
                     ...door.doorControl!.controlInformation.map((e) =>
                         _buildEditablePropertiesCard(
                             context: context, informationEntries: e)),
+                  SizedBox(
+                    height: 360,
+                    child: switch (door.doorControl) {
+                      null => const Text('Unknown door control type'),
+                      _ => PaginatedDataTable2(
+                          source: OutputDataSource(
+                              outputs:
+                                  door.doorControl!.controlOutputs.toList()),
+                          columns: [
+                            'Output',
+                            'Connector (Label)',
+                            'State',
+                            'Control',
+                          ]
+                              .map((title) => DataColumn2(label: Text(title)))
+                              .toList(),
+                          showCheckboxColumn: false,
+                          rowsPerPage: 5,
+                          empty:
+                              const Center(child: Text('No events available')),
+                          renderEmptyRowsInTheEnd: false,
+                        ),
+                    },
+                  ),
+                  SizedBox(
+                    height: 360,
+                    child: switch (door.doorControl) {
+                      null => const Text('Unknown door control type'),
+                      _ => PaginatedDataTable2(
+                          source: InputDataSource(
+                              inputs: door.doorControl!.controlInputs.toList()),
+                          columns: [
+                            'Input',
+                            'Connector (Label)',
+                            'State',
+                          ]
+                              .map((title) => DataColumn2(label: Text(title)))
+                              .toList(),
+                          showCheckboxColumn: false,
+                          rowsPerPage: 5,
+                          empty:
+                              const Center(child: Text('No events available')),
+                          renderEmptyRowsInTheEnd: false,
+                        ),
+                    },
+                  ),
                 ],
               ),
               _buildGroup(

@@ -66,6 +66,10 @@ class MyApp extends StatelessWidget {
         isDense: true,
         labelStyle: Theme.of(context).textTheme.bodyMedium,
       ),
+      switchTheme: SwitchThemeData(
+        trackOutlineColor:
+            MaterialStateProperty.resolveWith((_) => Colors.transparent),
+      ),
       useMaterial3: true,
     );
   }
