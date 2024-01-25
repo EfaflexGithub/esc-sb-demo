@@ -2,13 +2,13 @@
 
 # EFA-SmartConnect Building Automation Demo
 
-![App Logo](/assets/icon/icon.png =75x)
+<img src="assets/icon/icon.png" alt="application icon" width="75" >
 
 ## Overview
 
 The EFA-SmartConnect Module Demo App is an open source demonstration application that showcases the capabilities and functionalities of the EFA-SmartConnect® Module. This module supports both WiFi and Ethernet connections and serves as an extension board for the EFA-TRONIC® door control.
 
-### Key Features
+## Key Features
 
 - **Modbus Interface Support:** Communicate seamlessly with the EFA-SmartConnect Module through the Modbus interface.
 - **Door Status:** Monitor the current status of doors in real-time.
@@ -17,42 +17,27 @@ The EFA-SmartConnect Module Demo App is an open source demonstration application
 - **Parameter Configuration:** Change basic parameters of the door control to customize the behavior.
 - **Input and Output Status:** Read the status of inputs and outputs associated with the doors.
 
-## Screenshots
+## Screenshot
 
-![Screenshot 1](/doc/screenshots/door-overview.png =800x)
+<img src="doc/screenshots/door-overview.png" alt="screenshot of door overview" width="800" >
 
+[Further Screenshots](#screenshots)
 
-![Screenshot 2](/doc/screenshots/door-details-1.png =800x)
-
-![Screenshot 3](/doc/screenshots/door-details-2.png =800x)
-
-![Screenshot 3](/doc/screenshots/door-details-3.png =800x)
-
-![Screenshot 3](/doc/screenshots/door-details-4.png =800x)
-
-![Screenshot 3](/doc/screenshots/door-details-5.png =800x)
-
-![Screenshot 3](/doc/screenshots/event-filter-overview.png =800x)
-
-![Screenshot 3](/doc/screenshots/settings-1.png =800x)
-
-![Screenshot 3](/doc/screenshots/settings-2.png =800x)
-
-## Trying
+# Trying
 
 Download the Windows x64 installer to quickly set up the EFA-SmartConnect Module Demo App on your Windows machine. No admin rights required.
 
 [Latest Release](https://github.com/EfaflexGithub/esc-sb-demo/releases/latest)
 
-## Contributing
+# Contributing
 
 We welcome contributions from the community. If you have any ideas, bug reports, or feature requests, feel free to open an issue or submit a pull request.
 
-### Prerequisites
+## Prerequisites
 
 - [Flutter](https://flutter.dev/) installed on your development environment.
 
-### Installation
+## Installation
 
 1. Clone the repository:
 
@@ -78,7 +63,7 @@ We welcome contributions from the community. If you have any ideas, bug reports,
    flutter pub run build_runner build
    ```
 
-### Usage
+## Usage
 
 Run the application on an emulator or connected device:
 
@@ -86,22 +71,40 @@ Run the application on an emulator or connected device:
 flutter run
 ```
 
-## License
+# License
 
 This project is licensed under the [GNU General Public License v3.0](LICENSE.md).
 
-## Links
+# Links
 
-### EFA-SmartConnect
+## EFA-SmartConnect
 
-[EFAFLEX - EFA-SmartConnect®](https://link.efaflex.com/3ne6k)
+[EFAFLEX - EFA-SmartConnect®](https://link.efaflex.com/nvuf)
 
-### EFA-SmartConnect App
+## EFA-SmartConnect App
 
 - [Apple App Store](https://link.efaflex.com/3z4ez)
 - [Google Play Store](https://link.efaflex.com/ujs88)
 
-### EFA-SmartConnect Building Automation
+## EFA-SmartConnect Building Automation
 
 - [Modbus Documentation](https://link.efaflex.com/kgf4b)
-- [EFA-SmartBuilding API](https://api.efaflex.com/efa-smartbuilding/v1/documentation)
+- [EFA-SmartBuilding API](https://link.efaflex.com/6afi)
+
+## Screenshots
+
+<img src="doc/screenshots/door-details-1.png" alt="screenshot of door details" width="800" >
+
+<img src="doc/screenshots/door-details-2.png" alt="screenshot of door details" width="800" >
+
+<img src="doc/screenshots/door-details-3.png" alt="screenshot of door details" width="800" >
+
+<img src="doc/screenshots/door-details-4.png" alt="screenshot of door details" width="800" >
+
+<img src="doc/screenshots/door-details-5.png" alt="screenshot of door details" width="800" >
+
+<img src="doc/screenshots/event-filter-overview.png" alt="screenshot of events with filter" width="800" >
+
+<img src="doc/screenshots/settings-1.png" alt="screenshot of app settings" width="800" >
+
+<img src="doc/screenshots/settings-2.png" alt="screenshot of app settings" width="800" >
