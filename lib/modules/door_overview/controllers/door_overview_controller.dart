@@ -138,16 +138,16 @@ class DoorOverviewController extends GetxController {
         String ip = ipController.text;
         String port = portController.text;
         int refreshRate = int.parse(refreshRateController.text, radix: 10);
-        // String licenseKey = licenseController.text;
+        String licenseKey = licenseController.text;
 
         var service = await doorCollectionService.add(
           ModbusTcpService.fromConfig(
-            ModbusTcpServiceConfiguration(
-              ip: ip,
-              port: int.parse(port),
-              refreshRate: Duration(milliseconds: refreshRate),
-            ),
-          ),
+              ModbusTcpServiceConfiguration(
+                ip: ip,
+                port: int.parse(port),
+                refreshRate: Duration(milliseconds: refreshRate),
+              ),
+              licenseKey: licenseKey),
         ) as ModbusTcpService;
 
         await service.start();

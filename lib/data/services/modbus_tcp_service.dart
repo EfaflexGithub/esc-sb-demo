@@ -46,7 +46,7 @@ base class ModbusTcpService extends SmartDoorService {
             client: client);
 
   ModbusTcpService.fromConfig(this.configuration,
-      {int? id, ModbusClient? client})
+      {String? licenseKey, int? id, ModbusClient? client})
       : client = client ??
             createTcpClient(configuration.ip,
                 port: configuration.port,
@@ -61,7 +61,7 @@ base class ModbusTcpService extends SmartDoorService {
     efaTronic.extensionBoards.add(SmartConnectModule());
     tooltip.value =
         'server: ${configuration.ip}:${configuration.port}\nrefresh rate: ${configuration.refreshRate.inMilliseconds} ms';
-    initializeStateMachine();
+    initializeStateMachine(licenseKey);
     registerParameterChangeListeners(efaTronic);
   }
 
@@ -120,9 +120,8 @@ base class ModbusTcpService extends SmartDoorService {
           false => 'Not Activated',
           null => 'Unknown',
         },
-        'Licensing Expiration Date': _licenseExpirationDate != null
-            ? DateFormat('yyyy-MM-dd').format(_licenseExpirationDate!)
-            : 'unknown',
+        'Licensing Expiration Date':
+            expirationDateToString(_licenseExpirationDate),
       };
 
   @override
@@ -324,7 +323,7 @@ base class ModbusTcpService extends SmartDoorService {
     return configuration.toMap();
   }
 
-  void initializeStateMachine() {
+  void initializeStateMachine(String? licenseKey) {
     // configure disconnect timer
     _disconnectTimer ??=
         RestartableTimer(const Duration(milliseconds: 500), () async {
@@ -377,7 +376,17 @@ base class ModbusTcpService extends SmartDoorService {
       _setStatus(_ModbusTcpServiceState.checkingLicense);
       try {
         await updateDoorModelByGroup(ModbusRegisterGroup.licensing);
-        if (_licenseActivated!) {
+        if (licenseKey != null) {
+          try {
+            var result = await writeLicenseKey(licenseKey!);
+            if (result == LicenseActivationResult.success) {
+              await updateDoorModelByGroup(ModbusRegisterGroup.licensing);
+            }
+          } finally {
+            licenseKey = null;
+          }
+        }
+        if (_licenseActivated == true) {
           await updateDoorModelByGroup(ModbusRegisterGroup.doorData);
           await door.saveToCache();
           await updateDoorModelByGroup(
@@ -1275,6 +1284,19 @@ base class ModbusTcpService extends SmartDoorService {
       default:
         throw "Unsupported type $type or mismatching value type ${value.runtimeType}";
     }
+  }
+
+  static String expirationDateToString(DateTime? expirationDate) {
+    if (expirationDate == null) {
+      return "Unknown";
+    }
+    if (expirationDate.compareTo(DateTime(2099, 12, 31)) >= 0) {
+      return "Unlimited";
+    }
+    if (expirationDate.isBefore(DateTime.now())) {
+      return "Expired";
+    }
+    return DateFormat('yyyy-MM-dd').format(expirationDate);
   }
 }
 
