@@ -39,28 +39,34 @@ We welcome contributions from the community. If you have any ideas, bug reports,
 
 ## Installation
 
-1. Clone the repository:
+1. On Windows: Enable Developer Mode:
+
+   ```bash
+   start ms-settings:developers
+   ```
+
+2. Clone the repository:
 
    ```bash
    git clone https://github.com/EfaflexGithub/esc-sb-demo.git
    ```
 
-2. Navigate to the project directory:
+3. Navigate to the project directory:
 
    ```bash
    cd esc-sb-demo
    ```
 
-3. Install dependencies:
+4. Install dependencies:
 
    ```bash
    flutter pub get
    ```
 
-4. Run code generator:
+5. Run code generator:
 
    ```bash
-   flutter pub run build_runner build
+   dart run build_runner build
    ```
 
 ## Usage
