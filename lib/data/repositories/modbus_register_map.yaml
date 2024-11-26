@@ -370,6 +370,18 @@ registers:
     address: 1001
     datatype: Int32
 
+  - name: Reversal Counter Safety Group
+    group: Cycle Counters
+    registerType: InputRegister
+    address: 1003
+    datatype: Int32
+
+  - name: Reversal Counter Safety Edge
+    group: Cycle Counters
+    registerType: InputRegister
+    address: 1005
+    datatype: Int32
+
   - name: Daily Cycles (Day)
     group: Cycle Counters
     registerType: InputRegister

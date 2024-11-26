@@ -773,6 +773,14 @@ base class ModbusTcpService extends SmartDoorService {
         door.cycleCounter = value;
         break;
 
+      case ModbusRegisterName.reversalCounterSafetyGroup when value is int:
+        door.reversalsSafetyGroup = value;
+        break;
+
+      case ModbusRegisterName.reversalCounterSafetyEdge when value is int:
+        door.reversalsSafetyEdge = value;
+        break;
+
       case ModbusRegisterName.dailyCyclesDay when value is int:
         _smartConnectModule?.cycleAnalysis.dailyCyclesDay.value = value;
         break;

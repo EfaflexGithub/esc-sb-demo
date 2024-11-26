@@ -101,6 +101,10 @@ class DoorDetailsPage extends GetView<DoorDetailsController> {
                               door.doorControl?.firmwareVersion.value ?? '?',
                           "Current Cycle Counter":
                               door.cycleCounter?.localized ?? '?',
+                          "Reversals (Safety Group)":
+                              door.reversalsSafetyGroup?.localized ?? '?',
+                          "Reversals (Safety Edge)":
+                              door.reversalsSafetyEdge?.localized ?? '?',
                         },
                       )),
                   Obx(() => _buildTextPropertiesCard(

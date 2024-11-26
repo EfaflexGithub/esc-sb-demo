@@ -24,6 +24,14 @@ class Door with IsarCollectionMixin {
   int? get cycleCounter => _cycleCounter.value;
   set cycleCounter(int? value) => _cycleCounter.value = value;
 
+  final _siCycleCounter = Rxn<int>();
+  int? get reversalsSafetyGroup => _siCycleCounter.value;
+  set reversalsSafetyGroup(int? value) => _siCycleCounter.value = value;
+
+  final _seCycleCounter = Rxn<int>();
+  int? get reversalsSafetyEdge => _seCycleCounter.value;
+  set reversalsSafetyEdge(int? value) => _seCycleCounter.value = value;
+
   final _openingStatus = Rx<OpeningStatus>(OpeningStatus.unknown);
   @enumerated
   OpeningStatus get openingStatus => _openingStatus.value;
