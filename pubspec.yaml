@@ -2,7 +2,7 @@ name: efa_smartconnect_modbus_demo
 title: EFA-SmartConnect Modbus Demo
 description: This application demonstrates how to use the EFA-SmartConnect Modbus TCP interface.
 publish_to: 'none'
-version: 0.11.0
+version: 0.12.0
 
 environment:
   sdk: '>=3.0.1 <4.0.0'
