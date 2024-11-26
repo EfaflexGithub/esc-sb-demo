@@ -80,7 +80,7 @@ class DoorOverviewPage extends GetView<DoorOverviewController> {
       return;
     }
     controller.showCheckboxColumn.value = true;
-    controller.bottomSheetController = showBottomSheet<void>(
+    controller.bottomSheetController = showBottomSheet(
       enableDrag: false,
       elevation: 8,
       context: context,

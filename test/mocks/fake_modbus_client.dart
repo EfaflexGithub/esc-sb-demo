@@ -5,12 +5,12 @@ import 'package:efa_smartconnect_modbus_demo/data/services/modbus_tcp_service.da
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:modbus/modbus.dart';
-import 'package:logger/logger.dart';
+import 'package:logger/logger.dart' as logger;
 
 class FakeModbusClient extends Fake implements ModbusClient {
   FakeModbusClient(this._dataConfiguration);
 
-  final _logger = Logger();
+  final _logger = logger.Logger();
   final ModbusDataConfiguration _dataConfiguration;
   var _isConnected = false;
 
