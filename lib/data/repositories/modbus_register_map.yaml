@@ -866,199 +866,199 @@ registers:
     group: Virtual In- Outputs
     registerType: Coil
     address: 1501
-    access: R
+    access: R/W
   
   - name: Virtual Output 22
     group: Virtual In- Outputs
     registerType: Coil
     address: 1502
-    access: R
+    access: R/W
 
   - name: Virtual Output 23
     group: Virtual In- Outputs
     registerType: Coil
     address: 1503
-    access: R
+    access: R/W
 
   - name: Virtual Output 24
     group: Virtual In- Outputs
     registerType: Coil
     address: 1504
-    access: R
+    access: R/W
 
   - name: Virtual Output 27
     group: Virtual In- Outputs
     registerType: Coil
     address: 1505
-    access: R
+    access: R/W
 
   - name: Virtual Output 2B
     group: Virtual In- Outputs
     registerType: Coil
     address: 1506
-    access: R
+    access: R/W
 
   - name: Virtual Output 2C
     group: Virtual In- Outputs
     registerType: Coil
     address: 1507
-    access: R
+    access: R/W
 
   - name: Virtual Output 2D
     group: Virtual In- Outputs
     registerType: Coil
     address: 1508
-    access: R
+    access: R/W
 
   - name: Virtual Output 2E
     group: Virtual In- Outputs
     registerType: Coil
     address: 1509
-    access: R
+    access: R/W
 
   - name: Virtual Output 2F
     group: Virtual In- Outputs
     registerType: Coil
     address: 1510
-    access: R
+    access: R/W
 
   - name: Virtual Output 31
     group: Virtual In- Outputs
     registerType: Coil
     address: 1511
-    access: R
+    access: R/W
 
   - name: Virtual Output 32
     group: Virtual In- Outputs
     registerType: Coil
     address: 1512
-    access: R
+    access: R/W
 
   - name: Virtual Output 33
     group: Virtual In- Outputs
     registerType: Coil
     address: 1513
-    access: R
+    access: R/W
 
   - name: Virtual Output 34
     group: Virtual In- Outputs
     registerType: Coil
     address: 1514
-    access: R
+    access: R/W
 
   - name: Virtual Output 35
     group: Virtual In- Outputs
     registerType: Coil
     address: 1515
-    access: R
+    access: R/W
 
   - name: Virtual Output 36
     group: Virtual In- Outputs
     registerType: Coil
     address: 1516
-    access: R
+    access: R/W
 
   - name: Virtual Output 37
     group: Virtual In- Outputs
     registerType: Coil
     address: 1517
-    access: R
+    access: R/W
 
   - name: Virtual Output 38
     group: Virtual In- Outputs
     registerType: Coil
     address: 1518
-    access: R
+    access: R/W
 
   - name: Virtual Output 41
     group: Virtual In- Outputs
     registerType: Coil
     address: 1519
-    access: R
+    access: R/W
 
   - name: Virtual Output 42
     group: Virtual In- Outputs
     registerType: Coil
     address: 1520
-    access: R
+    access: R/W
 
   - name: Virtual Output 43
     group: Virtual In- Outputs
     registerType: Coil
     address: 1521
-    access: R
+    access: R/W
 
   - name: Virtual Output 44
     group: Virtual In- Outputs
     registerType: Coil
     address: 1522
-    access: R
+    access: R/W
 
   - name: Virtual Output 45
     group: Virtual In- Outputs
     registerType: Coil
     address: 1523
-    access: R
+    access: R/W
 
   - name: Virtual Output 46
     group: Virtual In- Outputs
     registerType: Coil
     address: 1524
-    access: R
+    access: R/W
 
   - name: Virtual Output 47
     group: Virtual In- Outputs
     registerType: Coil
     address: 1525
-    access: R
+    access: R/W
 
   - name: Virtual Output 48
     group: Virtual In- Outputs
     registerType: Coil
     address: 1526
-    access: R
+    access: R/W
 
   - name: Virtual Output 49
     group: Virtual In- Outputs
     registerType: Coil
     address: 1527
-    access: R
+    access: R/W
 
   - name: Virtual Output 4A
     group: Virtual In- Outputs
     registerType: Coil
     address: 1528
-    access: R
+    access: R/W
 
   - name: Virtual Output 4B
     group: Virtual In- Outputs
     registerType: Coil
     address: 1529
-    access: R
+    access: R/W
 
   - name: Virtual Output 4C
     group: Virtual In- Outputs
     registerType: Coil
     address: 1530
-    access: R
+    access: R/W
 
   - name: Virtual Output 4D
     group: Virtual In- Outputs
     registerType: Coil
     address: 1531
-    access: R
+    access: R/W
 
   - name: Virtual Output 4E
     group: Virtual In- Outputs
     registerType: Coil
     address: 1532
-    access: R
+    access: R/W
 
   - name: Virtual Output 4F
     group: Virtual In- Outputs
     registerType: Coil
     address: 1533
-    access: R
+    access: R/W
 
   - name: Virtual Input 13
     group: Virtual In- Outputs

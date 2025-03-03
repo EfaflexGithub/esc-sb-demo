@@ -554,134 +554,167 @@ base class EfaTronic extends DoorControl {
     ControlOutput(
       description: "Output 21",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
     ControlOutput(
       description: "Output 22",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
     ControlOutput(
       description: "Output 23",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
     ControlOutput(
       description: "Output 24",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
     ControlOutput(
       description: "Output 27",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
     ControlOutput(
       description: "Output 2B",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
     ControlOutput(
       description: "Output 2C",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
     ControlOutput(
       description: "Output 2D",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
     ControlOutput(
       description: "Output 2E",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
     ControlOutput(
       description: "Output 2F",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
     ControlOutput(
       description: "Output 31",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
     ControlOutput(
       description: "Output 32",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
     ControlOutput(
       description: "Output 33",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
     ControlOutput(
       description: "Output 34",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
     ControlOutput(
       description: "Output 35",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
     ControlOutput(
       description: "Output 36",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
     ControlOutput(
       description: "Output 37",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
     ControlOutput(
       description: "Output 38",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
     ControlOutput(
       description: "Output 41",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
     ControlOutput(
       description: "Output 42",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
     ControlOutput(
       description: "Output 43",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
     ControlOutput(
       description: "Output 44",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
     ControlOutput(
       description: "Output 45",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
     ControlOutput(
       description: "Output 46",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
     ControlOutput(
       description: "Output 47",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
     ControlOutput(
       description: "Output 48",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
     ControlOutput(
       description: "Output 49",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
     ControlOutput(
       description: "Output 4A",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
     ControlOutput(
       description: "Output 4B",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
     ControlOutput(
       description: "Output 4C",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
     ControlOutput(
       description: "Output 4D",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
     ControlOutput(
       description: "Output 4E",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
     ControlOutput(
       description: "Output 4F",
       virtual: true,
+      onChangeRequested: _outputChangeRequested,
     ),
   ];
 
